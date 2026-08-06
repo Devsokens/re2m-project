@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-royal-blue: #002366;
+    --color-luminous-blue: #1A4C8C;
+    --color-sky-blue: #4169E1;
+    --color-ice-blue: #DBEAFE;
+    --color-slate-gray: #64748B;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #FFFFFF;
+    color: #0f172a;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+}
+
+/* Custom Corporate Colors */
+.bg-royal-blue {
+  background-color: #002366;
+}
+
+.bg-luminous-blue {
+  background-color: #1A4C8C;
+}
+
+.text-royal-blue {
+  color: #002366;
+}
+
+.text-sky-blue {
+  color: #4169E1;
+}
+
+/* Corporate light panel */
+.light-panel {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+}
+
+/* 3D Depth Card effect */
+.corporate-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 12px 30px -10px rgba(0, 35, 102, 0.08), 0 8px 20px -8px rgba(0, 0, 0, 0.04);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateZ(0);
+}
+
+.corporate-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 35px -12px rgba(0, 35, 102, 0.15), 0 12px 25px -10px rgba(0, 0, 0, 0.06);
+  border-color: #4169E1;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 35, 102, 0.1);
+}
+
+/* 3D Glass card depth */
+.glass-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 35, 102, 0.08);
+  box-shadow: 0 10px 25px -8px rgba(0, 35, 102, 0.06), 0 8px 16px -6px rgba(0, 0, 0, 0.03);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  transform: translateY(-5px);
+  border-color: #4169E1;
+  box-shadow: 0 22px 35px -12px rgba(0, 35, 102, 0.14), 0 12px 20px -10px rgba(0, 0, 0, 0.05);
+}
+
+/* Scrolling marquee animation for partner logos */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Print specifications for 85x54mm card */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-card-area, #printable-card-area * {
+    visibility: visible;
+  }
+  #printable-card-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  @page {
+    size: 85mm 54mm;
+    margin: 0;
+  }
+}

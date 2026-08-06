@@ -1,0 +1,18 @@
+{
+  "name": "RE2M Connect",
+  "short_name": "RE2M",
+  "description": "Plateforme Web PWA — Cartes Membres Virtuelles & Réseau Professionnel Digital",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002366",
+  "theme_color": "#002366",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
