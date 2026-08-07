@@ -153,11 +153,19 @@ export const AccueilView: React.FC<AccueilViewProps> = ({ onStartDemo, onNavigat
             {[...partners, ...partners, ...partners].map((partner, idx) => (
               <div
                 key={idx}
-                className="flex items-center gap-2.5 bg-white px-6 py-3 rounded-xl border border-slate-200 shadow-sm shrink-0"
+                className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
               >
-                <div className="w-8 h-8 rounded bg-[#002366] flex items-center justify-center font-bold text-white text-xs">
-                  {partner.name.charAt(0)}
-                </div>
+                {partner.logo ? (
+                  <img
+                    src={partner.logo}
+                    alt={`${partner.name} logo`}
+                    className="h-10 w-auto max-w-[120px] object-contain shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-xl bg-[#002366] flex items-center justify-center font-bold text-white text-sm shrink-0">
+                    {partner.name.charAt(0)}
+                  </div>
+                )}
                 <div className="text-left">
                   <p className="text-xs font-extrabold text-[#002366]">{partner.name}</p>
                   <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">{partner.label}</p>
