@@ -144,6 +144,10 @@ export function App() {
         {currentView === 'accueil' && (
           <AccueilView
             onStartDemo={() => handleOpenMemberProfile(members[0] || INITIAL_MEMBERS[0])}
+            onNavigate={(view) => {
+              setCurrentView(view);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
           />
         )}
 

@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
-export const Hero: React.FC = () => {
+interface HeroProps {
+  onNavigate: (view: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact') => void;
+}
+
+export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
@@ -10,21 +14,24 @@ export const Hero: React.FC = () => {
       subtitle: "25 ans d'expertise",
       text: "Le Cabinet RE2M vous accompagne dans l'optimisation de vos fonctions Achats et Logistique. Avec plus de 25 ans d'expérience, nous vous garantissons des résultats probants et mesurables.",
       image: "/slide_01.jpg",
-      cta: "Nous Contacter"
+      cta: "Nous Contacter",
+      targetView: 'contact' as const
     },
     {
       title: "Expertise & Transfert de Compétences",
       subtitle: "Formation certifiante",
       text: "Dirigé par Roch-Emmanuel MVE-MBORO, Expert-Consultant-Formateur certifié PNUD, notre cabinet vous forme aux meilleures pratiques des Achats et de la Logistique.",
       image: "/slide_02.jpg",
-      cta: "Nos Services"
+      cta: "Nos Services",
+      targetView: 'nos-services' as const
     },
     {
       title: "Gagner Grâce aux Achats",
       subtitle: "Résultats garantis",
       text: "Notre mission : vous faire réaliser des économies significatives et améliorer votre productivité grâce à une gestion optimisée de vos achats et de votre supply chain.",
       image: "/slide_03.jpg",
-      cta: "En Savoir Plus"
+      cta: "En Savoir Plus",
+      targetView: 'qui-nous-sommes' as const
     }
   ];
 
@@ -84,7 +91,10 @@ export const Hero: React.FC = () => {
 
                   {/* CTA Button */}
                   <div className="pt-2">
-                    <button className="bg-white text-[#002366] font-bold px-6 py-3.5 rounded-xl shadow-lg hover:bg-slate-100 transition-colors text-sm">
+                    <button 
+                      onClick={() => onNavigate(slide.targetView)}
+                      className="bg-white text-[#002366] font-bold px-6 py-3.5 rounded-xl shadow-lg hover:bg-slate-100 transition-colors text-sm cursor-pointer"
+                    >
                       {slide.cta}
                     </button>
                   </div>
@@ -100,7 +110,7 @@ export const Hero: React.FC = () => {
       {/* Manual Slide Controls */}
       <button
         onClick={handlePrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-black/30 hover:bg-black/55 text-white transition-colors"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-black/30 hover:bg-black/55 text-white transition-colors cursor-pointer"
         aria-label="Diapositive précédente"
       >
         <ChevronLeft className="w-6 h-6" />
@@ -108,7 +118,7 @@ export const Hero: React.FC = () => {
 
       <button
         onClick={handleNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-black/30 hover:bg-black/55 text-white transition-colors"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-black/30 hover:bg-black/55 text-white transition-colors cursor-pointer"
         aria-label="Diapositive suivante"
       >
         <ChevronRight className="w-6 h-6" />
@@ -120,7 +130,7 @@ export const Hero: React.FC = () => {
           <button
             key={idx}
             onClick={() => setCurrentSlide(idx)}
-            className={`w-3.5 h-3.5 rounded-full transition-all ${
+            className={`w-3.5 h-3.5 rounded-full transition-all cursor-pointer ${
               idx === currentSlide ? 'bg-white scale-110' : 'bg-white/40'
             }`}
             aria-label={`Aller à la diapositive ${idx + 1}`}
