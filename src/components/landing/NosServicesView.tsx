@@ -25,19 +25,22 @@ export const NosServicesView: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 animate-fadeIn space-y-12 bg-white text-[#0f172a]">
-      
+
       {/* Header */}
-      <div className="text-center max-w-3xl mx-auto space-y-3">
-        <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest">
+      <div className="text-center max-w-3xl mx-auto">
+        <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest mb-6 inline-block">
           Nos Services
         </span>
-        <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366]">
+
+        <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-8">
           Nos Domaines d'Expertise Stratégiques
         </h1>
+
         <p className="text-slate-500 text-sm sm:text-base">
           Des services structurés pour vous faire réaliser des économies substantielles et optimiser vos flux de stockage.
         </p>
       </div>
+
 
       {/* Services List Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -11,7 +11,7 @@ export const QuiNousSommesView: React.FC = () => {
           Qui Sommes-Nous
         </span>
 
-        <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-3">
+        <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-8">
           Cabinet RE2M  L'Excellence Achats & Logistique
         </h1>
 

@@ -5,28 +5,30 @@ import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 export const ContactView: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 animate-fadeIn space-y-12 bg-white text-[#0f172a]">
-      
+
       {/* Header */}
-      <div className="text-center max-w-3xl mx-auto space-y-3">
-        <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest">
+      <div className="text-center max-w-3xl mx-auto">
+        <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest mb-6 inline-block">
           Nous Contacter
         </span>
-        <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366]">
+
+        <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-8">
           Prenez Contact avec le Cabinet RE2M
         </h1>
+
         <p className="text-slate-500 text-sm">
-          Nos conseillers sont disponibles pour répondre à toutes vos interrogations d'audit logistique ou de formation.
+          Nos conseillers sont disponibles pour répondre à
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-        
+
         {/* Contact Info Cards */}
         <div className="lg:col-span-5 space-y-6">
           <h3 className="font-serif text-xl font-bold text-[#002366] mb-4">Coordonnées du Siège</h3>
 
           <div className="space-y-4">
-            
+
             {/* Address */}
             <div className="flex gap-4 p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
               <MapPin className="w-6 h-6 text-blue-800 shrink-0 mt-1" />
