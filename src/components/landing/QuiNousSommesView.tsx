@@ -4,14 +4,15 @@ import { BookOpen, ShieldCheck, CheckCircle } from 'lucide-react';
 export const QuiNousSommesView: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 animate-fadeIn space-y-12 bg-white text-[#0f172a]">
-      
+
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
         <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest">
           Qui Sommes-Nous
         </span>
+
         <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366]">
-          Cabinet RE2M • L'Excellence Achats & Logistique
+          Cabinet RE2M  L'Excellence Achats & Logistique
         </h1>
         <p className="text-slate-500 text-sm">
           Depuis 25 ans, nous accompagnons nos clients à Libreville, au Gabon et à l'international dans l'amélioration de leur performance achats.
@@ -28,25 +29,12 @@ export const QuiNousSommesView: React.FC = () => {
           <p className="text-slate-600 text-sm leading-relaxed">
             Avec 25 ans de pratique et d'expérience dans le monde dont un accent particulier sur le local, nous garantissons des résultats probants dans des environnements et contextes variés.
           </p>
-          
-          <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-              <BookOpen className="w-5 h-5 text-blue-800 mb-2" />
-              <h4 className="font-bold text-xs text-[#002366] uppercase">Formations PNUD</h4>
-              <p className="text-[10px] text-slate-500 mt-1">Conformes aux exigences internationales.</p>
-            </div>
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-              <ShieldCheck className="w-5 h-5 text-blue-800 mb-2" />
-              <h4 className="font-bold text-xs text-[#002366] uppercase">Gouvernance</h4>
-              <p className="text-[10px] text-slate-500 mt-1">Transparence et efficacité achats.</p>
-            </div>
-          </div>
         </div>
 
         {/* Vision & Values card */}
         <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200/80 space-y-6">
           <h3 className="font-serif text-xl font-bold text-[#002366]">Nos Engagements Clés</h3>
-          
+
           <div className="space-y-4">
             <div className="flex gap-3">
               <CheckCircle className="w-5 h-5 text-blue-800 shrink-0 mt-0.5" />

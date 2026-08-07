@@ -19,16 +19,16 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
         {/* Clickable Brand Logo redirects to Admin Login portal */}
-        {/* Logo contains both the icon and text verbatim, styled with official proportions */}
+        {/* Responsive heights to fit mobile screens elegantly */}
         <div 
           onClick={() => setCurrentView('admin-login')}
-          className="flex items-center cursor-pointer group"
+          className="flex items-center cursor-pointer group shrink-0"
           title="Accéder au Portail Administration Cabinet RE2M"
         >
           <img 
             src="/logo1.png" 
             alt="Cabinet RE2M Logo" 
-            className="h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
+            className="h-8 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
           />
         </div>
 
@@ -36,7 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <nav className="hidden md:flex items-center gap-1.5">
           <button
             onClick={() => setCurrentView('accueil')}
-            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               currentView === 'accueil'
                 ? 'bg-white text-[#002366] shadow'
                 : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => setCurrentView('qui-nous-sommes')}
-            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               currentView === 'qui-nous-sommes'
                 ? 'bg-white text-[#002366] shadow'
                 : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => setCurrentView('nos-services')}
-            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               currentView === 'nos-services'
                 ? 'bg-white text-[#002366] shadow'
                 : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -69,7 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => setCurrentView('contact')}
-            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               currentView === 'contact'
                 ? 'bg-white text-[#002366] shadow'
                 : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -79,8 +79,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </nav>
 
-        {/* Small Admin claims switch switcher for testing */}
-        <div className="flex items-center bg-white/15 border border-white/25 rounded-xl p-1">
+        {/* Small Admin claims switcher - hidden on mobile to avoid layout crowding */}
+        <div className="hidden sm:flex items-center bg-white/15 border border-white/25 rounded-xl p-1 shrink-0">
           <select
             value={activeRole}
             onChange={(e) => setActiveRole(e.target.value as UserRole)}
@@ -95,29 +95,29 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       </div>
 
-      {/* Mobile Navigation Toolbar */}
-      <div className="md:hidden flex items-center justify-around bg-blue-900 py-2 px-2 text-white text-[11px] font-semibold border-t border-blue-950">
+      {/* Mobile Navigation Toolbar - Pinned at the bottom of the viewport for app-like usability */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around bg-[#002366] py-3.5 px-2 text-white text-[11px] font-bold border-t border-blue-900 shadow-2xl">
         <button
-          onClick={() => setCurrentView('accueil')}
-          className={`py-1 px-3.5 rounded-lg ${currentView === 'accueil' ? 'bg-white text-[#002366]' : 'text-white/80'}`}
+          onClick={() => { setCurrentView('accueil'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          className={`py-1 px-3.5 rounded-lg cursor-pointer ${currentView === 'accueil' ? 'bg-white text-[#002366] shadow' : 'text-white/80'}`}
         >
           Accueil
         </button>
         <button
-          onClick={() => setCurrentView('qui-nous-sommes')}
-          className={`py-1 px-3.5 rounded-lg ${currentView === 'qui-nous-sommes' ? 'bg-white text-[#002366]' : 'text-white/80'}`}
+          onClick={() => { setCurrentView('qui-nous-sommes'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          className={`py-1 px-3.5 rounded-lg cursor-pointer ${currentView === 'qui-nous-sommes' ? 'bg-white text-[#002366] shadow' : 'text-white/80'}`}
         >
           Qui sommes-nous
         </button>
         <button
-          onClick={() => setCurrentView('nos-services')}
-          className={`py-1 px-3.5 rounded-lg ${currentView === 'nos-services' ? 'bg-white text-[#002366]' : 'text-white/80'}`}
+          onClick={() => { setCurrentView('nos-services'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          className={`py-1 px-3.5 rounded-lg cursor-pointer ${currentView === 'nos-services' ? 'bg-white text-[#002366] shadow' : 'text-white/80'}`}
         >
           Services
         </button>
         <button
-          onClick={() => setCurrentView('contact')}
-          className={`py-1 px-3.5 rounded-lg ${currentView === 'contact' ? 'bg-white text-[#002366]' : 'text-white/80'}`}
+          onClick={() => { setCurrentView('contact'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          className={`py-1 px-3.5 rounded-lg cursor-pointer ${currentView === 'contact' ? 'bg-white text-[#002366] shadow' : 'text-white/80'}`}
         >
           Contact
         </button>
@@ -125,3 +125,4 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+export default Navbar;
