@@ -140,7 +140,7 @@ export function App() {
       />
 
       {/* View Switcher Router */}
-      <main className="flex-1 pb-16 md:pb-0">
+      <main className="flex-1">
         {currentView === 'accueil' && (
           <AccueilView
             onStartDemo={() => handleOpenMemberProfile(members[0] || INITIAL_MEMBERS[0])}

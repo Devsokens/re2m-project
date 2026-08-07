@@ -6,18 +6,20 @@ export const QuiNousSommesView: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 animate-fadeIn space-y-12 bg-white text-[#0f172a]">
 
       {/* Header */}
-      <div className="text-center max-w-3xl mx-auto space-y-3">
-        <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest">
+      <div className="text-center max-w-3xl mx-auto">
+        <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest mb-6 inline-block">
           Qui Sommes-Nous
         </span>
 
-        <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366]">
+        <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-3">
           Cabinet RE2M  L'Excellence Achats & Logistique
         </h1>
+
         <p className="text-slate-500 text-sm">
           Depuis 25 ans, nous accompagnons nos clients à Libreville, au Gabon et à l'international dans l'amélioration de leur performance achats.
         </p>
       </div>
+
 
       {/* Presentation Overview Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-4">
