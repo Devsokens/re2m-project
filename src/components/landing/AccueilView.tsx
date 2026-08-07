@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Hero } from './Hero';
 import { Award, CheckCircle, Sparkles, TrendingUp } from 'lucide-react';
 
@@ -8,6 +8,8 @@ interface AccueilViewProps {
 }
 
 export const AccueilView: React.FC<AccueilViewProps> = ({ onStartDemo, onNavigate }) => {
+  const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
+
   const stats = [
     { value: '25', label: "Ans d'Expérience" },
     { value: '16', label: 'Entreprises Formées' },
@@ -124,9 +126,16 @@ export const AccueilView: React.FC<AccueilViewProps> = ({ onStartDemo, onNavigat
                 Fort de 25 ans d'expérience internationale, il a développé une expertise reconnue dans l'optimisation des fonctions Achats et Logistique. Sa certification UNDP Procurement Certification témoigne de son excellence professionnelle.
               </p>
 
-              <div className="p-4 rounded-xl bg-white border border-slate-200 flex items-center gap-3 text-xs text-slate-700">
-                <Award className="w-5 h-5 text-[#002366] shrink-0" />
-                <span>Certification PNUD de niveau international, assurant rigueur et conformité.</span>
+              {/* Clickable UNDP certification card to show image modal preview */}
+              <div 
+                onClick={() => setIsCertificateModalOpen(true)}
+                className="p-4 rounded-xl bg-white border border-slate-200 flex items-center gap-3 text-xs text-slate-700 cursor-pointer hover:border-blue-800 hover:bg-blue-50/40 transition-all shadow-sm group/cert"
+                title="Cliquer pour afficher la certification PNUD"
+              >
+                <Award className="w-5 h-5 text-[#002366] shrink-0 group-hover/cert:scale-110 transition-transform" />
+                <div>
+                  <span className="font-bold text-[#002366] underline group-hover/cert:text-blue-800">Certification PNUD</span> de niveau international, assurant rigueur et conformité. <span className="text-[10px] text-slate-400 font-semibold">(Cliquez pour afficher)</span>
+                </div>
               </div>
             </div>
 
@@ -192,6 +201,54 @@ export const AccueilView: React.FC<AccueilViewProps> = ({ onStartDemo, onNavigat
           </button>
         </div>
       </section>
+
+      {/* Certificate Modal */}
+      {isCertificateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-3xl w-full shadow-2xl relative border border-slate-200 space-y-4 animate-scaleUp">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-serif text-base sm:text-lg font-bold text-[#002366]">
+                Aperçu du Certificat Officiel
+              </h3>
+              <button
+                onClick={() => setIsCertificateModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 font-bold text-lg p-1 cursor-pointer"
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body: Image */}
+            <div className="flex justify-center bg-slate-50 rounded-2xl p-2 border border-slate-100 overflow-hidden">
+              <img
+                src="/undp_certificate.png"
+                alt="UNDP Procurement Certificate - Roch-Emmanuel MVE-MBORO"
+                className="w-full h-auto object-contain max-h-[60vh] rounded-xl"
+              />
+            </div>
+
+            {/* Modal Description */}
+            <p className="text-[11px] text-slate-500 text-center leading-relaxed">
+              Certification de Réussite délivrée à Roch-Emmanuel MVE-MBORO en Novembre 2009 à New York,<br />
+              par le Directeur du Bureau de Gestion du Programme des Nations Unies pour le Développement (PNUD).
+            </p>
+
+            {/* Modal Footer */}
+            <div className="text-center pt-2">
+              <button
+                onClick={() => setIsCertificateModalOpen(false)}
+                className="bg-[#002366] hover:bg-blue-900 text-white text-xs font-bold px-6 py-2.5 rounded-xl cursor-pointer"
+              >
+                Fermer l'aperçu
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );
