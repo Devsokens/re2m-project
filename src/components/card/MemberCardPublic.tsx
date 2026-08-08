@@ -66,7 +66,7 @@ export const MemberCardPublic: React.FC<MemberCardPublicProps> = ({ member, onBa
         
         {/* Subtle Watermark Logo in Card Background */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.08] z-0">
-          <img src="/logo1.png" alt="Cabinet RE2M Watermark" className="w-[85%] h-auto object-contain max-h-[85%]" />
+          <img src="/logo2.png" alt="Cabinet RE2M Watermark" className="w-[85%] h-auto object-contain max-h-[85%]" />
         </div>
 
         {/* Background Subtle Gradient Lighting (Matching Frontend Theme) */}
@@ -77,7 +77,7 @@ export const MemberCardPublic: React.FC<MemberCardPublicProps> = ({ member, onBa
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-6 relative z-10">
           <div className="flex items-center gap-3.5">
             <div className="flex items-center justify-center shrink-0">
-              <img src="/logo1.png" alt="Cabinet RE2M Logo" className="h-10 w-auto object-contain" />
+              <img src="/logo2.png" alt="Cabinet RE2M Logo" className="h-10 w-auto object-contain" />
             </div>
             <div>
               <h2 className="font-sans text-base font-black text-[#002366] tracking-wider uppercase">
@@ -103,7 +103,7 @@ export const MemberCardPublic: React.FC<MemberCardPublicProps> = ({ member, onBa
           {/* Avatar Badge with Member Photo (or Cabinet Logo fallback) */}
           <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl overflow-hidden border border-slate-200 shadow-sm shrink-0 bg-white flex items-center justify-center p-2 relative z-10">
             <img 
-              src={member.photo || "/logo1.png"} 
+              src={member.photo || "/logo2.png"} 
               alt={member.photo ? `${member.firstName} ${member.lastName}` : "Cabinet RE2M Logo"} 
               className={`w-full h-full ${member.photo ? 'object-cover rounded-2xl' : 'object-contain'}`} 
             />
