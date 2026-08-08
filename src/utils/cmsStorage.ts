@@ -68,15 +68,13 @@ const defaultAccueilBlocks: CMSBlock[] = [
     order: 3,
     enabled: true,
     settings: {
-      title: "Notre valeur ajoutée",
-      subtitle: "Pourquoi choisir le Cabinet RE2M ?",
-      quote: "Gagner grâce aux Achats et à la Logistique",
+      title: "Notre Fondateur",
+      subtitle: "Roch-Emmanuel MVE-MBORO",
+      quote: "Expert-Consultant-Formateur en Achats & Logistique certifié par le Programme des Nations Unies pour le Développement (PNUD).",
       paragraphs: [
-        "Dans le contexte économique actuel, la performance de la chaîne d'approvisionnement et l'optimisation des achats sont devenus des leviers stratégiques majeurs pour la compétitivité et la rentabilité des entreprises.",
-        "Notre accompagnement est conçu pour structurer, professionnaliser et optimiser vos services Achats et Logistique afin de libérer de la valeur et d'avoir un impact direct et mesurable sur vos résultats financiers.",
-        "Grâce à notre expertise unique, nous aidons vos collaborateurs à acquérir des compétences clés et à adopter des outils et processus d'excellence opérationnelle."
+        "Fort de 25 ans d'expérience internationale, il a développé une expertise reconnue dans l'optimisation des fonctions Achats et Logistique. Sa certification UNDP Procurement Certification témoigne de son excellence professionnelle."
       ],
-      image: "/team_01.jpg"
+      image: "/more-info.jpg"
     }
   },
   {
@@ -343,6 +341,9 @@ function mergeDefaultSettings(storedBlocks: CMSBlock[], defaultBlocks: CMSBlock[
       mergedSettings.commitments = defBlock.settings.commitments;
     }
     if (stored.type === 'ContactDetails' && stored.settings?.title === undefined) {
+      Object.assign(mergedSettings, defBlock.settings);
+    }
+    if (stored.type === 'FounderSection' && (stored.settings?.title === undefined || stored.settings.title === 'Notre valeur ajoutée')) {
       Object.assign(mergedSettings, defBlock.settings);
     }
     

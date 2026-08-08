@@ -98,11 +98,13 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
         ]
       },
       'FounderSection': {
-        title: "Notre valeur ajoutée",
-        subtitle: "Qui sommes-nous ?",
-        quote: "Devise du cabinet",
-        paragraphs: ["Paragraphe 1"],
-        image: "/team_01.jpg"
+        title: "Notre Fondateur",
+        subtitle: "Roch-Emmanuel MVE-MBORO",
+        quote: "Expert-Consultant-Formateur en Achats & Logistique certifié par le Programme des Nations Unies pour le Développement (PNUD).",
+        paragraphs: [
+          "Fort de 25 ans d'expérience internationale, il a développé une expertise reconnue dans l'optimisation des fonctions Achats et Logistique. Sa certification UNDP Procurement Certification témoigne de son excellence professionnelle."
+        ],
+        image: "/more-info.jpg"
       },
       'HeaderBanner': {
         badge: "Nouveau Badge",
