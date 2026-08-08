@@ -310,6 +310,40 @@ const getStorageKey = (slug: PageSlug, isDraft: boolean) => {
   return `cms_layout_${slug}_${isDraft ? 'draft' : 'published'}`;
 };
 
+function mergeDefaultSettings(storedBlocks: CMSBlock[], defaultBlocks: CMSBlock[]): CMSBlock[] {
+  return storedBlocks.map(stored => {
+    const defBlock = defaultBlocks.find(d => d.id === stored.id);
+    if (!defBlock) return stored;
+    
+    const mergedSettings = { ...defBlock.settings, ...stored.settings };
+    
+    // For any list-based block, if the stored list is undefined, migrate it from default
+    if (stored.type === 'Collaborations' && stored.settings?.items === undefined) {
+      mergedSettings.items = defBlock.settings.items;
+    }
+    if (stored.type === 'Testimonials' && stored.settings?.items === undefined) {
+      mergedSettings.items = defBlock.settings.items;
+    }
+    if (stored.type === 'Hero' && stored.settings?.slides === undefined) {
+      mergedSettings.slides = defBlock.settings.slides;
+    }
+    if (stored.type === 'CounterStats' && stored.settings?.stats === undefined) {
+      mergedSettings.stats = defBlock.settings.stats;
+    }
+    if (stored.type === 'ServicesList' && stored.settings?.items === undefined) {
+      mergedSettings.items = defBlock.settings.items;
+    }
+    if (stored.type === 'PresentationGrid' && stored.settings?.commitments === undefined) {
+      mergedSettings.commitments = defBlock.settings.commitments;
+    }
+    
+    return {
+      ...stored,
+      settings: mergedSettings
+    };
+  });
+}
+
 export const cmsStorage = {
   // Initialize default layout data in localStorage if it doesn't exist
   init() {
@@ -319,9 +353,22 @@ export const cmsStorage = {
 
       if (!localStorage.getItem(pubKey)) {
         localStorage.setItem(pubKey, JSON.stringify(defaultLayouts[slug]));
+      } else {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(pubKey) || '[]') as CMSBlock[];
+          const migrated = mergeDefaultSettings(parsed, defaultLayouts[slug]);
+          localStorage.setItem(pubKey, JSON.stringify(migrated));
+        } catch(e) {}
       }
+      
       if (!localStorage.getItem(draftKey)) {
         localStorage.setItem(draftKey, JSON.stringify(defaultLayouts[slug]));
+      } else {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(draftKey) || '[]') as CMSBlock[];
+          const migrated = mergeDefaultSettings(parsed, defaultLayouts[slug]);
+          localStorage.setItem(draftKey, JSON.stringify(migrated));
+        } catch(e) {}
       }
     });
   },
