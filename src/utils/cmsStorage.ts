@@ -317,7 +317,7 @@ const getStorageKey = (slug: PageSlug, isDraft: boolean) => {
 };
 
 function mergeDefaultSettings(storedBlocks: CMSBlock[], defaultBlocks: CMSBlock[]): CMSBlock[] {
-  return storedBlocks.map(stored => {
+  const mergedExisting = storedBlocks.map(stored => {
     const defBlock = defaultBlocks.find(d => d.id === stored.id);
     if (!defBlock) return stored;
     
@@ -351,6 +351,9 @@ function mergeDefaultSettings(storedBlocks: CMSBlock[], defaultBlocks: CMSBlock[
       settings: mergedSettings
     };
   });
+
+  const missingBlocks = defaultBlocks.filter(d => !storedBlocks.some(s => s.id === d.id));
+  return [...mergedExisting, ...missingBlocks].sort((a, b) => a.order - b.order);
 }
 
 export const cmsStorage = {
