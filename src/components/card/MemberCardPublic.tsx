@@ -65,8 +65,8 @@ export const MemberCardPublic: React.FC<MemberCardPublicProps> = ({ member, onBa
       <div className="w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-xl space-y-8 relative overflow-hidden">
         
         {/* Subtle Watermark Logo in Card Background */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.035] z-0">
-          <img src="/logo.png" alt="Cabinet RE2M Watermark" className="w-[85%] h-auto object-contain max-h-[85%]" />
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.08] z-0">
+          <img src="/logo1.png" alt="Cabinet RE2M Watermark" className="w-[85%] h-auto object-contain max-h-[85%]" />
         </div>
 
         {/* Background Subtle Gradient Lighting (Matching Frontend Theme) */}
@@ -77,10 +77,10 @@ export const MemberCardPublic: React.FC<MemberCardPublicProps> = ({ member, onBa
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-6 relative z-10">
           <div className="flex items-center gap-3.5">
             <div className="flex items-center justify-center shrink-0">
-              <img src="/logo.png" alt="Cabinet RE2M Logo" className="h-10 w-auto object-contain" />
+              <img src="/logo1.png" alt="Cabinet RE2M Logo" className="h-10 w-auto object-contain" />
             </div>
             <div>
-              <h2 className="font-serif text-base font-black text-[#002366] tracking-wider uppercase">
+              <h2 className="font-sans text-base font-black text-[#002366] tracking-wider uppercase">
                 CABINET RE2M
               </h2>
               <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">
@@ -100,20 +100,14 @@ export const MemberCardPublic: React.FC<MemberCardPublicProps> = ({ member, onBa
         {/* Consultant Identity Section */}
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10">
           
-          {/* Avatar Badge with Member Photo (or initials fallback) */}
-          {member.photo ? (
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl overflow-hidden border border-slate-200 shadow-sm shrink-0 bg-slate-50 flex items-center justify-center">
-              <img 
-                src={member.photo} 
-                alt={`${member.firstName} ${member.lastName}`} 
-                className="w-full h-full object-cover" 
-              />
-            </div>
-          ) : (
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-blue-50 border border-blue-100 flex items-center justify-center font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] shadow-sm shrink-0">
-              {member.firstName.charAt(0)}{member.lastName.charAt(0)}
-            </div>
-          )}
+          {/* Avatar Badge with Member Photo (or Cabinet Logo fallback) */}
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl overflow-hidden border border-slate-200 shadow-sm shrink-0 bg-white flex items-center justify-center p-2 relative z-10">
+            <img 
+              src={member.photo || "/logo1.png"} 
+              alt={member.photo ? `${member.firstName} ${member.lastName}` : "Cabinet RE2M Logo"} 
+              className={`w-full h-full ${member.photo ? 'object-cover rounded-2xl' : 'object-contain'}`} 
+            />
+          </div>
 
           {/* Details */}
           <div className="space-y-2 text-center sm:text-left flex-1">

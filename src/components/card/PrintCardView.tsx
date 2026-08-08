@@ -62,7 +62,7 @@ export const PrintCardView: React.FC<PrintCardViewProps> = ({ member, isOpen, on
               {/* Header */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-serif text-[11px] font-extrabold tracking-widest text-blue-200">
+                  <h4 className="font-sans text-[11px] font-extrabold tracking-widest text-blue-200">
                     CABINET RE2M
                   </h4>
                   <p className="text-[7px] text-slate-300 font-medium tracking-wider">
@@ -70,7 +70,7 @@ export const PrintCardView: React.FC<PrintCardViewProps> = ({ member, isOpen, on
                   </p>
                 </div>
                 <div className="w-7 h-7 rounded bg-[#001845] p-0.5 border border-blue-900">
-                  <img src="/logo.png" alt="RE2M" className="w-full h-full object-contain" />
+                  <img src="/logo1.png" alt="RE2M" className="w-full h-full object-contain" />
                 </div>
               </div>
 
@@ -117,7 +117,7 @@ export const PrintCardView: React.FC<PrintCardViewProps> = ({ member, isOpen, on
               <div className="absolute inset-2 border border-blue-800/30 rounded-lg pointer-events-none" />
 
               <div className="pt-1">
-                <h4 className="font-serif text-[10px] font-extrabold text-blue-200 tracking-widest uppercase">
+                <h4 className="font-sans text-[10px] font-extrabold text-blue-200 tracking-widest uppercase">
                   RE2M CONNECT
                 </h4>
               </div>
