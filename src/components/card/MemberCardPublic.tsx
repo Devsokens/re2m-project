@@ -48,7 +48,7 @@ export const MemberCardPublic: React.FC<MemberCardPublicProps> = ({ member, onBa
   return (
     <div className="min-h-[85vh] py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto flex flex-col items-center justify-center bg-slate-50 text-[#0f172a]">
       
-      {/* Back to Home Navigation Arrow */}
+      {/* Back to Previous Navigation Arrow */}
       {onBackToHome && (
         <div className="w-full max-w-2xl mb-4 flex justify-start animate-fadeIn">
           <button
@@ -56,7 +56,7 @@ export const MemberCardPublic: React.FC<MemberCardPublicProps> = ({ member, onBa
             className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-[#002366] bg-white border border-slate-200 hover:border-[#002366] px-4 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 shrink-0" />
-            <span>Retour à l'accueil</span>
+            <span>Retour</span>
           </button>
         </div>
       )}
