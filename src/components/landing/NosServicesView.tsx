@@ -155,28 +155,32 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                     </div>
                     <div className="relative w-full flex overflow-x-hidden bg-slate-50 py-6 border-y border-slate-200/60">
                       <div className="flex gap-16 animate-marquee whitespace-nowrap">
-                        {[...partners, ...partners, ...partners].map((partner, pIdx) => (
-                          <div
-                            key={pIdx}
-                            className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
-                          >
-                            {partner.logo ? (
-                              <img
-                                src={partner.logo}
-                                alt={`${partner.name} logo`}
-                                className="h-10 w-auto max-w-[120px] object-contain shrink-0"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-xl bg-[#002366] flex items-center justify-center font-bold text-white text-sm shrink-0">
-                                {partner.name.charAt(0)}
+                        {(() => {
+                          const collabs = block.settings.items || partners;
+                          const repeated = [...collabs, ...collabs, ...collabs];
+                          return repeated.map((partner, pIdx) => (
+                            <div
+                              key={pIdx}
+                              className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
+                            >
+                              {partner.logo ? (
+                                <img
+                                  src={partner.logo}
+                                  alt={`${partner.name} logo`}
+                                  className="h-10 w-auto max-w-[120px] object-contain shrink-0"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-xl bg-[#002366] flex items-center justify-center font-bold text-white text-sm shrink-0">
+                                  {partner.name.charAt(0)}
+                                </div>
+                              )}
+                              <div className="text-left">
+                                <p className="text-xs font-extrabold text-[#002366]">{partner.name}</p>
+                                <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">{partner.label}</p>
                               </div>
-                            )}
-                            <div className="text-left">
-                              <p className="text-xs font-extrabold text-[#002366]">{partner.name}</p>
-                              <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">{partner.label}</p>
                             </div>
-                          </div>
-                        ))}
+                          ));
+                        })()}
                       </div>
                     </div>
                   </section>

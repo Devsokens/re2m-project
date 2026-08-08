@@ -19,11 +19,11 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
             switch (block.type) {
               case 'HeaderBanner':
                 return (
-                  <div 
+                  <div
                     className="relative w-full py-24 bg-cover bg-no-repeat"
-                    style={{ 
+                    style={{
                       backgroundImage: `url(${block.settings.backgroundImage || '/qui_nous_sommes_bg.jpg'})`,
-                      backgroundPosition: 'center 15%' 
+                      backgroundPosition: 'center 15%'
                     }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-b from-[#002366]/55 via-[#002366]/25 to-[#002366]/55" />
@@ -125,7 +125,10 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
                     </div>
                     <div className="relative w-full flex overflow-x-hidden bg-slate-50 py-6 border-y border-slate-200/60">
                       <div className="flex gap-16 animate-marquee whitespace-nowrap">
-                        {[...partners, ...partners, ...partners].map((partner, pIdx) => (
+                        {(() => {
+                          const collabs = block.settings.items || partners;
+                          const repeated = [...collabs, ...collabs, ...collabs];
+                          return repeated.map((partner, pIdx) => (
                           <div
                             key={pIdx}
                             className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
@@ -146,7 +149,8 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
                               <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">{partner.label}</p>
                             </div>
                           </div>
-                        ))}
+                        ));
+                      })()}
                       </div>
                     </div>
                   </section>
@@ -159,15 +163,13 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
           return (
             <div
               key={block.id}
-              className={`relative transition-all ${
-                onSelectBlock 
-                  ? `cursor-pointer border-2 border-dashed rounded-3xl group/block my-2 ${
-                      block.enabled 
-                        ? 'border-transparent hover:border-[#C5A85C] hover:ring-2 hover:ring-[#C5A85C]/30 hover:ring-offset-2' 
-                        : 'border-slate-350 opacity-40 hover:opacity-75 bg-slate-50/50'
-                    }` 
+              className={`relative transition-all ${onSelectBlock
+                  ? `cursor-pointer border-2 border-dashed rounded-3xl group/block my-2 ${block.enabled
+                    ? 'border-transparent hover:border-[#C5A85C] hover:ring-2 hover:ring-[#C5A85C]/30 hover:ring-offset-2'
+                    : 'border-slate-350 opacity-40 hover:opacity-75 bg-slate-50/50'
+                  }`
                   : ''
-              }`}
+                }`}
               onClick={(e) => {
                 if (onSelectBlock) {
                   e.stopPropagation();
@@ -191,13 +193,13 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
   // Fallback Statique
   return (
     <div className="animate-fadeIn space-y-12 bg-white text-[#0f172a] pb-16">
-      
+
       {/* Header Banner Section */}
-      <div 
+      <div
         className="relative w-full py-24 bg-cover bg-no-repeat"
-        style={{ 
+        style={{
           backgroundImage: "url('/qui_nous_sommes_bg.jpg')",
-          backgroundPosition: 'center 15%' 
+          backgroundPosition: 'center 15%'
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-[#002366]/55 via-[#002366]/25 to-[#002366]/55" />
@@ -308,9 +310,9 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
 
             <div className="lg:col-span-4 flex flex-col items-center">
               <div className="p-1 rounded-2xl bg-white border border-slate-200 shadow-md max-w-[250px] w-full">
-                <img 
-                  src="/team_01.jpg" 
-                  alt="Roch-Emmanuel MVE-MBORO - Directeur Général" 
+                <img
+                  src="/team_01.jpg"
+                  alt="Roch-Emmanuel MVE-MBORO - Directeur Général"
                   className="w-full h-auto rounded-xl object-contain"
                 />
               </div>
@@ -333,14 +335,14 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
         <div className="relative w-full flex overflow-x-hidden bg-slate-50 py-6 border-y border-slate-200/60">
           <div className="flex gap-16 animate-marquee whitespace-nowrap">
             {[...partners, ...partners, ...partners].map((partner, idx) => (
-              <div 
+              <div
                 key={idx}
                 className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
               >
                 {partner.logo ? (
-                  <img 
-                    src={partner.logo} 
-                    alt={`${partner.name} logo`} 
+                  <img
+                    src={partner.logo}
+                    alt={`${partner.name} logo`}
                     className="h-10 w-auto max-w-[120px] object-contain shrink-0"
                   />
                 ) : (

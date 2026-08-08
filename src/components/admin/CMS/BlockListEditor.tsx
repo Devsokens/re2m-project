@@ -1,6 +1,6 @@
 import React from 'react';
 import { CMSBlock } from '../../../types/cms';
-import { Edit, Eye, EyeOff, ArrowUp, ArrowDown } from 'lucide-react';
+import { Edit, Eye, EyeOff, ArrowUp, ArrowDown, Plus, Trash2 } from 'lucide-react';
 
 interface BlockListEditorProps {
   blocks: CMSBlock[];
@@ -44,15 +44,136 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
     onUpdateBlocks(reordered);
   };
 
+  const handleDeleteBlock = (blockId: string) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer définitivement cette section ? Cette action est irréversible et supprimera tout le contenu saisi.")) {
+      const updated = blocks.filter((b) => b.id !== blockId);
+      // Re-index orders
+      const reordered = updated.map((b, idx) => ({ ...b, order: idx }));
+      onUpdateBlocks(reordered);
+    }
+  };
+
+  const handleAddBlock = (type: string) => {
+    const defaultSettings: Record<string, any> = {
+      'Hero': {
+        slides: [
+          {
+            title: "Nouveau titre de diapositive",
+            subtitle: "Sous-titre",
+            text: "Description de la diapositive...",
+            image: "/slide_01.jpg",
+            cta: "Découvrir",
+            targetView: "nos-services"
+          }
+        ]
+      },
+      'CounterStats': {
+        stats: [
+          { value: '10', label: 'Nouvel indicateur' }
+        ]
+      },
+      'ServicesList': {
+        items: [
+          {
+            title: "Nouveau Service",
+            desc: "Description du service...",
+            image: "/single_service_01.jpg",
+            iconName: "ClipboardList",
+            details: ["Détail du service 1"]
+          }
+        ]
+      },
+      'Collaborations': {
+        title: "Nos Partenaires",
+        description: "Ils nous font confiance",
+        items: [
+          { name: "Nouveau Partenaire", label: "Secteur", logo: "" }
+        ]
+      },
+      'Testimonials': {
+        title: "Témoignages",
+        description: "Ce que disent nos clients",
+        items: [
+          { company: "Entreprise", service: "Service", text: "Témoignage", logo: "" }
+        ]
+      },
+      'FounderSection': {
+        title: "Notre valeur ajoutée",
+        subtitle: "Qui sommes-nous ?",
+        quote: "Devise du cabinet",
+        paragraphs: ["Paragraphe 1"],
+        image: "/team_01.jpg"
+      },
+      'HeaderBanner': {
+        badge: "Nouveau Badge",
+        title: "Nouveau Titre de Page",
+        description: "Description de la page...",
+        backgroundImage: "/qui_nous_sommes_bg.jpg"
+      },
+      'PresentationGrid': {
+        title: "Nos Engagements",
+        desc1: "Paragraphe 1",
+        desc2: "Paragraphe 2",
+        commitmentsTitle: "Engagements",
+        commitments: [
+          { title: "Engagement 1", desc: "Description..." }
+        ]
+      },
+      'DirectorMessage': {
+        title: "Mot du Directeur",
+        subtitle: "Message de bienvenue",
+        paragraphs: ["Paragraphe 1"],
+        directorName: "Nom",
+        directorTitle: "Titre",
+        image: "/team_01.jpg"
+      }
+    };
+
+    const newBlock: CMSBlock = {
+      id: `${type.toLowerCase()}_${Date.now()}`,
+      type: type as any,
+      order: blocks.length,
+      enabled: true,
+      settings: defaultSettings[type] || {}
+    };
+
+    onUpdateBlocks([...blocks, newBlock]);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
         <h4 className="text-xs font-extrabold text-[#002366] uppercase tracking-wider">
-          Structure des Blocs de la Page
+          Structure des Blocs
         </h4>
         <span className="text-[10px] text-slate-400 font-semibold">
-          Configurez l'ordre et l'activation des sections
+          Ajoutez, réorganisez ou masquez vos sections
         </span>
+      </div>
+
+      {/* Add Block Form */}
+      <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+        <label className="text-[10px] font-bold text-[#6e5d3d] uppercase shrink-0">Ajouter une Section :</label>
+        <select
+          onChange={(e) => {
+            if (e.target.value) {
+              handleAddBlock(e.target.value);
+              e.target.value = '';
+            }
+          }}
+          className="text-xs p-2 border border-[#D6CFBC] rounded-xl bg-white focus:outline-none focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] w-full sm:max-w-[220px]"
+        >
+          <option value="">-- Choisir le type --</option>
+          <option value="Hero">Hero (Carrousel)</option>
+          <option value="CounterStats">CounterStats (Chiffres)</option>
+          <option value="ServicesList">ServicesList (Services)</option>
+          <option value="Collaborations">Collaborations (Partenaires)</option>
+          <option value="Testimonials">Testimonials (Témoignages)</option>
+          <option value="FounderSection">FounderSection (Fondateur)</option>
+          <option value="HeaderBanner">HeaderBanner (Bannière Entête)</option>
+          <option value="PresentationGrid">PresentationGrid (Engagements)</option>
+          <option value="DirectorMessage">DirectorMessage (Message Directeur)</option>
+        </select>
       </div>
 
       <div className="space-y-3">
@@ -81,9 +202,9 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
             </div>
 
             {/* Block Controls */}
-            <div className="flex items-center gap-2 self-end sm:self-auto">
+            <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
               {/* Move Buttons */}
-              <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden mr-2">
+              <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-white">
                 <button
                   onClick={() => handleMoveUp(idx)}
                   disabled={idx === 0}
@@ -135,17 +256,27 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
                 <Edit className="w-3.5 h-3.5" />
                 <span>Modifier</span>
               </button>
+
+              {/* Delete Button */}
+              <button
+                onClick={() => handleDeleteBlock(block.id)}
+                className="p-2 rounded-xl border border-rose-100 bg-rose-50 text-rose-700 hover:bg-rose-100 flex items-center justify-center cursor-pointer transition-all"
+                title="Supprimer la section"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             </div>
 
           </div>
         ))}
 
         {blocks.length === 0 && (
-          <div className="text-center py-8 border-2 border-dashed border-slate-200 rounded-3xl text-slate-400 text-xs">
-            Aucun bloc configuré pour cette page.
+          <div className="text-center py-8 border-2 border-dashed border-[#D6CFBC] rounded-3xl text-slate-400 text-xs bg-white/50">
+            Aucune section configurée pour cette page. Utilisez le sélecteur ci-dessus pour en ajouter une.
           </div>
         )}
       </div>
     </div>
   );
 };
+export default BlockListEditor;

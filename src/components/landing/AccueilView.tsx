@@ -3,6 +3,7 @@ import { Hero } from './Hero';
 import { Award, CheckCircle, Sparkles, TrendingUp } from 'lucide-react';
 import { partners } from '../../data/partners';
 import { CMSBlock } from '../../types/cms';
+import { cmsStorage } from '../../utils/cmsStorage';
 
 interface AccueilViewProps {
   onStartDemo: () => void;
@@ -111,6 +112,27 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                   </section>
                 );
               case 'ServicesPreview':
+                const sBlock = cmsStorage.getDraftLayout('nos-services').find(b => b.type === 'ServicesList');
+                const allServices = sBlock?.settings.items || [
+                  {
+                    title: "Audit & Conseil",
+                    desc: "Diagnostic complet de vos fonctions Achats et Logistique. Recommandations stratégiques pour l'optimisation de vos processus.",
+                    image: "/service_01.jpg"
+                  },
+                  {
+                    title: "Formation Certifiante",
+                    desc: "Formations pratiques et opérationnelles en gestion des achats, contrats, stocks, inventaires, négociation et relation fournisseurs. Programme sur mesure.",
+                    image: "/service_02.jpg"
+                  },
+                  {
+                    title: "Accompagnement & Coaching",
+                    desc: "Coaching et accompagnement personnalisé pour la mise en œuvre de solutions innovantes. Transfert de compétences et outils d'amélioration continue.",
+                    image: "/service_03.jpg"
+                  }
+                ];
+                const limit = block.settings.limit || 3;
+                const displayServices = allServices.slice(0, limit);
+
                 return (
                   <section className="bg-slate-50 py-16 border-y border-slate-200 animate-fadeIn">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -127,84 +149,35 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        <div className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col justify-between h-full group hover:shadow-lg transition-all duration-300">
-                          <div>
-                            <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
-                              <img 
-                                src="/service_01.jpg" 
-                                alt="Audit & Conseil"
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              />
+                        {displayServices.map((srv: any, idx: number) => (
+                          <div key={idx} className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col justify-between h-full group hover:shadow-lg transition-all duration-300">
+                            <div>
+                              <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                                <img 
+                                  src={srv.image || "/service_01.jpg"} 
+                                  alt={srv.title}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                              </div>
+                              <div className="p-6 space-y-3">
+                                <h4 className="font-serif text-lg font-bold text-[#002366]">{srv.title}</h4>
+                                <p className="text-xs text-slate-500 leading-relaxed text-justify">
+                                  {srv.desc}
+                                </p>
+                              </div>
                             </div>
-                            <div className="p-6 space-y-3">
-                              <h4 className="font-serif text-lg font-bold text-[#002366]">Audit & Conseil</h4>
-                              <p className="text-xs text-slate-500 leading-relaxed text-justify">
-                                Diagnostic complet de vos fonctions Achats et Logistique. Recommandations stratégiques pour l'optimisation de vos processus et l'amélioration de votre performance.
-                              </p>
-                            </div>
-                          </div>
-                          <div className="px-6 pb-6 pt-2">
-                            <button 
-                              onClick={() => onNavigate('nos-services')}
-                              className="text-xs font-bold text-blue-800 hover:text-blue-900 flex items-center gap-1 group/btn cursor-pointer"
-                            >
-                              Découvrir <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col justify-between h-full group hover:shadow-lg transition-all duration-300">
-                          <div>
-                            <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
-                              <img 
-                                src="/service_02.jpg" 
-                                alt="Formation Certifiante"
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              />
-                            </div>
-                            <div className="p-6 space-y-3">
-                              <h4 className="font-serif text-lg font-bold text-[#002366]">Formation Certifiante</h4>
-                              <p className="text-xs text-slate-500 leading-relaxed text-justify">
-                                Formations pratiques et opérationnelles en gestion des achats, contrats, stocks, inventaires, négociation et relation fournisseurs. Programme sur mesure.
-                              </p>
+                            <div className="px-6 pb-6 pt-2">
+                              <button 
+                                onClick={() => onNavigate('nos-services')}
+                                className="text-xs font-bold text-blue-800 hover:text-blue-900 flex items-center gap-1 group/btn cursor-pointer"
+                              >
+                                Découvrir <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
+                              </button>
                             </div>
                           </div>
-                          <div className="px-6 pb-6 pt-2">
-                            <button 
-                              onClick={() => onNavigate('nos-services')}
-                              className="text-xs font-bold text-blue-800 hover:text-blue-900 flex items-center gap-1 group/btn cursor-pointer"
-                            >
-                              Découvrir <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col justify-between h-full group hover:shadow-lg transition-all duration-300">
-                          <div>
-                            <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
-                              <img 
-                                src="/service_03.jpg" 
-                                alt="Accompagnement"
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              />
-                            </div>
-                            <div className="p-6 space-y-3">
-                              <h4 className="font-serif text-lg font-bold text-[#002366]">Accompagnement & Coaching</h4>
-                              <p className="text-xs text-slate-500 leading-relaxed text-justify">
-                                Coaching et accompagnement personnalisé pour la mise en œuvre de solutions innovantes. Transfert de compétences et outils d'amélioration continue.
-                              </p>
-                            </div>
-                          </div>
-                          <div className="px-6 pb-6 pt-2">
-                            <button 
-                              onClick={() => onNavigate('nos-services')}
-                              className="text-xs font-bold text-blue-800 hover:text-blue-900 flex items-center gap-1 group/btn cursor-pointer"
-                            >
-                              Découvrir <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
-                            </button>
-                          </div>
-                        </div>
+                        ))}
                       </div>
+
                     </div>
                   </section>
                 );
@@ -327,28 +300,32 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
 
                     <div className="relative w-full flex overflow-x-hidden bg-slate-50 py-6 border-y border-slate-200/60">
                       <div className="flex gap-16 animate-marquee whitespace-nowrap">
-                        {[...partners, ...partners, ...partners].map((partner, idx) => (
-                          <div 
-                            key={idx}
-                            className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
-                          >
-                            {partner.logo ? (
-                              <img 
-                                src={partner.logo} 
-                                alt={`${partner.name} logo`} 
-                                className="h-10 w-auto max-w-[120px] object-contain shrink-0"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-xl bg-[#002366] flex items-center justify-center font-bold text-white text-sm shrink-0">
-                                {partner.name.charAt(0)}
+                        {(() => {
+                          const collabs = block.settings.items || partners;
+                          const repeated = [...collabs, ...collabs, ...collabs];
+                          return repeated.map((partner, idx) => (
+                            <div 
+                              key={idx}
+                              className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
+                            >
+                              {partner.logo ? (
+                                <img 
+                                  src={partner.logo} 
+                                  alt={`${partner.name} logo`} 
+                                  className="h-10 w-auto max-w-[120px] object-contain shrink-0"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-xl bg-[#002366] flex items-center justify-center font-bold text-white text-sm shrink-0">
+                                  {partner.name.charAt(0)}
+                                </div>
+                              )}
+                              <div className="text-left">
+                                <p className="text-xs font-extrabold text-[#002366]">{partner.name}</p>
+                                <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">{partner.label}</p>
                               </div>
-                            )}
-                            <div className="text-left">
-                              <p className="text-xs font-extrabold text-[#002366]">{partner.name}</p>
-                              <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">{partner.label}</p>
                             </div>
-                          </div>
-                        ))}
+                          ));
+                        })()}
                       </div>
                     </div>
                   </section>

@@ -18,17 +18,12 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="sticky top-0 z-40 w-full bg-[#002366] text-white shadow-md border-b border-blue-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
-        {/* Clickable Brand Logo redirects to Admin Login portal */}
-        {/* Logo contains both the icon and text verbatim, styled with official proportions */}
-        <div 
-          onClick={() => setCurrentView('admin-login')}
-          className="flex items-center cursor-pointer group"
-          title="Accéder au Portail Administration Cabinet RE2M"
-        >
+        {/* Static Brand Logo (no redirection link) */}
+        <div className="flex items-center">
           <img 
             src="/logo1.png" 
             alt="Cabinet RE2M Logo" 
-            className="h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
+            className="h-11 w-auto object-contain"
           />
         </div>
 

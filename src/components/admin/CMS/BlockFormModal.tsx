@@ -56,11 +56,45 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
       case 'Hero':
         return (
           <div className="space-y-6">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Diapositives du Carousel</h4>
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Diapositives du Carousel</h4>
+              <button
+                type="button"
+                onClick={() => {
+                  const newSlides = [...(localSettings.slides || [])];
+                  newSlides.push({
+                    title: "Nouveau titre de diapositive",
+                    subtitle: "Sous-titre",
+                    text: "Description de la diapositive...",
+                    image: "/slide_01.jpg",
+                    cta: "Découvrir",
+                    targetView: "nos-services"
+                  });
+                  handleFieldChange('slides', newSlides);
+                }}
+                className="px-3 py-1 bg-[#C5A85C] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#B5933A] cursor-pointer flex items-center gap-1 transition-all"
+              >
+                <Plus className="w-3.5 h-3.5 shrink-0" />
+                <span>Ajouter une Diapositive</span>
+              </button>
+            </div>
+            
             {(localSettings.slides || []).map((slide: any, idx: number) => (
-              <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+              <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3 relative group/slide">
                 <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                   <span className="text-xs font-bold text-[#002366]">Slide #{idx + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newSlides = [...localSettings.slides];
+                      newSlides.splice(idx, 1);
+                      handleFieldChange('slides', newSlides);
+                    }}
+                    className="text-rose-600 hover:text-rose-800 text-[10px] font-bold uppercase flex items-center gap-1 cursor-pointer transition-colors"
+                    title="Supprimer cette diapositive"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Supprimer
+                  </button>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -74,7 +108,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newSlides[idx].subtitle = e.target.value;
                         handleFieldChange('slides', newSlides);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -87,11 +121,11 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newSlides[idx].title = e.target.value;
                         handleFieldChange('slides', newSlides);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none"
                     />
                   </div>
                 </div>
-
+                
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase">Description / Texte</label>
                   <textarea
@@ -102,10 +136,10 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                       newSlides[idx].text = e.target.value;
                       handleFieldChange('slides', newSlides);
                     }}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none"
                   />
                 </div>
-
+                
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase">Chemin Image (ou URL)</label>
@@ -117,7 +151,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newSlides[idx].image = e.target.value;
                         handleFieldChange('slides', newSlides);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -130,7 +164,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newSlides[idx].cta = e.target.value;
                         handleFieldChange('slides', newSlides);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -142,7 +176,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newSlides[idx].targetView = e.target.value;
                         handleFieldChange('slides', newSlides);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none"
                     >
                       <option value="accueil">Accueil</option>
                       <option value="qui-nous-sommes">Qui Nous Sommes</option>
@@ -159,13 +193,42 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
       case 'CounterStats':
         return (
           <div className="space-y-4">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Statistiques Clés</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Statistiques Clés</h4>
+              <button
+                type="button"
+                onClick={() => {
+                  const newStats = [...(localSettings.stats || [])];
+                  newStats.push({ value: '100', label: 'Nouveau indicateur' });
+                  handleFieldChange('stats', newStats);
+                }}
+                className="px-3 py-1 bg-[#C5A85C] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#B5933A] cursor-pointer flex items-center gap-1 transition-all"
+              >
+                <Plus className="w-3.5 h-3.5 shrink-0" />
+                <span>Ajouter un indicateur</span>
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {(localSettings.stats || []).map((stat: any, idx: number) => (
-                <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                  <span className="text-[10px] font-bold text-slate-400">Statistique #{idx + 1}</span>
+                <div key={idx} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 relative group/stat">
+                  <div className="flex justify-between items-center pb-1 border-b border-slate-200">
+                    <span className="text-[10px] font-bold text-slate-400">Statistique #{idx + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newStats = [...localSettings.stats];
+                        newStats.splice(idx, 1);
+                        handleFieldChange('stats', newStats);
+                      }}
+                      className="text-rose-600 hover:text-rose-800 text-[9px] font-bold uppercase flex items-center gap-1 cursor-pointer transition-colors"
+                      title="Supprimer cette statistique"
+                    >
+                      <Trash2 className="w-3 h-3" /> Supprimer
+                    </button>
+                  </div>
                   <div>
-                    <label className="block text-[9px] font-bold text-slate-500 uppercase">Valeur (Nombre)</label>
+                    <label className="block text-[9px] font-bold text-slate-500 uppercase">Valeur (Nombre/Texte)</label>
                     <input
                       type="text"
                       value={stat.value || ''}
@@ -174,7 +237,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newStats[idx].value = e.target.value;
                         handleFieldChange('stats', newStats);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
                     />
                   </div>
                   <div>
@@ -187,7 +250,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newStats[idx].label = e.target.value;
                         handleFieldChange('stats', newStats);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
                     />
                   </div>
                 </div>
@@ -197,7 +260,6 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
         );
 
       case 'ServicesPreview':
-      case 'Collaborations':
         return (
           <div className="space-y-4">
             <div>
@@ -206,7 +268,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                 type="text"
                 value={localSettings.title || ''}
                 onChange={(e) => handleFieldChange('title', e.target.value)}
-                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl"
+                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
               />
             </div>
             <div>
@@ -215,8 +277,124 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                 rows={3}
                 value={localSettings.description || ''}
                 onChange={(e) => handleFieldChange('description', e.target.value)}
-                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl"
+                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
               />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase">Nombre maximal de services à afficher</label>
+              <input
+                type="number"
+                value={localSettings.limit || 3}
+                onChange={(e) => handleFieldChange('limit', parseInt(e.target.value) || 3)}
+                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+              />
+            </div>
+          </div>
+        );
+
+      case 'Collaborations':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase">Titre de la Section</label>
+                <input
+                  type="text"
+                  value={localSettings.title || ''}
+                  onChange={(e) => handleFieldChange('title', e.target.value)}
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase">Description / Sous-titre</label>
+                <input
+                  type="text"
+                  value={localSettings.description || ''}
+                  onChange={(e) => handleFieldChange('description', e.target.value)}
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200 pt-2">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Liste des Partenaires</h4>
+              <button
+                type="button"
+                onClick={() => {
+                  const newItems = [...(localSettings.items || [])];
+                  newItems.push({
+                    name: "Nouveau Partenaire",
+                    label: "Secteur",
+                    logo: ""
+                  });
+                  handleFieldChange('items', newItems);
+                }}
+                className="px-3 py-1 bg-[#C5A85C] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#B5933A] cursor-pointer flex items-center gap-1 transition-all"
+              >
+                <Plus className="w-3.5 h-3.5 shrink-0" />
+                <span>Ajouter un Partenaire</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {(localSettings.items || []).map((partner: any, idx: number) => (
+                <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 relative group/partner">
+                  <div className="flex justify-between items-center pb-1 border-b border-slate-200">
+                    <span className="text-[10px] font-bold text-slate-450">Partenaire #{idx + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newItems = [...localSettings.items];
+                        newItems.splice(idx, 1);
+                        handleFieldChange('items', newItems);
+                      }}
+                      className="text-rose-700 hover:text-rose-900 text-[9px] font-bold uppercase flex items-center gap-1 cursor-pointer transition-colors"
+                      title="Supprimer ce partenaire"
+                    >
+                      <Trash2 className="w-3 h-3" /> Supprimer
+                    </button>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-slate-500 uppercase">Nom</label>
+                    <input
+                      type="text"
+                      value={partner.name || ''}
+                      onChange={(e) => {
+                        const newItems = [...localSettings.items];
+                        newItems[idx].name = e.target.value;
+                        handleFieldChange('items', newItems);
+                      }}
+                      className="mt-0.5 w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-slate-500 uppercase">Label / Secteur</label>
+                    <input
+                      type="text"
+                      value={partner.label || ''}
+                      onChange={(e) => {
+                        const newItems = [...localSettings.items];
+                        newItems[idx].label = e.target.value;
+                        handleFieldChange('items', newItems);
+                      }}
+                      className="mt-0.5 w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-slate-500 uppercase">URL Logo (PNG)</label>
+                    <input
+                      type="text"
+                      value={partner.logo || ''}
+                      onChange={(e) => {
+                        const newItems = [...localSettings.items];
+                        newItems[idx].logo = e.target.value;
+                        handleFieldChange('items', newItems);
+                      }}
+                      className="mt-0.5 w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         );
@@ -333,7 +511,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   type="text"
                   value={localSettings.title || ''}
                   onChange={(e) => handleFieldChange('title', e.target.value)}
-                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl"
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
                 />
               </div>
               <div>
@@ -342,19 +520,48 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   type="text"
                   value={localSettings.description || ''}
                   onChange={(e) => handleFieldChange('description', e.target.value)}
-                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl"
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
                 />
               </div>
             </div>
 
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider pt-2 border-t border-slate-200">
-              Liste des Témoignages
-            </h4>
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200 pt-2">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Liste des Témoignages</h4>
+              <button
+                type="button"
+                onClick={() => {
+                  const newItems = [...(localSettings.items || [])];
+                  newItems.push({
+                    company: "Nouvelle Entreprise",
+                    service: "Prestation logistique",
+                    text: "“Un accompagnement sur-mesure...”",
+                    logo: ""
+                  });
+                  handleFieldChange('items', newItems);
+                }}
+                className="px-3 py-1 bg-[#C5A85C] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#B5933A] cursor-pointer flex items-center gap-1 transition-all"
+              >
+                <Plus className="w-3.5 h-3.5 shrink-0" />
+                <span>Ajouter un Témoignage</span>
+              </button>
+            </div>
             
             {(localSettings.items || []).map((testi: any, idx: number) => (
-              <div key={idx} className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+              <div key={idx} className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 relative group/testi">
                 <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                   <span className="text-xs font-bold text-[#002366]">Témoignage #{idx + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newItems = [...localSettings.items];
+                      newItems.splice(idx, 1);
+                      handleFieldChange('items', newItems);
+                    }}
+                    className="text-rose-600 hover:text-rose-800 text-[10px] font-bold uppercase flex items-center gap-1 cursor-pointer transition-colors"
+                    title="Supprimer ce témoignage"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Supprimer
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -368,7 +575,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].company = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
                     />
                   </div>
                   <div>
@@ -381,7 +588,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].service = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
                     />
                   </div>
                 </div>
@@ -396,7 +603,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                       newItems[idx].text = e.target.value;
                       handleFieldChange('items', newItems);
                     }}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                    className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
                   />
                 </div>
 
@@ -410,7 +617,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                       newItems[idx].logo = e.target.value;
                       handleFieldChange('items', newItems);
                     }}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                    className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
                   />
                 </div>
               </div>
@@ -427,7 +634,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                 type="text"
                 value={localSettings.title || ''}
                 onChange={(e) => handleFieldChange('title', e.target.value)}
-                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl"
+                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -437,7 +644,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   rows={3}
                   value={localSettings.desc1 || ''}
                   onChange={(e) => handleFieldChange('desc1', e.target.value)}
-                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl"
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
                 />
               </div>
               <div>
@@ -446,43 +653,78 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   rows={3}
                   value={localSettings.desc2 || ''}
                   onChange={(e) => handleFieldChange('desc2', e.target.value)}
-                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl"
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
                 />
               </div>
             </div>
 
             <div className="border-t border-slate-200 pt-4 space-y-4">
-              <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Engagements Clés</h5>
-              {(localSettings.commitments || []).map((comm: any, idx: number) => (
-                <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[9px] font-bold text-slate-500 uppercase">Engagement #{idx + 1} - Titre</label>
-                    <input
-                      type="text"
-                      value={comm.title || ''}
-                      onChange={(e) => {
-                        const newComms = [...localSettings.commitments];
-                        newComms[idx].title = e.target.value;
-                        handleFieldChange('commitments', newComms);
-                      }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
-                    />
+              <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+                <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Engagements Clés</h5>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newComms = [...(localSettings.commitments || [])];
+                    newComms.push({ title: "Nouvel Engagement", desc: "Description de l'engagement..." });
+                    handleFieldChange('commitments', newComms);
+                  }}
+                  className="px-3 py-1 bg-[#C5A85C] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#B5933A] cursor-pointer flex items-center gap-1 transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5 shrink-0" />
+                  <span>Ajouter un Engagement</span>
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-4 pt-2">
+                {(localSettings.commitments || []).map((comm: any, idx: number) => (
+                  <div key={idx} className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 relative group/comm">
+                    <div className="flex justify-between items-center pb-1 border-b border-slate-200">
+                      <span className="text-[10px] font-bold text-slate-450">Engagement #{idx + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newComms = [...localSettings.commitments];
+                          newComms.splice(idx, 1);
+                          handleFieldChange('commitments', newComms);
+                        }}
+                        className="text-rose-600 hover:text-rose-800 text-[9px] font-bold uppercase flex items-center gap-1 cursor-pointer transition-colors"
+                        title="Supprimer cet engagement"
+                      >
+                        <Trash2 className="w-3 h-3" /> Supprimer
+                      </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase">Titre</label>
+                        <input
+                          type="text"
+                          value={comm.title || ''}
+                          onChange={(e) => {
+                            const newComms = [...localSettings.commitments];
+                            newComms[idx].title = e.target.value;
+                            handleFieldChange('commitments', newComms);
+                          }}
+                          className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase">Description</label>
+                        <input
+                          type="text"
+                          value={comm.desc || ''}
+                          onChange={(e) => {
+                            const newComms = [...localSettings.commitments];
+                            newComms[idx].desc = e.target.value;
+                            handleFieldChange('commitments', newComms);
+                          }}
+                          className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-[9px] font-bold text-slate-500 uppercase">Engagement #{idx + 1} - Description</label>
-                    <input
-                      type="text"
-                      value={comm.desc || ''}
-                      onChange={(e) => {
-                        const newComms = [...localSettings.commitments];
-                        newComms[idx].desc = e.target.value;
-                        handleFieldChange('commitments', newComms);
-                      }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
-                    />
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         );
@@ -556,12 +798,44 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
       case 'ServicesList':
         return (
           <div className="space-y-6">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Liste Complète des Services (Nos Services)</h4>
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Liste Complète des Services (Nos Services)</h4>
+              <button
+                type="button"
+                onClick={() => {
+                  const newItems = [...(localSettings.items || [])];
+                  newItems.push({
+                    title: "Nouveau Service",
+                    desc: "Description courte...",
+                    image: "/single_service_01.jpg",
+                    iconName: "ClipboardList",
+                    details: ["Détail du service 1"]
+                  });
+                  handleFieldChange('items', newItems);
+                }}
+                className="px-3 py-1 bg-[#C5A85C] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#B5933A] cursor-pointer flex items-center gap-1 transition-all"
+              >
+                <Plus className="w-3.5 h-3.5 shrink-0" />
+                <span>Ajouter un Service</span>
+              </button>
+            </div>
             
             {(localSettings.items || []).map((srv: any, idx: number) => (
-              <div key={idx} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+              <div key={idx} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 relative group/srv">
                 <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                   <span className="text-xs font-bold text-[#002366]">Service #{idx + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newItems = [...localSettings.items];
+                      newItems.splice(idx, 1);
+                      handleFieldChange('items', newItems);
+                    }}
+                    className="text-rose-600 hover:text-rose-800 text-[10px] font-bold uppercase flex items-center gap-1 cursor-pointer transition-colors"
+                    title="Supprimer ce service"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Supprimer
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -575,7 +849,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].title = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
                     />
                   </div>
                   <div>
@@ -588,7 +862,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].desc = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
                     />
                   </div>
                 </div>
@@ -604,7 +878,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].image = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
                     />
                   </div>
                   <div>
@@ -616,7 +890,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].iconName = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
                     >
                       <option value="ClipboardList">ClipboardList (Audit)</option>
                       <option value="GraduationCap">GraduationCap (Formation)</option>
@@ -636,7 +910,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                       newItems[idx].details = e.target.value.split('\n');
                       handleFieldChange('items', newItems);
                     }}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl font-mono text-[11px]"
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl font-mono text-[11px] focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
                   />
                 </div>
               </div>

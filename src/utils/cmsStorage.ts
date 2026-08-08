@@ -1,5 +1,28 @@
 import { PageLayout, CMSBlock, PageSlug } from '../types/cms';
 
+const defaultPartners = [
+  {
+    name: "COLAS",
+    label: "Gabon",
+    logo: "https://tse4.mm.bing.net/th/id/OIP.TeuJJGq0FrNo9cbaoSOijQHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3"
+  },
+  {
+    name: "SEEG",
+    label: "Société d'Énergie",
+    logo: "https://africannuaire.com/wp-content/uploads/2017/05/LOGO-SEEG-AA-17.jpg"
+  },
+  {
+    name: "SGEPP",
+    label: "Hydrocarbures",
+    logo: "https://arda.africa/wp-content/uploads/2022/08/Arda_Member_Logos_SGEPP.png"
+  },
+  {
+    name: "PERENCO",
+    label: "Pétrole",
+    logo: "https://th.bing.com/th/id/R.416f199d5a0200667f7e42d6df1e3241?rik=4M35Oghc52VHow&riu=http%3a%2f%2flogonoid.com%2fimages%2fperenco-logo.png&ehk=AX2r5xs6pgn5JJuZJsUs4dLRsQMfAVJthprTVaaeaE8%3d&risl=&pid=ImgRaw&r=0"
+  }
+];
+
 // Default initial blocks for the Homepage (Accueil)
 const defaultAccueilBlocks: CMSBlock[] = [
   {
@@ -121,7 +144,8 @@ const defaultAccueilBlocks: CMSBlock[] = [
     enabled: true,
     settings: {
       title: "Ils nous font confiance",
-      description: "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M"
+      description: "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M",
+      items: defaultPartners
     }
   }
 ];
@@ -187,7 +211,8 @@ const defaultAboutBlocks: CMSBlock[] = [
     enabled: true,
     settings: {
       title: "Ils nous font confiance",
-      description: "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M"
+      description: "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M",
+      items: defaultPartners
     }
   }
 ];
@@ -266,7 +291,8 @@ const defaultServicesBlocks: CMSBlock[] = [
     enabled: true,
     settings: {
       title: "Ils nous font confiance",
-      description: "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M"
+      description: "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M",
+      items: defaultPartners
     }
   }
 ];
