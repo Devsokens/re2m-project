@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Hero } from './Hero';
 import { Award, CheckCircle, Sparkles, TrendingUp } from 'lucide-react';
+import { partners } from '../../data/partners';
 
 interface AccueilViewProps {
   onStartDemo: () => void;
@@ -17,23 +18,31 @@ export const AccueilView: React.FC<AccueilViewProps> = ({ onStartDemo, onNavigat
     { value: '23', label: 'Formations Certifiantes' }
   ];
 
-  // Real clients from website with official logo links
-  const partners = [
-    { name: 'Olam', label: 'Agroalimentaire', logo: 'https://freepngdesign.com/content/uploads/images/p62-27-olam-4185985136.png' },
-    { name: 'NSIA', label: 'Assurances & Banque', logo: 'https://nsiadirect.bj/images/nsia_30.jpg' },
-    { name: 'COLAS Gabon', label: 'Infrastructures', logo: 'https://tse4.mm.bing.net/th/id/OIP.TeuJJGq0FrNo9cbaoSOijQHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3' },
-    { name: 'BBS', label: 'Éducation & Formation', logo: 'https://www.orientation.ogooue-education.com/wp-content/uploads/listing-uploads/logo/2022/07/BBS-Logo.jpg' },
-    { name: 'SGEPP', label: 'Hydrocarbures', logo: 'https://arda.africa/wp-content/uploads/2022/08/Arda_Member_Logos_SGEPP.png' },
-    { name: 'BGFI', label: 'Banque', logo: 'https://madagascar.bgfi.com/media/logo-bgfibank.png' },
-    { name: 'SEEG', label: 'Énergie & Eau', logo: 'https://africannuaire.com/wp-content/uploads/2017/05/LOGO-SEEG-AA-17.jpg' },
-    { name: 'GAB\'OIL', label: 'Distribution Carburants', logo: 'https://th.bing.com/th/id/R.dc99f38bf45ca570c1044d1f6055bba4?rik=OmAxosCd9vLGXg&pid=ImgRaw&r=0' },
-    { name: 'SCG-Ré', label: 'Réassurance', logo: 'https://tse4.mm.bing.net/th/id/OIP.Dnbzua-jcJZpJBXkcbe11wHaFF?r=0&rs=1&pid=ImgDetMain&o=7&rm=3' },
-    { name: 'NETIS', label: 'Télécoms & Énergie', logo: 'https://tse1.mm.bing.net/th/id/OIP.kgBF8e96fn7XuWW0SbADEQAAAA?r=0&rs=1&pid=ImgDetMain&o=7&rm=3' },
-    { name: 'PERENCO', label: 'Pétrole & Gaz', logo: 'https://th.bing.com/th/id/R.416f199d5a0200667f7e42d6df1e3241?rik=4M35Oghc52VHow&riu=http%3a%2f%2flogonoid.com%2fimages%2fperenco-logo.png&ehk=AX2r5xs6pgn5JJuZJsUs4dLRsQMfAVJthprTVaaeaE8%3d&risl=&pid=ImgRaw&r=0' },
-    { name: 'ULYSS', label: 'Logistique & Services', logo: 'https://tse3.mm.bing.net/th/id/OIP.fpqXN9RhpDnwMlnaHwKXbAHaCn?r=0&rs=1&pid=ImgDetMain&o=7&rm=3' },
-    { name: 'CDC', label: 'Caisse des Dépôts', logo: 'https://tse4.mm.bing.net/th/id/OIP.fA-62jeglLIOrrOowXTs2AHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3' },
-    { name: 'YORHA consulting', label: 'Conseil & IT', logo: 'https://media.licdn.com/dms/image/v2/C5622AQFTtoGk3XjYTg/feedshare-shrink_800/feedshare-shrink_800/0/1577381524022?e=2147483647&v=beta&t=7YIqCOWbMGK_vwqU_27qf3uTKl8xoOjh-L4oy7xxy5w' },
-    { name: 'AZUR', label: 'Télécoms', logo: 'https://fr.infosgabon.com/wp-content/uploads/2013/02/AZUR.jpg' }
+  const testimonials = [
+    {
+      company: 'COLAS Gabon',
+      service: 'Formation & Accompagnement',
+      text: '“Le Cabinet RE2M nous a accompagnés dans la mise en place de notre gestion de la relation fournisseurs. Des résultats concrets et mesurables.”',
+      logo: 'https://tse4.mm.bing.net/th/id/OIP.TeuJJGq0FrNo9cbaoSOijQHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3'
+    },
+    {
+      company: 'SEEG',
+      service: 'Formation & Conseil',
+      text: '“Expertise remarquable en gestion des stocks et relation fournisseurs. Une équipe professionnelle et réactive.”',
+      logo: 'https://africannuaire.com/wp-content/uploads/2017/05/LOGO-SEEG-AA-17.jpg'
+    },
+    {
+      company: 'SGEPP',
+      service: 'Formation Achats',
+      text: '“Des formations pratiques et opérationnelles qui ont directement impacté notre performance achats.”',
+      logo: 'https://arda.africa/wp-content/uploads/2022/08/Arda_Member_Logos_SGEPP.png'
+    },
+    {
+      company: 'PERENCO',
+      service: 'Gestion des Inventaires',
+      text: '“Un accompagnement de qualité pour l\'optimisation de notre gestion des inventaires. Recommandé.”',
+      logo: 'https://th.bing.com/th/id/R.416f199d5a0200667f7e42d6df1e3241?rik=4M35Oghc52VHow&riu=http%3a%2f%2flogonoid.com%2fimages%2fperenco-logo.png&ehk=AX2r5xs6pgn5JJuZJsUs4dLRsQMfAVJthprTVaaeaE8%3d&risl=&pid=ImgRaw&r=0'
+    }
   ];
 
   return (
@@ -91,8 +100,116 @@ export const AccueilView: React.FC<AccueilViewProps> = ({ onStartDemo, onNavigat
         </div>
       </section>
 
-      {/* 2. SECTION FONDATEUR (VERBATIM FROM SITE OF CABINET RE2M WITH PHOTO IN ORIGINAL PROPORTIONS) */}
+      {/* 1.5 SECTION QUELQUES-UNS DE NOS SERVICES */}
       <section className="bg-slate-50 py-16 border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
+            <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest inline-block">
+              Quelques-uns de nos services
+            </span>
+            <h2 className="font-serif text-3xl font-extrabold text-[#002366] leading-tight">
+              Des solutions sur mesure pour optimiser votre performance
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Card 1: Audit & Conseil */}
+            <div className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col justify-between h-full group hover:shadow-lg transition-all duration-300">
+              <div>
+                <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                  <img 
+                    src="/service_01.jpg" 
+                    alt="Audit & Conseil"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className="p-6 space-y-3">
+                  <h4 className="font-serif text-lg font-bold text-[#002366]">Audit & Conseil</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed text-justify">
+                    Diagnostic complet de vos fonctions Achats et Logistique. Recommandations stratégiques pour l'optimisation de vos processus et l'amélioration de votre performance.
+                  </p>
+                </div>
+              </div>
+              <div className="px-6 pb-6 pt-2">
+                <button 
+                  onClick={() => onNavigate('nos-services')}
+                  className="text-xs font-bold text-blue-800 hover:text-blue-900 flex items-center gap-1 group/btn cursor-pointer"
+                >
+                  Découvrir <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Card 2: Formation Certifiante */}
+            <div className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col justify-between h-full group hover:shadow-lg transition-all duration-300">
+              <div>
+                <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                  <img 
+                    src="/service_02.jpg" 
+                    alt="Formation Certifiante"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className="p-6 space-y-3">
+                  <h4 className="font-serif text-lg font-bold text-[#002366]">Formation Certifiante</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed text-justify">
+                    Formations pratiques et opérationnelles en gestion des achats, contrats, stocks, inventaires, négociation et relation fournisseurs. Programme sur mesure.
+                  </p>
+                </div>
+              </div>
+              <div className="px-6 pb-6 pt-2">
+                <button 
+                  onClick={() => onNavigate('nos-services')}
+                  className="text-xs font-bold text-blue-800 hover:text-blue-900 flex items-center gap-1 group/btn cursor-pointer"
+                >
+                  Découvrir <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Card 3: Accompagnement */}
+            <div className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col justify-between h-full group hover:shadow-lg transition-all duration-300">
+              <div>
+                <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                  <img 
+                    src="/service_03.jpg" 
+                    alt="Accompagnement"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className="p-6 space-y-3">
+                  <h4 className="font-serif text-lg font-bold text-[#002366]">Accompagnement & Coaching</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed text-justify">
+                    Coaching et accompagnement personnalisé pour la mise en œuvre de solutions innovantes. Transfert de compétences et outils d'amélioration continue.
+                  </p>
+                </div>
+              </div>
+              <div className="px-6 pb-6 pt-2">
+                <button 
+                  onClick={() => onNavigate('nos-services')}
+                  className="text-xs font-bold text-blue-800 hover:text-blue-900 flex items-center gap-1 group/btn cursor-pointer"
+                >
+                  Découvrir <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <button 
+              onClick={() => onNavigate('nos-services')}
+              className="bg-[#002366] text-white font-bold px-6 py-3 rounded-xl hover:bg-blue-900 transition-colors text-xs cursor-pointer shadow-md inline-flex items-center gap-2"
+            >
+              Voir tous nos services <span>→</span>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 2. SECTION FONDATEUR (VERBATIM FROM SITE OF CABINET RE2M WITH PHOTO IN ORIGINAL PROPORTIONS) */}
+      <section className="bg-white py-16 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
@@ -143,8 +260,59 @@ export const AccueilView: React.FC<AccueilViewProps> = ({ onStartDemo, onNavigat
         </div>
       </section>
 
+      {/* 2.5 SECTION TÉMOIGNAGES (TESTIMONIALS) */}
+      <section className="bg-slate-50 py-16 border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
+            <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest inline-block">
+              Témoignages
+            </span>
+            <h2 className="font-serif text-3xl font-extrabold text-[#002366] leading-tight">
+              Ce que disent nos clients
+            </h2>
+            <p className="text-slate-500 text-sm sm:text-base">
+              Découvrez les retours d'expérience des leaders sectoriels accompagnés par le Cabinet RE2M.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {testimonials.map((testi, idx) => (
+              <div 
+                key={idx} 
+                className="corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300"
+              >
+                {/* Large decorative quotation mark */}
+                <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
+                  ”
+                </span>
+
+                <div className="space-y-4 relative z-10">
+                  <p className="text-slate-600 text-sm italic leading-relaxed text-justify">
+                    {testi.text}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
+                  <img 
+                    src={testi.logo} 
+                    alt={`${testi.company} logo`}
+                    className="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-white shrink-0"
+                  />
+                  <div>
+                    <h4 className="font-serif text-sm font-bold text-[#002366]">{testi.company}</h4>
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{testi.service}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
       {/* 3. SECTION COLLABORATIONS (LOGOS DÉFILANTS) */}
-      <section className="py-12 bg-white overflow-hidden">
+      <section className="py-12 bg-white overflow-hidden border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center">
           <h3 className="font-serif text-2xl font-bold text-[#002366]">
             Ils nous font confiance
