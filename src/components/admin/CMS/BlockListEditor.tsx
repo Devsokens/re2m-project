@@ -126,6 +126,24 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
         directorName: "Nom",
         directorTitle: "Titre",
         image: "/team_01.jpg"
+      },
+      'ContactDetails': {
+        badge: "Nous Contacter",
+        title: "Prenez Contact avec le Cabinet RE2M",
+        description: "Nos conseillers sont disponibles pour répondre à toutes vos demandes.",
+        addressTitle: "Adresse Physique",
+        addressLine1: "93 rue Albert AKOULOU OSSE",
+        addressLine2: "BP 1.357 Libreville, Gabon",
+        phoneTitle: "Téléphones Directs",
+        phone1: "+241 77 17 11 77",
+        phone2: "+241 65 06 25 26",
+        emailTitle: "Messagerie",
+        email: "remvemboro@outlook.fr",
+        hoursTitle: "Heures d'Ouverture",
+        hoursLine1: "Lundi - Vendredi",
+        hoursLine2: "08:00 - 17:00",
+        rccm: "RCCM: RG.LBV.2017A41250",
+        nif: "NIF: 482.914Y"
       }
     };
 
@@ -173,6 +191,7 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
           <option value="HeaderBanner">HeaderBanner (Bannière Entête)</option>
           <option value="PresentationGrid">PresentationGrid (Engagements)</option>
           <option value="DirectorMessage">DirectorMessage (Message Directeur)</option>
+          <option value="ContactDetails">ContactDetails (Coordonnées de Contact)</option>
         </select>
       </div>
 

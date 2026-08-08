@@ -6,6 +6,7 @@ import { BlockListEditor } from './BlockListEditor';
 import { AccueilView } from '../../landing/AccueilView';
 import { QuiNousSommesView } from '../../landing/QuiNousSommesView';
 import { NosServicesView } from '../../landing/NosServicesView';
+import { ContactView } from '../../landing/ContactView';
 import { Globe, RefreshCw, Check, ListOrdered } from 'lucide-react';
 
 interface GestionCMSProps {
@@ -180,6 +181,21 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
           >
             Nos Services
           </button>
+
+          <button
+            onClick={() => {
+              setSelectedPage('contact');
+              setIsFormOpen(false);
+              setEditingBlock(null);
+            }}
+            className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              selectedPage === 'contact'
+                ? 'bg-[#C5A85C] text-white shadow-md'
+                : 'text-[#6e5d3d] hover:text-[#002366] hover:bg-slate-200/40'
+            }`}
+          >
+            Contact
+          </button>
         </div>
       </div>
 
@@ -216,8 +232,15 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
           />
         )}
 
-        {selectedPage === 'nos-services' && (
+         {selectedPage === 'nos-services' && (
           <NosServicesView
+            blocks={draftBlocks}
+            onSelectBlock={handleSelectBlockFromPreview}
+          />
+        )}
+
+        {selectedPage === 'contact' && (
+          <ContactView
             blocks={draftBlocks}
             onSelectBlock={handleSelectBlockFromPreview}
           />

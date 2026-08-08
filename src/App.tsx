@@ -174,12 +174,14 @@ export function App() {
       )}
 
       {/* Main Navbar */}
-      <Navbar
-        currentView={currentView}
-        setCurrentView={handleNavigate}
-        activeRole={activeRole}
-        setActiveRole={setActiveRole}
-      />
+      {currentView !== 'admin' && (
+        <Navbar
+          currentView={currentView}
+          setCurrentView={handleNavigate}
+          activeRole={activeRole}
+          setActiveRole={setActiveRole}
+        />
+      )}
 
       {/* View Switcher Router */}
       <main className="flex-1">
@@ -207,7 +209,9 @@ export function App() {
         )}
 
         {currentView === 'contact' && (
-          <ContactView />
+          <ContactView 
+            blocks={previewBlocks['contact'] || cmsStorage.getPublishedLayout('contact')}
+          />
         )}
 
         {currentView === 'admin-login' && (
@@ -237,6 +241,7 @@ export function App() {
             activeRole={activeRole}
             onTogglePreview={handleTogglePreview}
             activePreviewSlug={activePreviewSlug}
+            onLogout={() => handleNavigate('accueil')}
           />
         )}
       </main>

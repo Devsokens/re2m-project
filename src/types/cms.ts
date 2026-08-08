@@ -8,7 +8,8 @@ export type BlockType =
   | 'HeaderBanner'
   | 'PresentationGrid'
   | 'DirectorMessage'
-  | 'ServicesList';
+  | 'ServicesList'
+  | 'ContactDetails';
 
 export interface CMSBlock {
   id: string;

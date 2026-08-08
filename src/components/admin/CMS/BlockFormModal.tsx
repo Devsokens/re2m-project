@@ -918,6 +918,193 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
           </div>
         );
 
+      case 'ContactDetails':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase">Badge de l'Entête</label>
+                <input
+                  type="text"
+                  value={localSettings.badge || ''}
+                  onChange={(e) => handleFieldChange('badge', e.target.value)}
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase">Titre Principal</label>
+                <input
+                  type="text"
+                  value={localSettings.title || ''}
+                  onChange={(e) => handleFieldChange('title', e.target.value)}
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase">Description / Texte d'aide</label>
+              <textarea
+                rows={2}
+                value={localSettings.description || ''}
+                onChange={(e) => handleFieldChange('description', e.target.value)}
+                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+              />
+            </div>
+
+            <div className="border-t border-slate-200 pt-4 space-y-4">
+              <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Adresse Physique</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-500 uppercase">Label de la Carte</label>
+                  <input
+                    type="text"
+                    value={localSettings.addressTitle || ''}
+                    onChange={(e) => handleFieldChange('addressTitle', e.target.value)}
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-500 uppercase">Adresse Ligne 1</label>
+                  <input
+                    type="text"
+                    value={localSettings.addressLine1 || ''}
+                    onChange={(e) => handleFieldChange('addressLine1', e.target.value)}
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-500 uppercase">Adresse Ligne 2</label>
+                  <input
+                    type="text"
+                    value={localSettings.addressLine2 || ''}
+                    onChange={(e) => handleFieldChange('addressLine2', e.target.value)}
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-200 pt-4 space-y-4">
+              <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Téléphones</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-500 uppercase">Label Téléphones</label>
+                  <input
+                    type="text"
+                    value={localSettings.phoneTitle || ''}
+                    onChange={(e) => handleFieldChange('phoneTitle', e.target.value)}
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-500 uppercase">Téléphone 1</label>
+                  <input
+                    type="text"
+                    value={localSettings.phone1 || ''}
+                    onChange={(e) => handleFieldChange('phone1', e.target.value)}
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-500 uppercase">Téléphone 2 (Optionnel)</label>
+                  <input
+                    type="text"
+                    value={localSettings.phone2 || ''}
+                    onChange={(e) => handleFieldChange('phone2', e.target.value)}
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-200 pt-4 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Messagerie</h5>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase">Label Email</label>
+                      <input
+                        type="text"
+                        value={localSettings.emailTitle || ''}
+                        onChange={(e) => handleFieldChange('emailTitle', e.target.value)}
+                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase">Adresse Email</label>
+                      <input
+                        type="text"
+                        value={localSettings.email || ''}
+                        onChange={(e) => handleFieldChange('email', e.target.value)}
+                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Heures d'Ouverture</h5>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase">Label Horaires</label>
+                      <input
+                        type="text"
+                        value={localSettings.hoursTitle || ''}
+                        onChange={(e) => handleFieldChange('hoursTitle', e.target.value)}
+                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase">Horaires Ligne 1</label>
+                      <input
+                        type="text"
+                        value={localSettings.hoursLine1 || ''}
+                        onChange={(e) => handleFieldChange('hoursLine1', e.target.value)}
+                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase">Horaires Ligne 2</label>
+                      <input
+                        type="text"
+                        value={localSettings.hoursLine2 || ''}
+                        onChange={(e) => handleFieldChange('hoursLine2', e.target.value)}
+                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-200 pt-4 space-y-4">
+              <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Identifiants Légaux / Renseignements</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-500 uppercase">Numéro RCCM</label>
+                  <input
+                    type="text"
+                    value={localSettings.rccm || ''}
+                    onChange={(e) => handleFieldChange('rccm', e.target.value)}
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-500 uppercase">Numéro NIF</label>
+                  <input
+                    type="text"
+                    value={localSettings.nif || ''}
+                    onChange={(e) => handleFieldChange('nif', e.target.value)}
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="text-xs text-slate-500 py-4">

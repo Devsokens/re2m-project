@@ -275,12 +275,40 @@ const defaultServicesBlocks: CMSBlock[] = [
   }
 ];
 
+// Default initial blocks for the Contact page
+const defaultContactBlocks: CMSBlock[] = [
+  {
+    id: 'contact_details',
+    type: 'ContactDetails',
+    order: 0,
+    enabled: true,
+    settings: {
+      badge: "Nous Contacter",
+      title: "Prenez Contact avec le Cabinet RE2M",
+      description: "Nos conseillers sont disponibles pour répondre à toutes vos demandes.",
+      addressTitle: "Adresse Physique",
+      addressLine1: "93 rue Albert AKOULOU OSSE",
+      addressLine2: "BP 1.357 Libreville, Gabon",
+      phoneTitle: "Téléphones Directs",
+      phone1: "+241 77 17 11 77",
+      phone2: "+241 65 06 25 26",
+      emailTitle: "Messagerie",
+      email: "remvemboro@outlook.fr",
+      hoursTitle: "Heures d'Ouverture",
+      hoursLine1: "Lundi - Vendredi",
+      hoursLine2: "08:00 - 17:00",
+      rccm: "RCCM: RG.LBV.2017A41250",
+      nif: "NIF: 482.914Y"
+    }
+  }
+];
+
 // Master default layouts map
 const defaultLayouts: Record<PageSlug, CMSBlock[]> = {
   'accueil': defaultAccueilBlocks,
   'qui-nous-sommes': defaultAboutBlocks,
   'nos-services': defaultServicesBlocks,
-  'contact': [] // Contact doesn't use block layout in current implementation
+  'contact': defaultContactBlocks
 };
 
 // Storage helper functions
@@ -313,6 +341,9 @@ function mergeDefaultSettings(storedBlocks: CMSBlock[], defaultBlocks: CMSBlock[
     }
     if (stored.type === 'PresentationGrid' && stored.settings?.commitments === undefined) {
       mergedSettings.commitments = defBlock.settings.commitments;
+    }
+    if (stored.type === 'ContactDetails' && stored.settings?.title === undefined) {
+      Object.assign(mergedSettings, defBlock.settings);
     }
     
     return {

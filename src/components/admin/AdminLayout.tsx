@@ -5,7 +5,7 @@ import { MemberTable } from './MemberTable';
 import { BatchGenerator } from './BatchGenerator';
 import { ActivityLogs } from './ActivityLogs';
 import { MemberFormModal } from './MemberFormModal';
-import { LayoutDashboard, Users, Package, ShieldAlert, Sliders } from 'lucide-react';
+import { LayoutDashboard, Users, Package, ShieldAlert, Sliders, LogOut } from 'lucide-react';
 import { GestionCMS } from './CMS/GestionCMS';
 import { PageSlug, CMSBlock } from '../../types/cms';
 
@@ -21,6 +21,7 @@ interface AdminLayoutProps {
   activeRole: UserRole;
   onTogglePreview: (slug: PageSlug, blocks: CMSBlock[] | null) => void;
   activePreviewSlug: PageSlug | null;
+  onLogout: () => void;
 }
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({
@@ -34,7 +35,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   onPrintCard,
   activeRole,
   onTogglePreview,
-  activePreviewSlug
+  activePreviewSlug,
+  onLogout
 }) => {
   const [adminTab, setAdminTab] = useState<'dashboard' | 'members' | 'batch' | 'logs' | 'cms'>('dashboard');
   const [editingMember, setEditingMember] = useState<Member | null>(null);
@@ -126,11 +128,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           </button>
         </div>
 
-        {/* Role Indicator */}
+        {/* Role Indicator & Log out */}
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end px-2">
-          <span className="text-[10px] font-extrabold text-[#002366] bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-xl uppercase tracking-wider">
+          <span className="text-[10px] font-extrabold text-[#002366] bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-xl uppercase tracking-wider shrink-0">
             Rôle Actif: {activeRole}
           </span>
+          <button
+            onClick={onLogout}
+            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center gap-1.5 shrink-0"
+            title="Se déconnecter de l'administration"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Déconnexion</span>
+          </button>
         </div>
 
       </div>

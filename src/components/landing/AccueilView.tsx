@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Hero } from './Hero';
-import { Award, CheckCircle, Sparkles, TrendingUp } from 'lucide-react';
+import { Award, CheckCircle, Sparkles, TrendingUp, ArrowLeft, ArrowRight } from 'lucide-react';
 import { partners } from '../../data/partners';
 import { CMSBlock } from '../../types/cms';
 import { cmsStorage } from '../../utils/cmsStorage';
@@ -19,6 +19,15 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
   onSelectBlock 
 }) => {
   const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
+  const [testiIndex, setTestiIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const stats = [
     { value: '25', label: "Ans d'Expérience" },
@@ -252,36 +261,95 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                        {(block.settings.items || testimonials).map((testi: any, tIdx: number) => (
-                          <div 
-                            key={tIdx} 
-                            className="corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300"
-                          >
-                            <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
-                              ”
-                            </span>
+                      {(() => {
+                        const items = block.settings.items || testimonials;
+                        const isSlider = items.length > 4;
+                        const displayedTestimonials = isSlider
+                          ? items.slice(testiIndex, testiIndex + (isMobile ? 1 : 2))
+                          : items;
 
-                            <div className="space-y-4 relative z-10">
-                              <p className="text-slate-600 text-sm italic leading-relaxed text-justify">
-                                {testi.text}
-                              </p>
+                        return (
+                          <div className="space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                              {displayedTestimonials.map((testi: any, tIdx: number) => (
+                                <div 
+                                  key={tIdx} 
+                                  className="corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300 min-h-[220px]"
+                                >
+                                  <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
+                                    ”
+                                  </span>
+
+                                  <div className="space-y-4 relative z-10">
+                                    <p className="text-slate-600 text-sm italic leading-relaxed text-justify">
+                                      {testi.text}
+                                    </p>
+                                  </div>
+
+                                  <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
+                                    <img 
+                                      src={testi.logo} 
+                                      alt={`${testi.company} logo`}
+                                      className="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-white shrink-0"
+                                    />
+                                    <div>
+                                      <h4 className="font-serif text-sm font-bold text-[#002366]">{testi.company}</h4>
+                                      <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{testi.service}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
 
-                            <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
-                              <img 
-                                src={testi.logo} 
-                                alt={`${testi.company} logo`}
-                                className="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-white shrink-0"
-                              />
-                              <div>
-                                <h4 className="font-serif text-sm font-bold text-[#002366]">{testi.company}</h4>
-                                <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{testi.service}</p>
+                            {isSlider && (
+                              <div className="flex items-center justify-center gap-4 mt-8 select-none">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTestiIndex(prev => Math.max(0, prev - 1));
+                                  }}
+                                  disabled={testiIndex === 0}
+                                  className="p-2.5 rounded-full border border-slate-200 bg-white text-[#002366] hover:border-[#002366] hover:bg-slate-50 transition-all disabled:opacity-30 disabled:hover:bg-white disabled:hover:border-slate-200 cursor-pointer shadow-sm"
+                                  title="Précédent"
+                                >
+                                  <ArrowLeft className="w-4 h-4" />
+                                </button>
+                                
+                                <div className="flex gap-2">
+                                  {Array.from({ length: items.length - (isMobile ? 0 : 1) }).map((_, idx) => (
+                                    <button
+                                      key={idx}
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setTestiIndex(idx);
+                                      }}
+                                      className={`w-2 h-2 rounded-full transition-all cursor-pointer ${
+                                        testiIndex === idx ? 'bg-[#C5A85C] w-4' : 'bg-slate-300'
+                                      }`}
+                                      aria-label={`Aller à la diapositive ${idx + 1}`}
+                                    />
+                                  ))}
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTestiIndex(prev => Math.min(items.length - (isMobile ? 1 : 2), prev + 1));
+                                  }}
+                                  disabled={testiIndex >= items.length - (isMobile ? 1 : 2)}
+                                  className="p-2.5 rounded-full border border-slate-200 bg-white text-[#002366] hover:border-[#002366] hover:bg-slate-50 transition-all disabled:opacity-30 disabled:hover:bg-white disabled:hover:border-slate-200 cursor-pointer shadow-sm"
+                                  title="Suivant"
+                                >
+                                  <ArrowRight className="w-4 h-4" />
+                                </button>
                               </div>
-                            </div>
+                            )}
                           </div>
-                        ))}
-                      </div>
+                        );
+                      })()}
 
                     </div>
                   </section>
