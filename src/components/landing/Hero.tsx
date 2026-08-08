@@ -3,12 +3,20 @@ import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 
 interface HeroProps {
   onNavigate: (view: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact') => void;
+  slides?: Array<{
+    title: string;
+    subtitle: string;
+    text: string;
+    image: string;
+    cta: string;
+    targetView: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact';
+  }>;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
+export const Hero: React.FC<HeroProps> = ({ onNavigate, slides: customSlides }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const slides = [
+  const defaultSlides = [
     {
       title: "Audit & Conseil en Achats & Logistique",
       subtitle: "25 ans d'expertise",
@@ -34,6 +42,8 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       targetView: 'qui-nous-sommes' as const
     }
   ];
+
+  const slides = customSlides || defaultSlides;
 
   useEffect(() => {
     const timer = setInterval(() => {

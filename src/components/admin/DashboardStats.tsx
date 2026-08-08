@@ -27,25 +27,25 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
   });
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8 animate-fadeIn text-[#0f172a]">
       
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/80 p-6 rounded-3xl border border-sky-500/30">
+      {/* Top Header Card */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-200 text-xs font-semibold uppercase tracking-wider mb-2">
-            <Sparkles className="w-3.5 h-3.5" /> Back-Office Administration • Dashboard
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-800 text-[10px] font-extrabold uppercase tracking-wider mb-2">
+            <Sparkles className="w-3.5 h-3.5" /> Administration • Tableau de Bord
           </div>
-          <h2 className="font-serif text-2xl font-bold text-white">
-            Tableau de Bord & Indicateurs Clefs
+          <h2 className="font-serif text-2xl font-bold text-[#002366]">
+            Indicateurs de Performance
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500 font-medium">
             Vue synthétique des activités, scans QR codes et taux d'adoption du réseau RE2M Connect.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl flex items-center gap-1">
-            <Activity className="w-4 h-4" /> PWA Synchro 100%
+          <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl flex items-center gap-1 uppercase tracking-wider">
+            <Activity className="w-4 h-4 text-emerald-600" /> Synchro PWA active
           </span>
         </div>
       </div>
@@ -54,62 +54,62 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Total Members */}
-        <div className="glass-card rounded-2xl p-6 relative">
+        <div className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 relative">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Membres Total</span>
-            <div className="w-10 h-10 rounded-xl bg-blue-950 border border-sky-500/30 flex items-center justify-center text-sky-300">
+            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Membres Total</span>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366]">
               <Users className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-4">
-            <p className="font-serif text-3xl font-bold text-white">{metrics.totalMembers}</p>
-            <p className="text-[11px] text-emerald-400 mt-1 font-semibold">
+            <p className="font-serif text-3xl font-bold text-[#002366]">{metrics.totalMembers}</p>
+            <p className="text-[11px] text-emerald-600 mt-1 font-bold">
               {metrics.activeMembers} actifs ({metrics.adoptionRate}% d'adoption)
             </p>
           </div>
         </div>
 
         {/* Total Scans */}
-        <div className="glass-card rounded-2xl p-6 relative">
+        <div className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 relative">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Scans QR Cumulés</span>
-            <div className="w-10 h-10 rounded-xl bg-blue-950 border border-sky-500/30 flex items-center justify-center text-sky-300">
+            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Scans QR Cumulés</span>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366]">
               <QrCode className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-4">
-            <p className="font-serif text-3xl font-bold text-white">{metrics.totalScans}</p>
-            <p className="text-[11px] text-sky-300 mt-1 font-semibold flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" /> +18.4% ce mois-ci
+            <p className="font-serif text-3xl font-bold text-[#002366]">{metrics.totalScans}</p>
+            <p className="text-[11px] text-blue-800 mt-1 font-bold flex items-center gap-1">
+              <TrendingUp className="w-3 h-3 text-blue-600" /> +18.4% ce mois-ci
             </p>
           </div>
         </div>
 
         {/* Cards Generated */}
-        <div className="glass-card rounded-2xl p-6 relative">
+        <div className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 relative">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Cartes Générées</span>
-            <div className="w-10 h-10 rounded-xl bg-blue-950 border border-sky-500/30 flex items-center justify-center text-sky-300">
+            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Cartes Générées</span>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366]">
               <CreditCard className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-4">
-            <p className="font-serif text-3xl font-bold text-white">{metrics.cardsGenerated}</p>
-            <p className="text-[11px] text-slate-400 mt-1">100% vCard 4.0 Conforme</p>
+            <p className="font-serif text-3xl font-bold text-[#002366]">{metrics.cardsGenerated}</p>
+            <p className="text-[11px] text-slate-450 font-semibold mt-1">100% vCard 4.0 Conforme</p>
           </div>
         </div>
 
         {/* Adoption Rate */}
-        <div className="glass-card rounded-2xl p-6 relative">
+        <div className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 relative">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Objectif SMART</span>
-            <div className="w-10 h-10 rounded-xl bg-blue-950 border border-sky-500/30 flex items-center justify-center text-sky-300">
+            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Objectif SMART</span>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366]">
               <Award className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-4">
-            <p className="font-serif text-3xl font-bold text-sky-300">{metrics.adoptionRate}%</p>
-            <p className="text-[11px] text-slate-300 mt-1">Cible SMART &gt; 90% atteinte</p>
+            <p className="font-serif text-3xl font-bold text-[#002366]">{metrics.adoptionRate}%</p>
+            <p className="text-[11px] text-slate-500 font-semibold mt-1">Cible SMART &gt; 90% atteinte</p>
           </div>
         </div>
 
@@ -119,36 +119,36 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Top Consultants by Scans */}
-        <div className="lg:col-span-7 glass-panel rounded-3xl p-6 border-sky-500/30 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="lg:col-span-7 bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
-              <h3 className="font-serif text-lg font-bold text-white">Top Consultants les plus Consultés</h3>
-              <p className="text-xs text-slate-400">Classement selon le volume de scans QR Code</p>
+              <h3 className="font-serif text-base font-bold text-[#002366]">Consultants les plus visités</h3>
+              <p className="text-xs text-slate-400 font-medium">Classement selon le volume de scans QR Code</p>
             </div>
-            <Award className="w-5 h-5 text-sky-300" />
+            <Award className="w-5 h-5 text-blue-800" />
           </div>
 
           <div className="space-y-4">
             {sortedTopConsultants.map((consultant, index) => (
               <div
                 key={consultant.id}
-                className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 flex items-center justify-between"
+                className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between hover:bg-slate-50 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-blue-950 border border-sky-500/40 flex items-center justify-center font-bold text-xs text-sky-200">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center font-bold text-xs text-blue-900">
                     #{index + 1}
                   </div>
                   <div>
-                    <p className="font-serif text-sm font-bold text-white">
+                    <p className="font-serif text-sm font-bold text-[#002366]">
                       {consultant.civility} {consultant.firstName} {consultant.lastName}
                     </p>
-                    <p className="text-xs text-slate-400">{consultant.title}</p>
+                    <p className="text-xs text-slate-500 font-medium">{consultant.title}</p>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-sm font-bold text-sky-300">{consultant.scanCount} scans</span>
-                  <p className="text-[10px] text-slate-500">{consultant.department}</p>
+                  <span className="text-sm font-bold text-blue-900">{consultant.scanCount} scans</span>
+                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{consultant.department}</p>
                 </div>
               </div>
             ))}
@@ -156,11 +156,11 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
         </div>
 
         {/* Department Breakdown */}
-        <div className="lg:col-span-5 glass-panel rounded-3xl p-6 border-sky-500/30 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="lg:col-span-5 bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
-              <h3 className="font-serif text-lg font-bold text-white">Répartition par Département</h3>
-              <p className="text-xs text-slate-400">Pourcentage des effectifs numérisés</p>
+              <h3 className="font-serif text-base font-bold text-[#002366]">Répartition par Département</h3>
+              <p className="text-xs text-slate-400 font-medium">Pourcentage des effectifs enregistrés</p>
             </div>
           </div>
 
@@ -170,12 +170,12 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
               return (
                 <div key={idx} className="space-y-1.5">
                   <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-slate-200">{dept}</span>
-                    <span className="text-sky-300">{count} membre(s) ({pct}%)</span>
+                    <span className="text-slate-600 font-bold">{dept}</span>
+                    <span className="text-blue-900 font-extrabold">{count} membre(s) ({pct}%)</span>
                   </div>
-                  <div className="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-slate-800">
+                  <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200/60">
                     <div
-                      className="bg-gradient-to-r from-blue-700 to-sky-400 h-full rounded-full transition-all duration-500"
+                      className="bg-[#002366] h-full rounded-full transition-all duration-500"
                       style={{ width: `${pct}%` }}
                     />
                   </div>

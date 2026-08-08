@@ -45,41 +45,41 @@ export const ActivityLogs: React.FC<ActivityLogsProps> = ({ logs }) => {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-6 animate-fadeIn text-[#0f172a]">
       
       {/* Header */}
-      <div className="glass-panel p-6 rounded-3xl border-sky-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-200 text-xs font-semibold uppercase tracking-wider mb-2">
-            <ShieldCheck className="w-3.5 h-3.5" /> Section 5.5 — Journal d'Activité & Audit Log
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-800 text-[10px] font-extrabold uppercase tracking-wider mb-2">
+            <ShieldCheck className="w-3.5 h-3.5" /> Journal d'Activité & Audit
           </div>
-          <h2 className="font-serif text-2xl font-bold text-white">
-            Traçabilité & Historique des Interactions
+          <h2 className="font-serif text-2xl font-bold text-[#002366]">
+            Traçabilité & Historique
           </h2>
-          <p className="text-xs text-slate-300">
+          <p className="text-xs text-slate-500 font-medium">
             Enregistrement sécurisé de la création de cartes, des scans QR, des modifications et des exports.
           </p>
         </div>
 
         <button
           onClick={handleExportCSV}
-          className="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-4 py-2.5 rounded-xl border border-slate-700 hover:border-sky-500/40 transition-colors flex items-center justify-center gap-2 text-xs cursor-pointer"
+          className="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold px-4 py-2.5 rounded-xl border border-slate-200 transition-all flex items-center justify-center gap-2 text-xs cursor-pointer"
         >
-          <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+          <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
           <span>Exporter CSV</span>
         </button>
       </div>
 
       {/* Filter Bar */}
-      <div className="glass-panel p-4 rounded-2xl border-slate-800 grid grid-cols-1 sm:grid-cols-12 gap-3">
+      <div className="bg-white border border-slate-200 p-4 rounded-2xl grid grid-cols-1 sm:grid-cols-12 gap-3 shadow-sm">
         <div className="sm:col-span-8 relative">
-          <Search className="w-4 h-4 text-sky-300 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Rechercher dans les logs (utilisateur, action, IP...)"
-            className="w-full bg-slate-900 text-white text-xs rounded-xl pl-9 pr-3 py-2 border border-slate-800 focus:border-sky-400 focus:outline-none"
+            className="w-full bg-slate-50 text-slate-700 text-xs rounded-xl pl-9 pr-3 py-2.5 border border-slate-200 focus:border-blue-900 focus:bg-white focus:outline-none transition-colors"
           />
         </div>
 
@@ -87,66 +87,66 @@ export const ActivityLogs: React.FC<ActivityLogsProps> = ({ logs }) => {
           <select
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
-            className="w-full bg-slate-900 text-white text-xs rounded-xl px-3 py-2 border border-slate-800 focus:border-sky-400 focus:outline-none cursor-pointer"
+            className="w-full bg-slate-50 text-slate-700 text-xs rounded-xl px-3 py-2.5 border border-slate-200 focus:border-blue-900 focus:bg-white focus:outline-none cursor-pointer transition-colors"
           >
-            <option value="Tous" className="bg-slate-900">Action: Toutes</option>
-            <option value="CREATE" className="bg-slate-900">Création (CREATE)</option>
-            <option value="UPDATE" className="bg-slate-900">Modification (UPDATE)</option>
-            <option value="DELETE" className="bg-slate-900">Suppression (DELETE)</option>
-            <option value="SCAN" className="bg-slate-900">Scan QR (SCAN)</option>
-            <option value="BATCH_EXPORT" className="bg-slate-900">Export par lot (BATCH_EXPORT)</option>
+            <option value="Tous">Action: Toutes</option>
+            <option value="CREATE">Création (CREATE)</option>
+            <option value="UPDATE">Modification (UPDATE)</option>
+            <option value="DELETE">Suppression (DELETE)</option>
+            <option value="SCAN">Scan QR (SCAN)</option>
+            <option value="BATCH_EXPORT">Export par lot (BATCH_EXPORT)</option>
           </select>
         </div>
       </div>
 
       {/* Logs Table */}
-      <div className="glass-panel rounded-3xl border-sky-500/30 overflow-hidden shadow-2xl">
+      <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900/90 text-sky-300 font-serif border-b border-slate-800 uppercase tracking-wider">
+            <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider">
               <tr>
-                <th className="py-4 px-4">Horodatage (UTC)</th>
-                <th className="py-4 px-4">Utilisateur / Origine</th>
-                <th className="py-4 px-4">Type d'Action</th>
-                <th className="py-4 px-4">Target Membre</th>
-                <th className="py-4 px-4">Détails de l'Événement</th>
-                <th className="py-4 px-4 text-right">Adresse IP</th>
+                <th className="py-4 px-5">Horodatage (UTC)</th>
+                <th className="py-4 px-5">Utilisateur / Origine</th>
+                <th className="py-4 px-5">Type d'Action</th>
+                <th className="py-4 px-5">Target Membre</th>
+                <th className="py-4 px-5">Détails de l'Événement</th>
+                <th className="py-4 px-5 text-right">Adresse IP</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80 text-slate-200">
+            <tbody className="divide-y divide-slate-100 text-slate-700">
               {filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-slate-500">
+                  <td colSpan={6} className="text-center py-12 text-slate-400 font-medium">
                     Aucun log trouvé correspondant au filtre.
                   </td>
                 </tr>
               ) : (
                 filteredLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-900/50 transition-colors">
-                    <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400">
+                  <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="py-3.5 px-5 font-mono text-[11px] text-slate-450 font-medium">
                       {new Date(log.timestamp).toLocaleString('fr-FR')}
                     </td>
-                    <td className="py-3.5 px-4 font-bold text-white">
+                    <td className="py-3.5 px-5 font-bold text-[#002366]">
                       {log.user}
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-5">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
-                        log.action === 'CREATE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                        log.action === 'UPDATE' ? 'bg-amber-500/10 text-amber-300 border-sky-500/30' :
-                        log.action === 'DELETE' ? 'bg-rose-500/10 text-rose-400 border-rose-500/30' :
-                        log.action === 'SCAN' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
-                        'bg-purple-500/10 text-purple-400 border-purple-500/30'
+                        log.action === 'CREATE' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                        log.action === 'UPDATE' ? 'bg-amber-50 text-amber-800 border-amber-100' :
+                        log.action === 'DELETE' ? 'bg-rose-50 text-rose-700 border-rose-100' :
+                        log.action === 'SCAN' ? 'bg-blue-50 text-blue-800 border-blue-100' :
+                        'bg-slate-50 text-slate-700 border-slate-200'
                       }`}>
                         {log.action}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 font-semibold text-sky-200">
+                    <td className="py-3.5 px-5 font-bold text-blue-900">
                       {log.targetMember || 'N/A'}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-300">
+                    <td className="py-3.5 px-5 text-slate-600 font-medium">
                       {log.details}
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono text-[10px] text-slate-500">
+                    <td className="py-3.5 px-5 text-right font-mono text-[10px] text-slate-450 font-medium">
                       {log.ipAddress || '197.221.14.10'}
                     </td>
                   </tr>

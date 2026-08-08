@@ -68,7 +68,7 @@ export async function downloadMemberPDF(member: Member): Promise<void> {
   doc.text(`Adresse: ${member.address}`, 8, 44);
 
   // Front QR Code watermark preview
-  const qrDataUrl = await generateMemberQRCodeDataUrl(member, 400, false);
+  const qrDataUrl = await generateMemberQRCodeDataUrl(member, 400, true);
   doc.addImage(qrDataUrl, 'PNG', 60, 25, 20, 20);
 
   // PAGE 2: VERSO (Back Side)

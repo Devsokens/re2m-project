@@ -5,7 +5,9 @@ import { MemberTable } from './MemberTable';
 import { BatchGenerator } from './BatchGenerator';
 import { ActivityLogs } from './ActivityLogs';
 import { MemberFormModal } from './MemberFormModal';
-import { LayoutDashboard, Users, Package, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Users, Package, ShieldAlert, Sliders } from 'lucide-react';
+import { GestionCMS } from './CMS/GestionCMS';
+import { PageSlug, CMSBlock } from '../../types/cms';
 
 interface AdminLayoutProps {
   members: Member[];
@@ -17,6 +19,8 @@ interface AdminLayoutProps {
   onViewQR: (member: Member) => void;
   onPrintCard: (member: Member) => void;
   activeRole: UserRole;
+  onTogglePreview: (slug: PageSlug, blocks: CMSBlock[] | null) => void;
+  activePreviewSlug: PageSlug | null;
 }
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({
@@ -28,9 +32,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   onViewMember,
   onViewQR,
   onPrintCard,
-  activeRole
+  activeRole,
+  onTogglePreview,
+  activePreviewSlug
 }) => {
-  const [adminTab, setAdminTab] = useState<'dashboard' | 'members' | 'batch' | 'logs'>('dashboard');
+  const [adminTab, setAdminTab] = useState<'dashboard' | 'members' | 'batch' | 'logs' | 'cms'>('dashboard');
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
@@ -56,61 +62,73 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     <div className="min-h-[85vh] py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
       
       {/* Sub-Navigation Tabs */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 glass-panel p-2 rounded-2xl border-sky-500/30">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-slate-200 p-2 rounded-2xl shadow-sm">
         
-        <div className="flex items-center gap-1 w-full sm:w-auto overflow-x-auto">
+        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
           <button
             onClick={() => setAdminTab('dashboard')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
               adminTab === 'dashboard'
-                ? 'bg-gradient-to-r from-blue-900 to-blue-800 text-sky-200 shadow border border-sky-500/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                ? 'bg-[#002366] text-white shadow-sm'
+                : 'text-slate-500 hover:text-[#002366] hover:bg-slate-50'
             }`}
           >
-            <LayoutDashboard className="w-4 h-4 text-sky-300" />
+            <LayoutDashboard className="w-4 h-4 shrink-0" />
             <span>Tableau de Bord</span>
           </button>
 
           <button
             onClick={() => setAdminTab('members')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
               adminTab === 'members'
-                ? 'bg-gradient-to-r from-blue-900 to-blue-800 text-sky-200 shadow border border-sky-500/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                ? 'bg-[#002366] text-white shadow-sm'
+                : 'text-slate-500 hover:text-[#002366] hover:bg-slate-50'
             }`}
           >
-            <Users className="w-4 h-4 text-sky-300" />
+            <Users className="w-4 h-4 shrink-0" />
             <span>Gestion Membres ({members.length})</span>
           </button>
 
           <button
             onClick={() => setAdminTab('batch')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
               adminTab === 'batch'
-                ? 'bg-gradient-to-r from-blue-900 to-blue-800 text-sky-200 shadow border border-sky-500/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                ? 'bg-[#002366] text-white shadow-sm'
+                : 'text-slate-500 hover:text-[#002366] hover:bg-slate-50'
             }`}
           >
-            <Package className="w-4 h-4 text-sky-300" />
+            <Package className="w-4 h-4 shrink-0" />
             <span>Génération par Lot</span>
           </button>
 
           <button
             onClick={() => setAdminTab('logs')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
               adminTab === 'logs'
-                ? 'bg-gradient-to-r from-blue-900 to-blue-800 text-sky-200 shadow border border-sky-500/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                ? 'bg-[#002366] text-white shadow-sm'
+                : 'text-slate-500 hover:text-[#002366] hover:bg-slate-50'
             }`}
           >
-            <ShieldAlert className="w-4 h-4 text-sky-300" />
+            <ShieldAlert className="w-4 h-4 shrink-0" />
             <span>Journal d'Activité</span>
+          </button>
+
+          <button
+            onClick={() => setAdminTab('cms')}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
+              adminTab === 'cms'
+                ? 'bg-[#002366] text-white shadow-sm'
+                : 'text-slate-500 hover:text-[#002366] hover:bg-slate-50'
+            }`}
+          >
+            <Sliders className="w-4 h-4 shrink-0" />
+            <span>Gestion CMS</span>
           </button>
         </div>
 
-        {/* Action Button & Role Indicator */}
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <span className="text-[11px] font-semibold text-sky-200 bg-sky-500/10 px-3 py-1.5 rounded-xl border border-sky-500/20">
+        {/* Role Indicator */}
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end px-2">
+          <span className="text-[10px] font-extrabold text-[#002366] bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-xl uppercase tracking-wider">
             Rôle Actif: {activeRole}
           </span>
         </div>
@@ -136,6 +154,13 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       {adminTab === 'batch' && <BatchGenerator members={members} />}
 
       {adminTab === 'logs' && <ActivityLogs logs={logs} />}
+
+      {adminTab === 'cms' && (
+        <GestionCMS
+          onTogglePreview={onTogglePreview}
+          activePreviewSlug={activePreviewSlug}
+        />
+      )}
 
       {/* Member Form Modal */}
       <MemberFormModal

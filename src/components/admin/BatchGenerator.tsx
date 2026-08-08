@@ -46,7 +46,7 @@ export const BatchGenerator: React.FC<BatchGeneratorProps> = ({ members }) => {
     const selectedMembers = members.filter(m => selectedIds.includes(m.id));
 
     for (let i = 1; i <= 100; i += 10) {
-      await new Promise((res) => setTimeout(res, 200));
+      await new Promise((res) => setTimeout(res, 150));
       setProgress(i);
     }
 
@@ -62,17 +62,17 @@ export const BatchGenerator: React.FC<BatchGeneratorProps> = ({ members }) => {
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8 animate-fadeIn text-[#0f172a]">
       
       {/* Header */}
-      <div className="glass-panel p-6 rounded-3xl border-sky-500/30 space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-200 text-xs font-semibold uppercase tracking-wider">
-          <Package className="w-3.5 h-3.5" /> Section 5.4 — Génération par Lot & Exports Masqués
+      <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm space-y-2">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-800 text-[10px] font-extrabold uppercase tracking-wider">
+          <Package className="w-3.5 h-3.5" /> Traitements par Lot
         </div>
-        <h2 className="font-serif text-2xl font-bold text-white">
-          Traitement par Lot & Packs d'Impression
+        <h2 className="font-serif text-2xl font-bold text-[#002366]">
+          Génération en Masse & Packs d'Impression
         </h2>
-        <p className="text-xs text-slate-300">
+        <p className="text-xs text-slate-500 font-medium">
           Sélectionnez un ensemble de consultants pour exporter en un clic leurs cartes PDF HD 85×54 mm, leurs vCards 4.0 ou le lot des QR Codes PNG.
         </p>
       </div>
@@ -80,31 +80,31 @@ export const BatchGenerator: React.FC<BatchGeneratorProps> = ({ members }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Left Column: Preset Selection & Member List */}
-        <div className="lg:col-span-7 glass-panel rounded-3xl p-6 border-sky-500/30 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-            <h3 className="font-serif text-lg font-bold text-white">1. Sélection des Membres ({selectedIds.length}/{members.length})</h3>
+        <div className="lg:col-span-7 bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <h3 className="font-serif text-base font-bold text-[#002366]">1. Sélection des Membres ({selectedIds.length}/{members.length})</h3>
             
             {/* Presets */}
             <div className="flex items-center gap-2 text-xs">
               <button
                 onClick={() => handlePresetChange('all')}
-                className={`px-3 py-1.5 rounded-xl border transition-colors ${
+                className={`px-3 py-1.5 rounded-xl border font-bold transition-all cursor-pointer ${
                   filterPreset === 'all'
-                    ? 'bg-sky-500 text-slate-950 font-bold border-sky-400'
-                    : 'bg-slate-900 text-slate-300 border-slate-800'
+                    ? 'bg-[#002366] text-white border-[#002366] shadow-sm'
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
                 }`}
               >
                 Tous
               </button>
               <button
                 onClick={() => handlePresetChange('active')}
-                className={`px-3 py-1.5 rounded-xl border transition-colors ${
+                className={`px-3 py-1.5 rounded-xl border font-bold transition-all cursor-pointer ${
                   filterPreset === 'active'
-                    ? 'bg-sky-500 text-slate-950 font-bold border-sky-400'
-                    : 'bg-slate-900 text-slate-300 border-slate-800'
+                    ? 'bg-[#002366] text-white border-[#002366] shadow-sm'
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
                 }`}
               >
-                Actifs Uniquement
+                Actifs
               </button>
             </div>
           </div>
@@ -119,24 +119,24 @@ export const BatchGenerator: React.FC<BatchGeneratorProps> = ({ members }) => {
                   onClick={() => toggleSelectMember(member.id)}
                   className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
                     isSelected
-                      ? 'bg-blue-950/80 border-sky-500/50 text-white'
-                      : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
+                      ? 'bg-blue-50/60 border-blue-200 text-[#002366]'
+                      : 'bg-slate-50/40 border-slate-100 text-slate-500 hover:border-slate-200'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     {isSelected ? (
-                      <CheckSquare className="w-5 h-5 text-sky-300 shrink-0" />
+                      <CheckSquare className="w-5 h-5 text-blue-900 shrink-0" />
                     ) : (
-                      <Square className="w-5 h-5 text-slate-600 shrink-0" />
+                      <Square className="w-5 h-5 text-slate-350 shrink-0" />
                     )}
                     <div>
-                      <p className="font-serif text-sm font-bold text-white">
+                      <p className="font-serif text-sm font-bold text-[#002366]">
                         {member.civility} {member.firstName} {member.lastName}
                       </p>
-                      <p className="text-xs text-slate-400">{member.title} • {member.department}</p>
+                      <p className="text-xs text-slate-555 font-medium">{member.title} • {member.department}</p>
                     </div>
                   </div>
-                  <span className="text-[10px] bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase bg-white border border-slate-200 px-2 py-0.5 rounded-lg shadow-sm">
                     {member.id}
                   </span>
                 </div>
@@ -148,8 +148,8 @@ export const BatchGenerator: React.FC<BatchGeneratorProps> = ({ members }) => {
         {/* Right Column: Export Options & Processing Status */}
         <div className="lg:col-span-5 space-y-6">
           
-          <div className="glass-panel rounded-3xl p-6 border-sky-500/30 space-y-6">
-            <h3 className="font-serif text-lg font-bold text-white">2. Format du Pack d'Export</h3>
+          <div className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
+            <h3 className="font-serif text-base font-bold text-[#002366]">2. Format du Pack d'Export</h3>
 
             <div className="space-y-3">
               {/* Option PDF HD */}
@@ -157,14 +157,14 @@ export const BatchGenerator: React.FC<BatchGeneratorProps> = ({ members }) => {
                 onClick={() => setExportType('PDF_HD')}
                 className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center gap-3 ${
                   exportType === 'PDF_HD'
-                    ? 'bg-blue-950 border-sky-400 text-white shadow-lg'
-                    : 'bg-slate-900/80 border-slate-800 text-slate-400'
+                    ? 'bg-blue-50/60 border-blue-200 text-[#002366] shadow-sm'
+                    : 'bg-slate-50/30 border-slate-100 text-slate-500 hover:border-slate-200'
                 }`}
               >
-                <FileText className="w-6 h-6 text-sky-300 shrink-0" />
+                <FileText className="w-6 h-6 text-[#002366] shrink-0" />
                 <div>
-                  <p className="text-sm font-bold text-white">Pack PDF HD Recto/Verso</p>
-                  <p className="text-[11px] text-slate-300">Format d'impression 85×54 mm offset CMYK 300 DPI</p>
+                  <p className="text-xs font-bold text-[#002366] uppercase tracking-wide">Pack PDF HD Recto/Verso</p>
+                  <p className="text-[11px] text-slate-500 font-medium">Format d'impression 85×54 mm offset CMYK 300 DPI</p>
                 </div>
               </div>
 
@@ -173,14 +173,14 @@ export const BatchGenerator: React.FC<BatchGeneratorProps> = ({ members }) => {
                 onClick={() => setExportType('ZIP_VCARD')}
                 className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center gap-3 ${
                   exportType === 'ZIP_VCARD'
-                    ? 'bg-blue-950 border-sky-400 text-white shadow-lg'
-                    : 'bg-slate-900/80 border-slate-800 text-slate-400'
+                    ? 'bg-blue-50/60 border-blue-200 text-[#002366] shadow-sm'
+                    : 'bg-slate-50/30 border-slate-100 text-slate-500 hover:border-slate-200'
                 }`}
               >
-                <Archive className="w-6 h-6 text-sky-300 shrink-0" />
+                <Archive className="w-6 h-6 text-[#002366] shrink-0" />
                 <div>
-                  <p className="text-sm font-bold text-white">Archive ZIP Fichiers .VCF</p>
-                  <p className="text-[11px] text-slate-300">Ensemble des cartes vCard 4.0 prêtes à importer</p>
+                  <p className="text-xs font-bold text-[#002366] uppercase tracking-wide">Archive ZIP Fichiers .VCF</p>
+                  <p className="text-[11px] text-slate-500 font-medium">Ensemble des cartes vCard 4.0 prêtes à importer</p>
                 </div>
               </div>
 
@@ -189,14 +189,14 @@ export const BatchGenerator: React.FC<BatchGeneratorProps> = ({ members }) => {
                 onClick={() => setExportType('QR_PNG')}
                 className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center gap-3 ${
                   exportType === 'QR_PNG'
-                    ? 'bg-blue-950 border-sky-400 text-white shadow-lg'
-                    : 'bg-slate-900/80 border-slate-800 text-slate-400'
+                    ? 'bg-blue-50/60 border-blue-200 text-[#002366] shadow-sm'
+                    : 'bg-slate-50/30 border-slate-100 text-slate-500 hover:border-slate-200'
                 }`}
               >
-                <QrCode className="w-6 h-6 text-sky-300 shrink-0" />
+                <QrCode className="w-6 h-6 text-[#002366] shrink-0" />
                 <div>
-                  <p className="text-sm font-bold text-white">Lot de QR Codes (PNG HD)</p>
-                  <p className="text-[11px] text-slate-300">Fichiers images haute définition avec logo centré</p>
+                  <p className="text-xs font-bold text-[#002366] uppercase tracking-wide">Lot de QR Codes (PNG HD)</p>
+                  <p className="text-[11px] text-slate-500 font-medium">Fichiers images haute définition avec logo centré</p>
                 </div>
               </div>
             </div>
@@ -205,32 +205,32 @@ export const BatchGenerator: React.FC<BatchGeneratorProps> = ({ members }) => {
             <button
               onClick={handleStartBatchProcess}
               disabled={isProcessing || selectedIds.length === 0}
-              className="w-full bg-gradient-to-r from-blue-900 via-sky-800 to-sky-600 hover:from-sky-700 hover:to-sky-500 disabled:opacity-50 text-white font-bold py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 text-sm ice-glow cursor-pointer"
+              className="w-full bg-[#002366] hover:bg-blue-900 text-white font-bold py-3.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 text-xs disabled:opacity-50 cursor-pointer"
             >
               {isProcessing ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin shrink-0" />
                   <span>Génération en cours ({progress}%)...</span>
                 </>
               ) : (
                 <>
-                  <Download className="w-5 h-5" />
-                  <span>Lancer la Génération du Pack ({selectedIds.length})</span>
+                  <Download className="w-4 h-4 shrink-0" />
+                  <span>Lancer la Génération ({selectedIds.length})</span>
                 </>
               )}
             </button>
           </div>
 
-          {/* Progress Bar or Completed Notice */}
+          {/* Progress Bar */}
           {isProcessing && (
-            <div className="bg-slate-900 p-6 rounded-2xl border border-sky-500/40 space-y-3">
-              <div className="flex justify-between text-xs text-sky-300 font-semibold">
+            <div className="bg-white border border-slate-200 p-5 rounded-3xl shadow-sm space-y-3">
+              <div className="flex justify-between text-xs text-[#002366] font-bold">
                 <span>Traitement en arrière-plan...</span>
                 <span>{progress}%</span>
               </div>
-              <div className="w-full bg-slate-950 rounded-full h-3 overflow-hidden border border-slate-800">
+              <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-slate-200/60">
                 <div
-                  className="bg-gradient-to-r from-blue-700 to-sky-400 h-full rounded-full transition-all duration-300"
+                  className="bg-[#002366] h-full rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -238,10 +238,10 @@ export const BatchGenerator: React.FC<BatchGeneratorProps> = ({ members }) => {
           )}
 
           {completed && (
-            <div className="bg-emerald-950/80 border border-emerald-500/50 p-6 rounded-2xl text-center space-y-2 animate-fadeIn">
-              <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
-              <h4 className="font-serif text-lg font-bold text-white">Génération Terminée !</h4>
-              <p className="text-xs text-slate-300">
+            <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-3xl text-center space-y-2 animate-fadeIn">
+              <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
+              <h4 className="font-serif text-base font-bold text-[#002366]">Génération Terminée !</h4>
+              <p className="text-xs text-slate-500 font-medium">
                 Le pack d'export contenant {selectedIds.length} élément(s) a été préparé et téléchargé.
               </p>
             </div>

@@ -32,7 +32,6 @@ export async function generateMemberQRCodeDataUrl(
     if (includeLogo) {
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        // Draw centered logo circle badge
         const center = size / 2;
         const logoSize = size * 0.22;
         const radius = logoSize / 2;
@@ -43,21 +42,45 @@ export async function generateMemberQRCodeDataUrl(
         ctx.fillStyle = member.qrBackground || '#FFFFFF';
         ctx.fill();
 
-        // Inner royal blue circle with gold border
-        ctx.beginPath();
-        ctx.arc(center, center, radius, 0, Math.PI * 2);
-        ctx.fillStyle = '#002366';
-        ctx.fill();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = '#C9A84C';
-        ctx.stroke();
+        // Load the logo.png image
+        const img = new Image();
+        img.src = '/logo.png';
+        await new Promise((resolve) => {
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+        });
 
-        // Draw RE2M text inside logo badge
-        ctx.fillStyle = '#C9A84C';
-        ctx.font = `bold ${Math.round(logoSize * 0.32)}px 'Playfair Display', serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('RE2M', center, center);
+        if (img.complete && img.naturalWidth > 0) {
+          // Clip to circle and draw logo
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(center, center, radius, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(img, center - radius, center - radius, logoSize, logoSize);
+          ctx.restore();
+
+          // Draw a thin border around the logo
+          ctx.beginPath();
+          ctx.arc(center, center, radius, 0, Math.PI * 2);
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = '#002366';
+          ctx.stroke();
+        } else {
+          // Fallback text logo if image fails to load
+          ctx.beginPath();
+          ctx.arc(center, center, radius, 0, Math.PI * 2);
+          ctx.fillStyle = '#002366';
+          ctx.fill();
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = '#C9A84C';
+          ctx.stroke();
+
+          ctx.fillStyle = '#C9A84C';
+          ctx.font = `bold ${Math.round(logoSize * 0.32)}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('RE2M', center, center);
+        }
       }
     }
 

@@ -13,8 +13,27 @@ import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminLogin } from './components/admin/AdminLogin';
 import { QRCodeModal } from './components/card/QRCodeModal';
 import { PrintCardView } from './components/card/PrintCardView';
+import { PageSlug, CMSBlock } from './types/cms';
+import { cmsStorage } from './utils/cmsStorage';
 
 export function App() {
+  // CMS Preview States
+  const [activePreviewSlug, setActivePreviewSlug] = useState<PageSlug | null>(null);
+  const [previewBlocks, setPreviewBlocks] = useState<Record<PageSlug, CMSBlock[] | null>>({
+    'accueil': null,
+    'qui-nous-sommes': null,
+    'nos-services': null,
+    'contact': null
+  });
+
+  const handleTogglePreview = (slug: PageSlug, blocks: CMSBlock[] | null) => {
+    setPreviewBlocks((prev) => ({
+      ...prev,
+      [slug]: blocks
+    }));
+    setActivePreviewSlug(blocks ? slug : null);
+  };
+
   // LocalStorage backed Members state
   const [members, setMembers] = useState<Member[]>(() => {
     const saved = localStorage.getItem('re2m_members');
@@ -29,6 +48,14 @@ export function App() {
 
   // View state: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact' | 'profile' | 'admin' | 'admin-login'
   const [currentView, setCurrentView] = useState<'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact' | 'profile' | 'admin' | 'admin-login'>('accueil');
+  const [previousView, setPreviousView] = useState<'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact' | 'profile' | 'admin' | 'admin-login'>('accueil');
+
+  const handleNavigate = (view: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact' | 'profile' | 'admin' | 'admin-login') => {
+    if (currentView !== 'profile') {
+      setPreviousView(currentView);
+    }
+    setCurrentView(view);
+  };
 
   // Selected member for profile view
   const [selectedMember, setSelectedMember] = useState<Member>(INITIAL_MEMBERS[0]);
@@ -121,6 +148,7 @@ export function App() {
     const updated = { ...member, scanCount: member.scanCount + 1 };
     handleUpdateMember(updated);
     setSelectedMember(updated);
+    setPreviousView(currentView);
     setCurrentView('profile');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -131,10 +159,24 @@ export function App() {
       {/* Offline PWA Notification Banner */}
       <OfflineBanner />
 
+      {/* Persistent CMS Preview Warning Bar */}
+      {activePreviewSlug && (
+        <div className="bg-amber-600 text-white text-xs font-bold py-2.5 px-4 text-center sticky top-0 z-50 flex items-center justify-center gap-4 shadow-md">
+          <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+          <span>Mode Prévisualisation Actif (Page: <strong className="uppercase">{activePreviewSlug}</strong>) — Les modifications de brouillon sont affichées mais non publiées.</span>
+          <button 
+            onClick={() => handleTogglePreview(activePreviewSlug, null)}
+            className="bg-white/25 hover:bg-white/40 px-3 py-1 rounded-lg font-bold text-[10px] uppercase cursor-pointer transition-colors"
+          >
+            Quitter l'Aperçu
+          </button>
+        </div>
+      )}
+
       {/* Main Navbar */}
       <Navbar
         currentView={currentView}
-        setCurrentView={setCurrentView}
+        setCurrentView={handleNavigate}
         activeRole={activeRole}
         setActiveRole={setActiveRole}
       />
@@ -145,18 +187,23 @@ export function App() {
           <AccueilView
             onStartDemo={() => handleOpenMemberProfile(members[0] || INITIAL_MEMBERS[0])}
             onNavigate={(view) => {
-              setCurrentView(view);
+              handleNavigate(view);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            blocks={previewBlocks['accueil'] || cmsStorage.getPublishedLayout('accueil')}
           />
         )}
 
         {currentView === 'qui-nous-sommes' && (
-          <QuiNousSommesView />
+          <QuiNousSommesView 
+            blocks={previewBlocks['qui-nous-sommes'] || cmsStorage.getPublishedLayout('qui-nous-sommes')}
+          />
         )}
 
         {currentView === 'nos-services' && (
-          <NosServicesView />
+          <NosServicesView 
+            blocks={previewBlocks['nos-services'] || cmsStorage.getPublishedLayout('nos-services')}
+          />
         )}
 
         {currentView === 'contact' && (
@@ -165,15 +212,15 @@ export function App() {
 
         {currentView === 'admin-login' && (
           <AdminLogin
-            onLoginSuccess={() => setCurrentView('admin')}
-            onCancel={() => setCurrentView('accueil')}
+            onLoginSuccess={() => handleNavigate('admin')}
+            onCancel={() => handleNavigate('accueil')}
           />
         )}
 
         {currentView === 'profile' && (
           <MemberCardPublic
             member={selectedMember}
-            onBackToHome={() => setCurrentView('accueil')}
+            onBackToHome={() => handleNavigate(previousView)}
           />
         )}
 
@@ -188,6 +235,8 @@ export function App() {
             onViewQR={(member) => setQrModalMember(member)}
             onPrintCard={(member) => setPrintModalMember(member)}
             activeRole={activeRole}
+            onTogglePreview={handleTogglePreview}
+            activePreviewSlug={activePreviewSlug}
           />
         )}
       </main>
@@ -210,7 +259,7 @@ export function App() {
       )}
 
       {/* Main Footer */}
-      <Footer setCurrentView={setCurrentView} />
+      <Footer setCurrentView={handleNavigate} />
 
     </div>
   );

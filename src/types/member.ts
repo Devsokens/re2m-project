@@ -12,6 +12,7 @@ export interface Member {
   title: string;
   department: string;
   bio?: string;
+  photo?: string; // Optional URL/path to member photo
   
   // Contact details
   email: string;

@@ -9,6 +9,7 @@ export const INITIAL_MEMBERS: Member[] = [
     title: 'Consultant Senior Achats & Supply Chain',
     department: 'Achats',
     bio: 'Expert avec 15 ans d\'expérience en optimisation de la chaîne d\'approvisionnement et négociations stratégiques à l\'international.',
+    photo: '/team_01.jpg',
     email: 'j.moubeyi@cabinet-re2m.com',
     mobile: '+241 07 00 00 00',
     phone: '+241 01 00 00 00',
