@@ -104,7 +104,7 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
         paragraphs: [
           "Fort de 25 ans d'expérience internationale, il a développé une expertise reconnue dans l'optimisation des fonctions Achats et Logistique. Sa certification UNDP Procurement Certification témoigne de son excellence professionnelle."
         ],
-        image: "/more-info.jpg"
+        image: "https://www.cabinet-re2m.com/assets/images/team_01.jpg"
       },
       'HeaderBanner': {
         badge: "Nouveau Badge",
@@ -127,7 +127,7 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
         paragraphs: ["Paragraphe 1"],
         directorName: "Nom",
         directorTitle: "Titre",
-        image: "/team_01.jpg"
+        image: "https://re-2-m-plateforme-marco-9167.vercel.app/more-info.jpg"
       },
       'ContactDetails': {
         badge: "Nous Contacter",

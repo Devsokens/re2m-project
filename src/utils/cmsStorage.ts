@@ -74,7 +74,7 @@ const defaultAccueilBlocks: CMSBlock[] = [
       paragraphs: [
         "Fort de 25 ans d'expérience internationale, il a développé une expertise reconnue dans l'optimisation des fonctions Achats et Logistique. Sa certification UNDP Procurement Certification témoigne de son excellence professionnelle."
       ],
-      image: "/more-info.jpg"
+      image: "https://www.cabinet-re2m.com/assets/images/team_01.jpg"
     }
   },
   {
@@ -136,7 +136,7 @@ const defaultAboutBlocks: CMSBlock[] = [
     settings: {
       badge: "Qui Sommes-Nous",
       title: "Cabinet RE2M • L'Excellence Achats & Logistique",
-      description: "Depuis 25 ans, nous accompagnons nos clients à Libreville, au Gabon et à l'international dans l'amélioration de leur performance achats.",
+      description: "Cabinet d'audit, de conseil, de formation et d'accompagnement spécialisé en Supply Chain, Achats et Logistique.",
       backgroundImage: "/qui_nous_sommes_bg.jpg"
     }
   },
@@ -146,7 +146,7 @@ const defaultAboutBlocks: CMSBlock[] = [
     order: 1,
     enabled: true,
     settings: {
-      title: "Cabinet RE2M par Roch-Emmanuel MVE-MBORO",
+      title: "Qui Sommes-Nous ?",
       desc1: "Le Cabinet RE2M est un cabinet d'audit, de conseil, de formation, d'accompagnement et de coaching en Achats et Logistique. Nous intervenons dans l'organisation, la réorganisation et l'optimisation des fonctions Achats & Logistique des organisations.",
       desc2: "Avec 25 ans de pratique et d'expérience dans le monde dont un accent particulier sur le local, nous garantissons des résultats probants dans des environnements et contextes variés.",
       commitmentsTitle: "Nos Engagements Clés",
@@ -172,12 +172,12 @@ const defaultAboutBlocks: CMSBlock[] = [
         "Au Cabinet RE2M, nous croyons fermement que le succès de nos clients est la mesure de notre propre réussite. Notre équipe de consultants expérimentés, hautement qualifiés dans leurs domaines respectifs, met à votre disposition une expertise solide et pertinente, forgée par vingt-cinq années de pratique sur le terrain.",
         "Nous privilégions une approche collaborative et humaine, où l'écoute active et la compréhension fine de vos enjeux spécifiques sont primordiales. Notre objectif est de construire un partenariat fort et durable, basé sur la transparence, l'excellence et des résultats tangibles.",
         "Je vous invite à parcourir les différentes sections de notre site pour découvrir l'étendue de nos services et nos domaines d'expertise. Que vous soyez une start-up, une PME ou un grand groupe, nous sommes prêts à relever vos défis à vos côtés.",
-        "N'hésitez pas à nous contacter pour échanger sur vos projets. Votre opinion nous est précieuse et nous permettra d'effectuer les ajustements nécessaires pour vous offer un service d'une qualité optimale.",
+        "N'hésitez pas à nous contacter pour échanger sur vos projets. Votre opinion nous est précieuse et nous permettra d'effectuer les ajustements nécessaires pour vous offrir un service d'une qualité optimale.",
         "Au plaisir de collaborer prochainement,"
       ],
       directorName: "Roch-Emmanuel MVE-MBORO",
       directorTitle: "Directeur Général, Cabinet RE2M",
-      image: "/team_01.jpg"
+      image: "https://re-2-m-plateforme-marco-9167.vercel.app/more-info.jpg"
     }
   },
   {
@@ -343,8 +343,17 @@ function mergeDefaultSettings(storedBlocks: CMSBlock[], defaultBlocks: CMSBlock[
     if (stored.type === 'ContactDetails' && stored.settings?.title === undefined) {
       Object.assign(mergedSettings, defBlock.settings);
     }
-    if (stored.type === 'FounderSection' && (stored.settings?.title === undefined || stored.settings.title === 'Notre valeur ajoutée')) {
-      Object.assign(mergedSettings, defBlock.settings);
+    if (stored.type === 'FounderSection') {
+      if (stored.settings?.title === undefined || stored.settings.title === 'Notre valeur ajoutée') {
+        Object.assign(mergedSettings, defBlock.settings);
+      } else if (stored.settings.image === '/more-info.jpg' || stored.settings.image === '/team_01.jpg') {
+        mergedSettings.image = defBlock.settings.image;
+      }
+    }
+    if (stored.type === 'DirectorMessage') {
+      if (stored.settings?.image === undefined || stored.settings.image === '/team_01.jpg' || stored.settings.image === '/more-info.jpg') {
+        mergedSettings.image = defBlock.settings.image;
+      }
     }
     
     return {
