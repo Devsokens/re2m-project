@@ -51,10 +51,14 @@ export function App() {
   const [previousView, setPreviousView] = useState<'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact' | 'profile' | 'admin' | 'admin-login'>('accueil');
 
   const handleNavigate = (view: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact' | 'profile' | 'admin' | 'admin-login') => {
+    let targetView = view;
+    if (view === 'admin-login') {
+      targetView = 'admin';
+    }
     if (currentView !== 'profile') {
       setPreviousView(currentView);
     }
-    setCurrentView(view);
+    setCurrentView(targetView);
   };
 
   // Selected member for profile view

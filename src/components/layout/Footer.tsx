@@ -17,7 +17,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentView }) => {
           {/* Rendered exactly like the header logo with same proportions and no white background wrapper */}
           <div 
             onClick={() => {
-              setCurrentView('admin-login');
+              setCurrentView('admin');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             className="flex items-center cursor-pointer group w-fit"
