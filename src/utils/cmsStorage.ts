@@ -43,6 +43,9 @@ const defaultAccueilBlocks: CMSBlock[] = [
     order: 1,
     enabled: true,
     settings: {
+      badge: 'Notre valeur ajoutée',
+      title: 'Faire gagner votre entreprise',
+      description: "Notre expertise de 25 ans nous permet d'intervenir dans tous les secteurs d'activité avec des résultats concrets. Nous transformons vos fonctions Achats et Logistique en véritables leviers de performance.",
       stats: [
         { value: '25', label: "Ans d'Expérience" },
         { value: '16', label: 'Entreprises Formées' },

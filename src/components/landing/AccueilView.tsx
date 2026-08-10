@@ -74,26 +74,48 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
             switch (block.type) {
               case 'Hero':
                 return (
-                  <Hero 
-                    onNavigate={onNavigate} 
-                    slides={block.settings.slides} 
+                  <Hero
+                    onNavigate={onNavigate}
+                    slides={block.settings.slides}
+                    onUpdateSlide={
+                      onUpdateBlockSetting
+                        ? (idx, key, v) => {
+                            const heroSlides = [...(block.settings.slides || [])];
+                            heroSlides[idx] = { ...heroSlides[idx], [key]: v };
+                            onUpdateBlockSetting(block.id, 'slides', heroSlides);
+                          }
+                        : undefined
+                    }
                   />
                 );
-              case 'CounterStats':
+              case 'CounterStats': {
+                const csStats = block.settings.stats || stats;
                 return (
                   <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fadeIn">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                       <div className="lg:col-span-6 space-y-6">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#002366] text-xs font-semibold uppercase tracking-wider border border-blue-100">
-                          <TrendingUp className="w-3.5 h-3.5" />
-                          Notre valeur ajoutée
-                        </div>
-                        <h2 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] leading-tight">
-                          Faire <em>gagner votre entreprise</em>
-                        </h2>
-                        <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                          Notre expertise de 25 ans nous permet d'intervenir dans tous les secteurs d'activité avec des résultats concrets. Nous transformons vos fonctions Achats et Logistique en véritables leviers de performance.
-                        </p>
+                        <EditableText
+                          as="div"
+                          label="Badge"
+                          value={block.settings.badge || 'Notre valeur ajoutée'}
+                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'badge', v)}
+                          className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#002366] text-xs font-semibold uppercase tracking-wider border border-blue-100"
+                        />
+                        <EditableText
+                          as="h2"
+                          label="Titre"
+                          value={block.settings.title || 'Faire gagner votre entreprise'}
+                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
+                          className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] leading-tight"
+                        />
+                        <EditableText
+                          as="p"
+                          label="Description"
+                          multiline
+                          value={block.settings.description || "Notre expertise de 25 ans nous permet d'intervenir dans tous les secteurs d'activité avec des résultats concrets. Nous transformons vos fonctions Achats et Logistique en véritables leviers de performance."}
+                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'description', v)}
+                          className="text-slate-600 text-sm sm:text-base leading-relaxed"
+                        />
                         <div className="space-y-3 pt-2 text-slate-700 text-xs sm:text-sm">
                           <div className="flex items-start gap-3">
                             <CheckCircle className="w-5 h-5 text-blue-800 shrink-0 mt-0.5" />
@@ -110,10 +132,30 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                         </div>
                       </div>
                       <div className="lg:col-span-6 grid grid-cols-2 gap-4">
-                        {(block.settings.stats || stats).map((stat: any, index: number) => (
+                        {csStats.map((stat: any, index: number) => (
                           <div key={index} className="corporate-card rounded-2xl p-6 text-center space-y-2 border border-slate-100 bg-slate-50">
-                            <span className="font-serif text-4xl sm:text-5xl font-extrabold text-[#002366]">{stat.value}</span>
-                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{stat.label}</p>
+                            <EditableText
+                              as="span"
+                              label="Valeur"
+                              value={stat.value}
+                              onSave={(v) => {
+                                const updated = [...csStats];
+                                updated[index] = { ...updated[index], value: v };
+                                onUpdateBlockSetting?.(block.id, 'stats', updated);
+                              }}
+                              className="font-serif text-4xl sm:text-5xl font-extrabold text-[#002366] block"
+                            />
+                            <EditableText
+                              as="p"
+                              label="Libellé"
+                              value={stat.label}
+                              onSave={(v) => {
+                                const updated = [...csStats];
+                                updated[index] = { ...updated[index], label: v };
+                                onUpdateBlockSetting?.(block.id, 'stats', updated);
+                              }}
+                              className="text-xs font-bold text-slate-500 uppercase tracking-wider"
+                            />
                             <div className="w-8 h-1 bg-blue-800 mx-auto rounded-full mt-2" />
                           </div>
                         ))}
@@ -121,6 +163,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                     </div>
                   </section>
                 );
+              }
               case 'ServicesPreview':
                 const sBlock = cmsStorage.getDraftLayout('nos-services').find(b => b.type === 'ServicesList');
                 const allServices = sBlock?.settings.items || [
@@ -290,72 +333,113 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                   </section>
                 );
               }
-              case 'Testimonials':
+              case 'Testimonials': {
+                const testiItems = block.settings.items || testimonials;
+                const saveTestiField = (originalIdx: number, key: string, v: string) => {
+                  const updated = [...testiItems];
+                  updated[originalIdx] = { ...updated[originalIdx], [key]: v };
+                  onUpdateBlockSetting?.(block.id, 'items', updated);
+                };
+                const repeatedTesti = [...testiItems, ...testiItems, ...testiItems];
+
                 return (
                   <section className="bg-slate-50 py-16 border-y border-slate-200 animate-fadeIn">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                      
+
                       <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-                        <h2 className="font-serif text-3xl font-extrabold text-[#002366] leading-tight">
-                          {block.settings.title || "Ce que disent nos clients"}
-                        </h2>
-                        <p className="text-slate-500 text-sm sm:text-base">
-                          {block.settings.description || "Découvrez les retours d'expérience des leaders sectoriels accompagnés par le Cabinet RE2M."}
-                        </p>
+                        <EditableText
+                          as="h2"
+                          label="Titre"
+                          value={block.settings.title || "Ce que disent nos clients"}
+                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
+                          className="font-serif text-3xl font-extrabold text-[#002366] leading-tight"
+                        />
+                        <EditableText
+                          as="p"
+                          label="Description"
+                          multiline
+                          value={block.settings.description || "Découvrez les retours d'expérience des leaders sectoriels accompagnés par le Cabinet RE2M."}
+                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'description', v)}
+                          className="text-slate-500 text-sm sm:text-base"
+                        />
                       </div>
 
-                      {(() => {
-                        const items = block.settings.items || testimonials;
-                        const repeated = [...items, ...items, ...items];
-                        return (
-                          <div className="relative w-full overflow-x-hidden py-4">
-                            <div className="flex gap-6 animate-marquee-testimonials whitespace-nowrap">
-                              {repeated.map((testi: any, tIdx: number) => (
-                                <div
-                                  key={tIdx}
-                                  className="whitespace-normal shrink-0 w-80 sm:w-96 corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300 min-h-[240px]"
-                                >
-                                  <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
-                                    ”
-                                  </span>
+                      <div className="relative w-full overflow-x-hidden py-4">
+                        <div className="flex gap-6 animate-marquee-testimonials whitespace-nowrap">
+                          {repeatedTesti.map((testi: any, tIdx: number) => {
+                            const originalIdx = tIdx % testiItems.length;
+                            return (
+                              <div
+                                key={tIdx}
+                                className="whitespace-normal shrink-0 w-80 sm:w-96 corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300 min-h-[240px]"
+                              >
+                                <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
+                                  ”
+                                </span>
 
-                                  <div className="space-y-4 relative z-10">
-                                    <p className="text-slate-600 text-sm italic leading-relaxed text-justify">
-                                      {testi.text}
-                                    </p>
-                                  </div>
+                                <div className="space-y-4 relative z-10">
+                                  <EditableText
+                                    as="p"
+                                    label="Témoignage"
+                                    multiline
+                                    value={testi.text}
+                                    onSave={(v) => saveTestiField(originalIdx, 'text', v)}
+                                    className="text-slate-600 text-sm italic leading-relaxed text-justify"
+                                  />
+                                </div>
 
-                                  <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
-                                    <img
-                                      src={testi.logo}
-                                      alt={`${testi.company} logo`}
-                                      className="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-white shrink-0"
+                                <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
+                                  <EditableImage
+                                    src={testi.logo}
+                                    alt={`${testi.company} logo`}
+                                    onSave={(v) => saveTestiField(originalIdx, 'logo', v)}
+                                    className="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-white shrink-0"
+                                  />
+                                  <div>
+                                    <EditableText
+                                      as="h4"
+                                      label="Entreprise"
+                                      value={testi.company}
+                                      onSave={(v) => saveTestiField(originalIdx, 'company', v)}
+                                      className="font-serif text-sm font-bold text-[#002366]"
                                     />
-                                    <div>
-                                      <h4 className="font-serif text-sm font-bold text-[#002366]">{testi.company}</h4>
-                                      <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{testi.service}</p>
-                                    </div>
+                                    <EditableText
+                                      as="p"
+                                      label="Service"
+                                      value={testi.service}
+                                      onSave={(v) => saveTestiField(originalIdx, 'service', v)}
+                                      className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5"
+                                    />
                                   </div>
                                 </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })()}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
 
                     </div>
                   </section>
                 );
+              }
               case 'Collaborations':
                 return (
                   <section className="py-12 bg-white overflow-hidden border-b border-slate-100 animate-fadeIn">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center">
-                      <h3 className="font-serif text-2xl font-bold text-[#002366]">
-                        {block.settings.title || "Ils nous font confiance"}
-                      </h3>
-                      <p className="text-xs text-slate-400 mt-1">
-                        {block.settings.description || "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M"}
-                      </p>
+                      <EditableText
+                        as="h3"
+                        label="Titre"
+                        value={block.settings.title || "Ils nous font confiance"}
+                        onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
+                        className="font-serif text-2xl font-bold text-[#002366]"
+                      />
+                      <EditableText
+                        as="p"
+                        label="Description"
+                        value={block.settings.description || "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M"}
+                        onSave={(v) => onUpdateBlockSetting?.(block.id, 'description', v)}
+                        className="text-xs text-slate-400 mt-1"
+                      />
                     </div>
 
                     <div className="relative w-full flex overflow-x-hidden py-4">
@@ -363,8 +447,25 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                         {(() => {
                           const collabs = block.settings.items || partners;
                           const repeated = [...collabs, ...collabs, ...collabs];
-                          return repeated.map((partner, idx) => (
-                            partner.logo ? (
+                          return repeated.map((partner, idx) => {
+                            const originalIdx = idx % collabs.length;
+                            if (onUpdateBlockSetting) {
+                              return (
+                                <EditableImage
+                                  key={idx}
+                                  src={partner.logo || ''}
+                                  alt={`${partner.name} logo`}
+                                  onSave={(v) => {
+                                    const updated = [...collabs];
+                                    updated[originalIdx] = { ...updated[originalIdx], logo: v };
+                                    onUpdateBlockSetting(block.id, 'items', updated);
+                                  }}
+                                  containerClassName="shrink-0"
+                                  className="h-14 w-auto max-w-[150px] object-contain opacity-80 hover:opacity-100 transition-opacity duration-300"
+                                />
+                              );
+                            }
+                            return partner.logo ? (
                               <img
                                 key={idx}
                                 src={partner.logo}
@@ -380,8 +481,8 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                               >
                                 {partner.name}
                               </span>
-                            )
-                          ));
+                            );
+                          });
                         })()}
                       </div>
                     </div>
@@ -396,28 +497,15 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
             <div
               key={block.id}
               className={`relative transition-all ${
-                onSelectBlock
-                  ? `cursor-pointer border-2 border-dashed rounded-3xl group/block my-2 ${
-                      block.enabled
-                        ? 'border-transparent hover:border-[#002366] hover:ring-2 hover:ring-[#002366]/20 hover:ring-offset-2'
-                        : 'border-slate-350 opacity-40 hover:opacity-75 bg-slate-50/50'
-                    }`
-                  : ''
-              } ${selectedBlockId === block.id ? '!border-[#002366] ring-2 ring-[#002366]/25 ring-offset-2' : ''}`}
-              onClick={(e) => {
-                if (onSelectBlock) {
-                  e.stopPropagation();
-                  onSelectBlock(block.id);
-                }
-              }}
+                onSelectBlock && !block.enabled ? 'rounded-3xl my-2 opacity-40 bg-slate-50/50' : ''
+              }`}
             >
-              {onSelectBlock && (
-                <div className="absolute top-3 right-3 bg-[#002366] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none opacity-0 group-hover/block:opacity-100 transition-opacity">
-                  {block.enabled ? `Modifier: ${block.type}` : `Masqué: ${block.type}`}
+              {onSelectBlock && !block.enabled && (
+                <div className="absolute top-3 right-3 bg-[#002366] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none">
+                  Masqué: {block.type}
                 </div>
               )}
               {renderBlockContent()}
-              {selectedBlockId === block.id && renderBlockEditor && renderBlockEditor(block)}
               {block.type === 'ServicesPreview' && (
                 <>
                   <section className="bg-white py-16 border-b border-slate-200">

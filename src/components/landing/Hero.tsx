@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { EditableText } from '../admin/editable/EditableText';
+import { EditableImage } from '../admin/editable/EditableImage';
 
 interface HeroProps {
   onNavigate: (view: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact') => void;
@@ -11,9 +13,10 @@ interface HeroProps {
     cta: string;
     targetView: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact';
   }>;
+  onUpdateSlide?: (index: number, key: string, value: string) => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onNavigate, slides: customSlides }) => {
+export const Hero: React.FC<HeroProps> = ({ onNavigate, slides: customSlides, onUpdateSlide }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const defaultSlides = [
@@ -68,45 +71,96 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, slides: customSlides }) 
           <div
             key={index}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+              index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
             }`}
           >
             {/* Background Image with original proportions (bg-cover bg-center) */}
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${slide.image})` }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#002366]/90 via-[#002366]/65 to-transparent" />
+            {onUpdateSlide ? (
+              <EditableImage
+                src={slide.image}
+                alt={slide.title}
+                onSave={(v) => onUpdateSlide(index, 'image', v)}
+                containerClassName="absolute inset-0 w-full h-full"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${slide.image})` }}
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#002366]/90 via-[#002366]/65 to-transparent pointer-events-none" />
 
             {/* Slide Content */}
             <div className="absolute inset-0 flex items-center">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                 <div className="max-w-2xl space-y-6 animate-fadeIn">
-                  
+
                   {/* Subtitle */}
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-sky-200 text-xs font-bold uppercase tracking-wider">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    {slide.subtitle}
-                  </div>
+                  {onUpdateSlide ? (
+                    <EditableText
+                      as="div"
+                      label="Sous-titre"
+                      value={slide.subtitle}
+                      onSave={(v) => onUpdateSlide(index, 'subtitle', v)}
+                      className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-sky-200 text-xs font-bold uppercase tracking-wider"
+                    />
+                  ) : (
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-sky-200 text-xs font-bold uppercase tracking-wider">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      {slide.subtitle}
+                    </div>
+                  )}
 
                   {/* Title */}
-                  <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight">
-                    {slide.title}
-                  </h1>
+                  {onUpdateSlide ? (
+                    <EditableText
+                      as="h1"
+                      label="Titre"
+                      value={slide.title}
+                      onSave={(v) => onUpdateSlide(index, 'title', v)}
+                      className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight"
+                    />
+                  ) : (
+                    <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight">
+                      {slide.title}
+                    </h1>
+                  )}
 
                   {/* Text */}
-                  <p className="text-slate-200 text-sm sm:text-base md:text-lg font-light leading-relaxed">
-                    {slide.text}
-                  </p>
+                  {onUpdateSlide ? (
+                    <EditableText
+                      as="p"
+                      label="Texte"
+                      multiline
+                      value={slide.text}
+                      onSave={(v) => onUpdateSlide(index, 'text', v)}
+                      className="text-slate-200 text-sm sm:text-base md:text-lg font-light leading-relaxed"
+                    />
+                  ) : (
+                    <p className="text-slate-200 text-sm sm:text-base md:text-lg font-light leading-relaxed">
+                      {slide.text}
+                    </p>
+                  )}
 
                   {/* CTA Button */}
                   <div className="pt-2">
-                    <button 
-                      onClick={() => onNavigate(slide.targetView)}
-                      className="bg-white text-[#002366] font-bold px-6 py-3.5 rounded-xl shadow-lg hover:bg-slate-100 transition-colors text-sm cursor-pointer"
-                    >
-                      {slide.cta}
-                    </button>
+                    {onUpdateSlide ? (
+                      <EditableText
+                        as="span"
+                        label="Texte du bouton"
+                        value={slide.cta}
+                        onSave={(v) => onUpdateSlide(index, 'cta', v)}
+                        className="inline-block bg-white text-[#002366] font-bold px-6 py-3.5 rounded-xl shadow-lg text-sm"
+                      />
+                    ) : (
+                      <button
+                        onClick={() => onNavigate(slide.targetView)}
+                        className="bg-white text-[#002366] font-bold px-6 py-3.5 rounded-xl shadow-lg hover:bg-slate-100 transition-colors text-sm cursor-pointer"
+                      >
+                        {slide.cta}
+                      </button>
+                    )}
                   </div>
 
                 </div>
