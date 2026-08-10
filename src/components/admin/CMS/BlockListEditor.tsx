@@ -173,7 +173,7 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
 
       {/* Add Block Form */}
       <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
-        <label className="text-[10px] font-bold text-[#6e5d3d] uppercase shrink-0">Ajouter une Section :</label>
+        <label className="text-[10px] font-bold text-[#64748B] uppercase shrink-0">Ajouter une Section :</label>
         <select
           onChange={(e) => {
             if (e.target.value) {
@@ -181,7 +181,7 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
               e.target.value = '';
             }
           }}
-          className="text-xs p-2 border border-[#D6CFBC] rounded-xl bg-white focus:outline-none focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] w-full sm:max-w-[220px]"
+          className="text-xs p-2 border border-[#E2E8F0] rounded-xl bg-white focus:outline-none focus:border-[#002366] focus:ring-1 focus:ring-[#002366] w-full sm:max-w-[220px]"
         >
           <option value="">-- Choisir le type --</option>
           <option value="Hero">Hero (Carrousel)</option>
@@ -292,7 +292,7 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
         ))}
 
         {blocks.length === 0 && (
-          <div className="text-center py-8 border-2 border-dashed border-[#D6CFBC] rounded-3xl text-slate-400 text-xs bg-white/50">
+          <div className="text-center py-8 border-2 border-dashed border-[#E2E8F0] rounded-3xl text-slate-400 text-xs bg-white/50">
             Aucune section configurée pour cette page. Utilisez le sélecteur ci-dessus pour en ajouter une.
           </div>
         )}

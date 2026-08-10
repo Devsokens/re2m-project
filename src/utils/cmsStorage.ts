@@ -63,24 +63,9 @@ const defaultAccueilBlocks: CMSBlock[] = [
     }
   },
   {
-    id: 'accueil_founder',
-    type: 'FounderSection',
-    order: 3,
-    enabled: true,
-    settings: {
-      title: "Notre Fondateur",
-      subtitle: "Roch-Emmanuel MVE-MBORO",
-      quote: "Expert-Consultant-Formateur en Achats & Logistique certifié par le Programme des Nations Unies pour le Développement (PNUD).",
-      paragraphs: [
-        "Fort de 25 ans d'expérience internationale, il a développé une expertise reconnue dans l'optimisation des fonctions Achats et Logistique. Sa certification UNDP Procurement Certification témoigne de son excellence professionnelle."
-      ],
-      image: "https://www.cabinet-re2m.com/assets/images/team_01.jpg"
-    }
-  },
-  {
     id: 'accueil_testimonials',
     type: 'Testimonials',
-    order: 4,
+    order: 3,
     enabled: true,
     settings: {
       title: "Ce que disent nos clients",
@@ -111,6 +96,21 @@ const defaultAccueilBlocks: CMSBlock[] = [
           logo: 'https://th.bing.com/th/id/R.416f199d5a0200667f7e42d6df1e3241?rik=4M35Oghc52VHow&riu=http%3a%2f%2flogonoid.com%2fimages%2fperenco-logo.png&ehk=AX2r5xs6pgn5JJuZJsUs4dLRsQMfAVJthprTVaaeaE8%3d&risl=&pid=ImgRaw&r=0'
         }
       ]
+    }
+  },
+  {
+    id: 'accueil_founder',
+    type: 'FounderSection',
+    order: 4,
+    enabled: true,
+    settings: {
+      title: "Notre Fondateur",
+      subtitle: "Roch-Emmanuel MVE-MBORO",
+      quote: "Expert-Consultant-Formateur en Achats & Logistique certifié par le Programme des Nations Unies pour le Développement (PNUD).",
+      paragraphs: [
+        "Fort de 25 ans d'expérience internationale, il a développé une expertise reconnue dans l'optimisation des fonctions Achats et Logistique. Sa certification UNDP Procurement Certification témoigne de son excellence professionnelle."
+      ],
+      image: "https://www.cabinet-re2m.com/assets/images/team_01.jpg"
     }
   },
   {
@@ -314,6 +314,12 @@ const getStorageKey = (slug: PageSlug, isDraft: boolean) => {
   return `cms_layout_${slug}_${isDraft ? 'draft' : 'published'}`;
 };
 
+// Bump this whenever defaultLayouts block ORDER changes, so every browser
+// automatically re-syncs instead of keeping stale block ordering forever
+// (stored blocks otherwise keep their own `order`, see mergeDefaultSettings).
+const CMS_SCHEMA_VERSION = '2';
+const SCHEMA_VERSION_KEY = 'cms_schema_version';
+
 function mergeDefaultSettings(storedBlocks: CMSBlock[], defaultBlocks: CMSBlock[]): CMSBlock[] {
   const mergedExisting = storedBlocks.map(stored => {
     const defBlock = defaultBlocks.find(d => d.id === stored.id);
@@ -369,6 +375,14 @@ function mergeDefaultSettings(storedBlocks: CMSBlock[], defaultBlocks: CMSBlock[
 export const cmsStorage = {
   // Initialize default layout data in localStorage if it doesn't exist
   init() {
+    if (localStorage.getItem(SCHEMA_VERSION_KEY) !== CMS_SCHEMA_VERSION) {
+      (Object.keys(defaultLayouts) as PageSlug[]).forEach((slug) => {
+        localStorage.removeItem(getStorageKey(slug, false));
+        localStorage.removeItem(getStorageKey(slug, true));
+      });
+      localStorage.setItem(SCHEMA_VERSION_KEY, CMS_SCHEMA_VERSION);
+    }
+
     (Object.keys(defaultLayouts) as PageSlug[]).forEach((slug) => {
       const pubKey = getStorageKey(slug, false);
       const draftKey = getStorageKey(slug, true);

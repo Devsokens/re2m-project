@@ -72,7 +72,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   });
                   handleFieldChange('slides', newSlides);
                 }}
-                className="px-3 py-1 bg-[#C5A85C] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#B5933A] cursor-pointer flex items-center gap-1 transition-all"
+                className="px-3 py-1 bg-[#002366] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#1e3a8a] cursor-pointer flex items-center gap-1 transition-all"
               >
                 <Plus className="w-3.5 h-3.5 shrink-0" />
                 <span>Ajouter une Diapositive</span>
@@ -108,7 +108,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newSlides[idx].subtitle = e.target.value;
                         handleFieldChange('slides', newSlides);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -121,7 +121,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newSlides[idx].title = e.target.value;
                         handleFieldChange('slides', newSlides);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none"
                     />
                   </div>
                 </div>
@@ -136,7 +136,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                       newSlides[idx].text = e.target.value;
                       handleFieldChange('slides', newSlides);
                     }}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none"
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none"
                   />
                 </div>
                 
@@ -151,7 +151,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newSlides[idx].image = e.target.value;
                         handleFieldChange('slides', newSlides);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -164,7 +164,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newSlides[idx].cta = e.target.value;
                         handleFieldChange('slides', newSlides);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -176,7 +176,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newSlides[idx].targetView = e.target.value;
                         handleFieldChange('slides', newSlides);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none"
                     >
                       <option value="accueil">Accueil</option>
                       <option value="qui-nous-sommes">Qui Nous Sommes</option>
@@ -202,7 +202,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   newStats.push({ value: '100', label: 'Nouveau indicateur' });
                   handleFieldChange('stats', newStats);
                 }}
-                className="px-3 py-1 bg-[#C5A85C] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#B5933A] cursor-pointer flex items-center gap-1 transition-all"
+                className="px-3 py-1 bg-[#002366] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#1e3a8a] cursor-pointer flex items-center gap-1 transition-all"
               >
                 <Plus className="w-3.5 h-3.5 shrink-0" />
                 <span>Ajouter un indicateur</span>
@@ -237,7 +237,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newStats[idx].value = e.target.value;
                         handleFieldChange('stats', newStats);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                     />
                   </div>
                   <div>
@@ -250,7 +250,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newStats[idx].label = e.target.value;
                         handleFieldChange('stats', newStats);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                     />
                   </div>
                 </div>
@@ -268,7 +268,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                 type="text"
                 value={localSettings.title || ''}
                 onChange={(e) => handleFieldChange('title', e.target.value)}
-                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
               />
             </div>
             <div>
@@ -277,7 +277,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                 rows={3}
                 value={localSettings.description || ''}
                 onChange={(e) => handleFieldChange('description', e.target.value)}
-                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
               />
             </div>
             <div>
@@ -286,7 +286,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                 type="number"
                 value={localSettings.limit || 3}
                 onChange={(e) => handleFieldChange('limit', parseInt(e.target.value) || 3)}
-                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
               />
             </div>
           </div>
@@ -302,7 +302,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   type="text"
                   value={localSettings.title || ''}
                   onChange={(e) => handleFieldChange('title', e.target.value)}
-                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                 />
               </div>
               <div>
@@ -311,7 +311,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   type="text"
                   value={localSettings.description || ''}
                   onChange={(e) => handleFieldChange('description', e.target.value)}
-                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                 />
               </div>
             </div>
@@ -329,7 +329,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   });
                   handleFieldChange('items', newItems);
                 }}
-                className="px-3 py-1 bg-[#C5A85C] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#B5933A] cursor-pointer flex items-center gap-1 transition-all"
+                className="px-3 py-1 bg-[#002366] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#1e3a8a] cursor-pointer flex items-center gap-1 transition-all"
               >
                 <Plus className="w-3.5 h-3.5 shrink-0" />
                 <span>Ajouter un Partenaire</span>
@@ -364,7 +364,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].name = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-0.5 w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      className="mt-0.5 w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                     />
                   </div>
                   <div>
@@ -377,7 +377,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].label = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-0.5 w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      className="mt-0.5 w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                     />
                   </div>
                   <div>
@@ -390,7 +390,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].logo = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-0.5 w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      className="mt-0.5 w-full text-xs p-1.5 border border-slate-200 rounded-lg focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                     />
                   </div>
                 </div>
@@ -511,7 +511,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   type="text"
                   value={localSettings.title || ''}
                   onChange={(e) => handleFieldChange('title', e.target.value)}
-                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white font-medium"
                 />
               </div>
               <div>
@@ -520,7 +520,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   type="text"
                   value={localSettings.description || ''}
                   onChange={(e) => handleFieldChange('description', e.target.value)}
-                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white font-medium"
                 />
               </div>
             </div>
@@ -539,7 +539,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   });
                   handleFieldChange('items', newItems);
                 }}
-                className="px-3 py-1 bg-[#C5A85C] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#B5933A] cursor-pointer flex items-center gap-1 transition-all"
+                className="px-3 py-1 bg-[#002366] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#1e3a8a] cursor-pointer flex items-center gap-1 transition-all"
               >
                 <Plus className="w-3.5 h-3.5 shrink-0" />
                 <span>Ajouter un Témoignage</span>
@@ -575,7 +575,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].company = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                     />
                   </div>
                   <div>
@@ -588,7 +588,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].service = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                     />
                   </div>
                 </div>
@@ -603,7 +603,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                       newItems[idx].text = e.target.value;
                       handleFieldChange('items', newItems);
                     }}
-                    className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                   />
                 </div>
 
@@ -617,7 +617,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                       newItems[idx].logo = e.target.value;
                       handleFieldChange('items', newItems);
                     }}
-                    className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                   />
                 </div>
               </div>
@@ -634,7 +634,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                 type="text"
                 value={localSettings.title || ''}
                 onChange={(e) => handleFieldChange('title', e.target.value)}
-                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white font-medium"
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -644,7 +644,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   rows={3}
                   value={localSettings.desc1 || ''}
                   onChange={(e) => handleFieldChange('desc1', e.target.value)}
-                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white font-medium"
                 />
               </div>
               <div>
@@ -653,7 +653,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   rows={3}
                   value={localSettings.desc2 || ''}
                   onChange={(e) => handleFieldChange('desc2', e.target.value)}
-                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white font-medium"
                 />
               </div>
             </div>
@@ -668,7 +668,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                     newComms.push({ title: "Nouvel Engagement", desc: "Description de l'engagement..." });
                     handleFieldChange('commitments', newComms);
                   }}
-                  className="px-3 py-1 bg-[#C5A85C] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#B5933A] cursor-pointer flex items-center gap-1 transition-all"
+                  className="px-3 py-1 bg-[#002366] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#1e3a8a] cursor-pointer flex items-center gap-1 transition-all"
                 >
                   <Plus className="w-3.5 h-3.5 shrink-0" />
                   <span>Ajouter un Engagement</span>
@@ -705,7 +705,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                             newComms[idx].title = e.target.value;
                             handleFieldChange('commitments', newComms);
                           }}
-                          className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                          className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                         />
                       </div>
                       <div>
@@ -718,7 +718,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                             newComms[idx].desc = e.target.value;
                             handleFieldChange('commitments', newComms);
                           }}
-                          className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                          className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                         />
                       </div>
                     </div>
@@ -813,7 +813,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   });
                   handleFieldChange('items', newItems);
                 }}
-                className="px-3 py-1 bg-[#C5A85C] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#B5933A] cursor-pointer flex items-center gap-1 transition-all"
+                className="px-3 py-1 bg-[#002366] text-white rounded-lg text-[10px] font-bold uppercase hover:bg-[#1e3a8a] cursor-pointer flex items-center gap-1 transition-all"
               >
                 <Plus className="w-3.5 h-3.5 shrink-0" />
                 <span>Ajouter un Service</span>
@@ -849,7 +849,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].title = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white font-medium"
                     />
                   </div>
                   <div>
@@ -862,7 +862,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].desc = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white font-medium"
                     />
                   </div>
                 </div>
@@ -878,7 +878,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].image = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                     />
                   </div>
                   <div>
@@ -890,7 +890,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         newItems[idx].iconName = e.target.value;
                         handleFieldChange('items', newItems);
                       }}
-                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                      className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                     >
                       <option value="ClipboardList">ClipboardList (Audit)</option>
                       <option value="GraduationCap">GraduationCap (Formation)</option>
@@ -910,7 +910,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                       newItems[idx].details = e.target.value.split('\n');
                       handleFieldChange('items', newItems);
                     }}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl font-mono text-[11px] focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl font-mono text-[11px] focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                   />
                 </div>
               </div>
@@ -928,7 +928,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   type="text"
                   value={localSettings.badge || ''}
                   onChange={(e) => handleFieldChange('badge', e.target.value)}
-                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white font-medium"
                 />
               </div>
               <div>
@@ -937,7 +937,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                   type="text"
                   value={localSettings.title || ''}
                   onChange={(e) => handleFieldChange('title', e.target.value)}
-                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+                  className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white font-medium"
                 />
               </div>
             </div>
@@ -948,7 +948,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                 rows={2}
                 value={localSettings.description || ''}
                 onChange={(e) => handleFieldChange('description', e.target.value)}
-                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white font-medium"
+                className="mt-1 w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white font-medium"
               />
             </div>
 
@@ -961,7 +961,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                     type="text"
                     value={localSettings.addressTitle || ''}
                     onChange={(e) => handleFieldChange('addressTitle', e.target.value)}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                   />
                 </div>
                 <div>
@@ -970,7 +970,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                     type="text"
                     value={localSettings.addressLine1 || ''}
                     onChange={(e) => handleFieldChange('addressLine1', e.target.value)}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                   />
                 </div>
                 <div>
@@ -979,7 +979,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                     type="text"
                     value={localSettings.addressLine2 || ''}
                     onChange={(e) => handleFieldChange('addressLine2', e.target.value)}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                   />
                 </div>
               </div>
@@ -994,7 +994,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                     type="text"
                     value={localSettings.phoneTitle || ''}
                     onChange={(e) => handleFieldChange('phoneTitle', e.target.value)}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                   />
                 </div>
                 <div>
@@ -1003,7 +1003,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                     type="text"
                     value={localSettings.phone1 || ''}
                     onChange={(e) => handleFieldChange('phone1', e.target.value)}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                   />
                 </div>
                 <div>
@@ -1012,7 +1012,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                     type="text"
                     value={localSettings.phone2 || ''}
                     onChange={(e) => handleFieldChange('phone2', e.target.value)}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                   />
                 </div>
               </div>
@@ -1029,7 +1029,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         type="text"
                         value={localSettings.emailTitle || ''}
                         onChange={(e) => handleFieldChange('emailTitle', e.target.value)}
-                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                       />
                     </div>
                     <div>
@@ -1038,7 +1038,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         type="text"
                         value={localSettings.email || ''}
                         onChange={(e) => handleFieldChange('email', e.target.value)}
-                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                       />
                     </div>
                   </div>
@@ -1053,7 +1053,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         type="text"
                         value={localSettings.hoursTitle || ''}
                         onChange={(e) => handleFieldChange('hoursTitle', e.target.value)}
-                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                       />
                     </div>
                     <div>
@@ -1062,7 +1062,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         type="text"
                         value={localSettings.hoursLine1 || ''}
                         onChange={(e) => handleFieldChange('hoursLine1', e.target.value)}
-                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                       />
                     </div>
                     <div>
@@ -1071,7 +1071,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                         type="text"
                         value={localSettings.hoursLine2 || ''}
                         onChange={(e) => handleFieldChange('hoursLine2', e.target.value)}
-                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                        className="w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                       />
                     </div>
                   </div>
@@ -1088,7 +1088,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                     type="text"
                     value={localSettings.rccm || ''}
                     onChange={(e) => handleFieldChange('rccm', e.target.value)}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                   />
                 </div>
                 <div>
@@ -1097,7 +1097,7 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
                     type="text"
                     value={localSettings.nif || ''}
                     onChange={(e) => handleFieldChange('nif', e.target.value)}
-                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#C5A85C] focus:ring-1 focus:ring-[#C5A85C] focus:outline-none bg-white"
+                    className="mt-1 w-full text-xs p-2 border border-slate-200 rounded-xl focus:border-[#002366] focus:ring-1 focus:ring-[#002366] focus:outline-none bg-white"
                   />
                 </div>
               </div>
@@ -1116,12 +1116,15 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
 
   if (inline) {
     return (
-      <div className="space-y-4 text-[#0f172a] animate-fadeIn">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="absolute top-12 right-3 z-40 w-[calc(100%-1.5rem)] sm:w-96 max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col max-h-[70vh] text-[#0f172a] animate-scaleUp"
+      >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-          <div>
-            <h4 className="font-serif text-sm font-bold text-[#002366]">
-              Propriétés : {block.type}
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 shrink-0">
+          <div className="min-w-0">
+            <h4 className="font-serif text-sm font-bold text-[#002366] truncate">
+              Modifier : {block.type}
             </h4>
             <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider mt-0.5">
               ID: {block.id}
@@ -1129,20 +1132,21 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-xs font-bold text-blue-800 hover:text-blue-950 cursor-pointer"
+            className="text-slate-400 hover:text-slate-600 shrink-0 cursor-pointer p-1"
+            aria-label="Fermer"
           >
-            ← Retour
+            <X className="w-4 h-4" />
           </button>
         </div>
-        {/* Form Fields */}
-        <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+        {/* Form Fields — scrolls within this popover only */}
+        <div className="space-y-4 flex-1 overflow-y-auto px-4 py-4">
           {renderFormFields()}
         </div>
         {/* Actions */}
-        <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-2">
+        <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-650 font-bold text-[11px] cursor-pointer transition-all"
+            className="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-[11px] cursor-pointer transition-all"
           >
             Annuler
           </button>
@@ -1159,10 +1163,10 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-      <div className="bg-[#FAF9F5] rounded-3xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden border border-[#E5DFD0] animate-scaleUp text-[#0f172a]">
+      <div className="bg-[#F8FAFC] rounded-3xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden border border-[#E2E8F0] animate-scaleUp text-[#0f172a]">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5DFD0] bg-[#C5A85C] text-white">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] bg-[#002366] text-white">
           <div>
             <h3 className="font-serif text-base sm:text-lg font-bold">
               Éditeur de Section : {block.type}
@@ -1186,16 +1190,16 @@ export const BlockFormModal: React.FC<BlockFormModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 border-t border-[#E5DFD0] bg-[#FAF9F5] flex items-center justify-end gap-3 shrink-0">
+        <div className="px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-end gap-3 shrink-0">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl border border-[#D6CFBC] hover:bg-[#EBE7DF]/30 text-[#6e5d3d] font-bold text-xs cursor-pointer transition-all"
+            className="px-5 py-2.5 rounded-xl border border-[#E2E8F0] hover:bg-[#F1F5F9]/30 text-[#64748B] font-bold text-xs cursor-pointer transition-all"
           >
             Annuler
           </button>
           <button
             onClick={handleSave}
-            className="px-6 py-2.5 rounded-xl bg-[#C5A85C] hover:bg-[#B5933A] text-white font-bold text-xs cursor-pointer shadow-md transition-all"
+            className="px-6 py-2.5 rounded-xl bg-[#002366] hover:bg-[#1e3a8a] text-white font-bold text-xs cursor-pointer shadow-md transition-all"
           >
             Valider les modifications
           </button>

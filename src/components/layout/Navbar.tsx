@@ -1,118 +1,85 @@
 import React from 'react';
+import { ArrowRight } from 'lucide-react';
 import { UserRole } from '../../types/member';
 
+type ViewType = 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'blog' | 'actualites' | 'contact' | 'profile' | 'admin' | 'admin-login';
+
 interface NavbarProps {
-  currentView: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact' | 'profile' | 'admin' | 'admin-login';
-  setCurrentView: (view: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact' | 'profile' | 'admin' | 'admin-login') => void;
+  currentView: ViewType;
+  setCurrentView: (view: ViewType) => void;
   activeRole: UserRole;
   setActiveRole: (role: UserRole) => void;
 }
 
+const NAV_ITEMS: { view: ViewType; label: string }[] = [
+  { view: 'accueil', label: 'Accueil' },
+  { view: 'qui-nous-sommes', label: 'Qui nous sommes' },
+  { view: 'nos-services', label: 'Nos services' },
+  { view: 'blog', label: 'Blog' },
+  { view: 'actualites', label: 'Actualités' },
+];
+
 export const Navbar: React.FC<NavbarProps> = ({
   currentView,
   setCurrentView,
-  activeRole,
-  setActiveRole
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full bg-[#002366] text-white shadow-md border-b border-blue-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 grid grid-cols-2 lg:grid-cols-3 items-center">
+
         {/* Static Brand Logo (no redirection link) */}
-        <div className="flex items-center">
-          <img 
-            src="/logo1.png" 
-            alt="Cabinet RE2M Logo" 
+        <div className="flex items-center justify-self-start">
+          <img
+            src="/logo1.png"
+            alt="Cabinet RE2M Logo"
             className="h-11 w-auto object-contain"
           />
         </div>
 
-        {/* Navigation Tabs (Only: Accueil, Qui nous sommes, Nos services, Contact) */}
-        <nav className="hidden md:flex items-center gap-1.5">
-          <button
-            onClick={() => setCurrentView('accueil')}
-            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              currentView === 'accueil'
-                ? 'bg-white text-[#002366] shadow'
-                : 'text-white/80 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            Accueil
-          </button>
-
-          <button
-            onClick={() => setCurrentView('qui-nous-sommes')}
-            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              currentView === 'qui-nous-sommes'
-                ? 'bg-white text-[#002366] shadow'
-                : 'text-white/80 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            Qui nous sommes
-          </button>
-
-          <button
-            onClick={() => setCurrentView('nos-services')}
-            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              currentView === 'nos-services'
-                ? 'bg-white text-[#002366] shadow'
-                : 'text-white/80 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            Nos services
-          </button>
-
-          <button
-            onClick={() => setCurrentView('contact')}
-            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              currentView === 'contact'
-                ? 'bg-white text-[#002366] shadow'
-                : 'text-white/80 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            Contact
-          </button>
+        {/* Navigation Tabs - centered */}
+        <nav className="hidden lg:flex items-center justify-center gap-1.5 justify-self-center">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.view}
+              onClick={() => setCurrentView(item.view)}
+              className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                currentView === item.view
+                  ? 'bg-white text-[#002366] shadow'
+                  : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
         </nav>
 
-        {/* Small Admin claims switch switcher for testing */}
-        <div className="flex items-center bg-white/15 border border-white/25 rounded-xl p-1">
-          <select
-            value={activeRole}
-            onChange={(e) => setActiveRole(e.target.value as UserRole)}
-            className="bg-transparent text-[10px] font-bold text-white focus:outline-none px-2 py-0.5 cursor-pointer"
-            title="Changer le rôle utilisateur"
+        {/* Contact CTA - far right */}
+        <div className="flex items-center justify-self-end">
+          <button
+            onClick={() => setCurrentView('contact')}
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-100 text-[#002366] font-bold text-xs px-4 py-2.5 rounded-xl transition-colors cursor-pointer shadow group/cta"
           >
-            <option value="SUPER_ADMIN" className="bg-[#002366] text-white">Super Admin</option>
-            <option value="ADMIN" className="bg-[#002366] text-white">Admin</option>
-            <option value="CONSULTANT" className="bg-[#002366] text-white">Consultant</option>
-          </select>
+            Nous contacter
+            <ArrowRight className="w-3.5 h-3.5 group-hover/cta:translate-x-1 transition-transform" />
+          </button>
         </div>
 
       </div>
 
       {/* Mobile Navigation Toolbar */}
-      <div className="md:hidden flex items-center justify-around bg-blue-900 py-2 px-2 text-white text-[11px] font-semibold border-t border-blue-950">
-        <button
-          onClick={() => { setCurrentView('accueil'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-          className={`py-1 px-3.5 rounded-lg cursor-pointer ${currentView === 'accueil' ? 'bg-white text-[#002366]' : 'text-white/80'}`}
-        >
-          Accueil
-        </button>
-        <button
-          onClick={() => { setCurrentView('qui-nous-sommes'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-          className={`py-1 px-3.5 rounded-lg cursor-pointer ${currentView === 'qui-nous-sommes' ? 'bg-white text-[#002366]' : 'text-white/80'}`}
-        >
-          Qui sommes-nous
-        </button>
-        <button
-          onClick={() => { setCurrentView('nos-services'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-          className={`py-1 px-3.5 rounded-lg cursor-pointer ${currentView === 'nos-services' ? 'bg-white text-[#002366]' : 'text-white/80'}`}
-        >
-          Services
-        </button>
+      <div className="lg:hidden flex items-center justify-around bg-blue-900 py-2 px-2 text-white text-[11px] font-semibold border-t border-blue-950 overflow-x-auto">
+        {NAV_ITEMS.map((item) => (
+          <button
+            key={item.view}
+            onClick={() => { setCurrentView(item.view); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className={`py-1 px-3 rounded-lg cursor-pointer shrink-0 ${currentView === item.view ? 'bg-white text-[#002366]' : 'text-white/80'}`}
+          >
+            {item.label}
+          </button>
+        ))}
         <button
           onClick={() => { setCurrentView('contact'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-          className={`py-1 px-3.5 rounded-lg cursor-pointer ${currentView === 'contact' ? 'bg-white text-[#002366]' : 'text-white/80'}`}
+          className="py-1 px-3 rounded-lg cursor-pointer shrink-0 font-bold bg-white text-[#002366]"
         >
           Contact
         </button>

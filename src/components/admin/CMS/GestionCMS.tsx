@@ -7,6 +7,7 @@ import { AccueilView } from '../../landing/AccueilView';
 import { QuiNousSommesView } from '../../landing/QuiNousSommesView';
 import { NosServicesView } from '../../landing/NosServicesView';
 import { ContactView } from '../../landing/ContactView';
+import { EditModeProvider } from '../../../contexts/EditModeContext';
 import { Globe, RefreshCw, Check, ListOrdered } from 'lucide-react';
 
 interface GestionCMSProps {
@@ -90,11 +91,47 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
     }
   };
 
+  // Instant, single-field update — used by click-to-edit fields directly in the preview
+  const handleUpdateBlockSetting = (blockId: string, key: string, value: any) => {
+    const updated = draftBlocks.map((b) =>
+      b.id === blockId ? { ...b, settings: { ...b.settings, [key]: value } } : b
+    );
+    setDraftBlocks(updated);
+    cmsStorage.saveDraftLayout(selectedPage, updated);
+    if (activePreviewSlug === selectedPage) {
+      onTogglePreview(selectedPage, updated);
+    }
+  };
+
+  // Small popover editor, anchored right inside the clicked block (no big modal)
+  const renderBlockEditor = (block: CMSBlock) => (
+    <BlockFormModal
+      block={block}
+      isOpen={true}
+      onClose={() => {
+        setIsFormOpen(false);
+        setEditingBlock(null);
+      }}
+      onSave={handleSaveBlockSettings}
+      onChange={(updatedBlock) => {
+        const updated = draftBlocks.map((b) =>
+          b.id === updatedBlock.id ? updatedBlock : b
+        );
+        setDraftBlocks(updated);
+        cmsStorage.saveDraftLayout(selectedPage, updated);
+        if (activePreviewSlug === selectedPage) {
+          onTogglePreview(selectedPage, updated);
+        }
+      }}
+      inline
+    />
+  );
+
   return (
-    <div className="space-y-6 text-[#0f172a] bg-[#FAF9F5] p-6 sm:p-10 rounded-3xl border border-[#E5DFD0] shadow-sm relative animate-fadeIn">
+    <div className="space-y-6 text-[#0f172a] bg-[#F8FAFC] p-6 sm:p-10 rounded-3xl border border-[#E2E8F0] shadow-sm relative animate-fadeIn">
       
       {/* WordPress-style Editor Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5DFD0] pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-6">
         <div className="space-y-1">
           <h2 className="font-serif text-3xl font-extrabold text-[#002366] leading-tight">
             Éditeur visuel
@@ -109,9 +146,9 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
           {/* Section structure view (Wordpress Outline style) */}
           <button
             onClick={() => setShowStructureModal(true)}
-            className="text-xs font-bold text-[#6e5d3d] hover:text-[#002366] tracking-wider uppercase flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="text-xs font-bold text-[#64748B] hover:text-[#002366] tracking-wider uppercase flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <ListOrdered className="w-4.5 h-4.5 shrink-0 text-[#C5A85C]" />
+            <ListOrdered className="w-4.5 h-4.5 shrink-0 text-[#002366]" />
             <span>Organiser les Sections</span>
           </button>
 
@@ -124,7 +161,7 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
                 onTogglePreview(selectedPage, draftBlocks);
               }
             }}
-            className="text-xs font-bold text-[#C5A85C] hover:text-[#B5933A] tracking-wider uppercase flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="text-xs font-bold text-[#002366] hover:text-[#1e3a8a] tracking-wider uppercase flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Globe className="w-4.5 h-4.5 shrink-0" />
             <span>
@@ -136,7 +173,7 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
 
       {/* WordPress-style Page Selection Tab Bar (Pill Box) */}
       <div className="flex justify-center sm:justify-start">
-        <div className="inline-flex gap-2 bg-[#EBE7DF]/60 p-1.5 rounded-2xl border border-[#D6CFBC]/60 shadow-inner">
+        <div className="inline-flex gap-2 bg-[#F1F5F9]/60 p-1.5 rounded-2xl border border-[#E2E8F0]/60 shadow-inner">
           <button
             onClick={() => {
               setSelectedPage('accueil');
@@ -145,8 +182,8 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
             }}
             className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               selectedPage === 'accueil'
-                ? 'bg-[#C5A85C] text-white shadow-md'
-                : 'text-[#6e5d3d] hover:text-[#002366] hover:bg-slate-200/40'
+                ? 'bg-[#002366] text-white shadow-md'
+                : 'text-[#64748B] hover:text-[#002366] hover:bg-slate-200/40'
             }`}
           >
             Accueil
@@ -160,8 +197,8 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
             }}
             className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               selectedPage === 'qui-nous-sommes'
-                ? 'bg-[#C5A85C] text-white shadow-md'
-                : 'text-[#6e5d3d] hover:text-[#002366] hover:bg-slate-200/40'
+                ? 'bg-[#002366] text-white shadow-md'
+                : 'text-[#64748B] hover:text-[#002366] hover:bg-slate-200/40'
             }`}
           >
             Qui Nous Sommes
@@ -175,8 +212,8 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
             }}
             className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               selectedPage === 'nos-services'
-                ? 'bg-[#C5A85C] text-white shadow-md'
-                : 'text-[#6e5d3d] hover:text-[#002366] hover:bg-slate-200/40'
+                ? 'bg-[#002366] text-white shadow-md'
+                : 'text-[#64748B] hover:text-[#002366] hover:bg-slate-200/40'
             }`}
           >
             Nos Services
@@ -190,8 +227,8 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
             }}
             className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
               selectedPage === 'contact'
-                ? 'bg-[#C5A85C] text-white shadow-md'
-                : 'text-[#6e5d3d] hover:text-[#002366] hover:bg-slate-200/40'
+                ? 'bg-[#002366] text-white shadow-md'
+                : 'text-[#64748B] hover:text-[#002366] hover:bg-slate-200/40'
             }`}
           >
             Contact
@@ -214,63 +251,53 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
         </div>
       )}
 
-      {/* Full-Width Website Reproduction Area */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-md overflow-hidden relative min-h-[600px] w-full">
-        {selectedPage === 'accueil' && (
-          <AccueilView
-            blocks={draftBlocks}
-            onSelectBlock={handleSelectBlockFromPreview}
-            onStartDemo={() => {}}
-            onNavigate={() => {}}
-          />
-        )}
+      {/* Website Reproduction Area — scrolls within its own contained zone.
+          `transform` makes this div the containing block for any position:fixed
+          descendant (e.g. a sticky navbar), so it stays confined to this canvas
+          instead of floating over the whole admin UI. */}
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-md overflow-y-auto relative transform max-h-[75vh] min-h-[600px] w-full">
+        <EditModeProvider key={selectedPage}>
+          {selectedPage === 'accueil' && (
+            <AccueilView
+              blocks={draftBlocks}
+              onSelectBlock={handleSelectBlockFromPreview}
+              selectedBlockId={editingBlock?.id ?? null}
+              renderBlockEditor={renderBlockEditor}
+              onUpdateBlockSetting={handleUpdateBlockSetting}
+              onStartDemo={() => {}}
+              onNavigate={() => {}}
+            />
+          )}
 
-        {selectedPage === 'qui-nous-sommes' && (
-          <QuiNousSommesView
-            blocks={draftBlocks}
-            onSelectBlock={handleSelectBlockFromPreview}
-          />
-        )}
+          {selectedPage === 'qui-nous-sommes' && (
+            <QuiNousSommesView
+              blocks={draftBlocks}
+              onSelectBlock={handleSelectBlockFromPreview}
+              selectedBlockId={editingBlock?.id ?? null}
+              renderBlockEditor={renderBlockEditor}
+            />
+          )}
 
-         {selectedPage === 'nos-services' && (
-          <NosServicesView
-            blocks={draftBlocks}
-            onSelectBlock={handleSelectBlockFromPreview}
-          />
-        )}
+          {selectedPage === 'nos-services' && (
+            <NosServicesView
+              blocks={draftBlocks}
+              onSelectBlock={handleSelectBlockFromPreview}
+              selectedBlockId={editingBlock?.id ?? null}
+              renderBlockEditor={renderBlockEditor}
+              onUpdateBlockSetting={handleUpdateBlockSetting}
+            />
+          )}
 
-        {selectedPage === 'contact' && (
-          <ContactView
-            blocks={draftBlocks}
-            onSelectBlock={handleSelectBlockFromPreview}
-          />
-        )}
+          {selectedPage === 'contact' && (
+            <ContactView
+              blocks={draftBlocks}
+              onSelectBlock={handleSelectBlockFromPreview}
+              selectedBlockId={editingBlock?.id ?? null}
+              renderBlockEditor={renderBlockEditor}
+            />
+          )}
+        </EditModeProvider>
       </div>
-
-      {/* WordPress-style Floating Balloon Popover Editor */}
-      {isFormOpen && editingBlock && (
-        <BlockFormModal
-          block={editingBlock}
-          isOpen={isFormOpen}
-          onClose={() => {
-            setIsFormOpen(false);
-            setEditingBlock(null);
-          }}
-          onSave={handleSaveBlockSettings}
-          onChange={(updatedBlock) => {
-            // Instant Real-Time Preview Update on typing
-            const updated = draftBlocks.map((b) =>
-              b.id === updatedBlock.id ? updatedBlock : b
-            );
-            setDraftBlocks(updated);
-            cmsStorage.saveDraftLayout(selectedPage, updated);
-            if (activePreviewSlug === selectedPage) {
-              onTogglePreview(selectedPage, updated);
-            }
-          }}
-          inline={false}
-        />
-      )}
 
       {/* Floating Outline Structure Modal */}
       {showStructureModal && (
@@ -280,7 +307,7 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h4 className="font-serif text-base font-bold text-[#002366] flex items-center gap-2">
-                <ListOrdered className="w-5 h-5 text-[#C5A85C]" />
+                <ListOrdered className="w-5 h-5 text-[#002366]" />
                 <span>Structure des Sections</span>
               </h4>
               <button

@@ -1,21 +1,18 @@
 import React from 'react';
-import { ClipboardList, GraduationCap, UsersRound, CheckCircle, Workflow, HelpCircle } from 'lucide-react';
+import { ClipboardList, GraduationCap, UsersRound, CheckCircle, Workflow } from 'lucide-react';
 import { partners } from '../../data/partners';
 import { CMSBlock } from '../../types/cms';
-
-const iconMap: Record<string, React.ComponentType<any>> = {
-  ClipboardList: ClipboardList,
-  GraduationCap: GraduationCap,
-  UsersRound: UsersRound,
-  Workflow: Workflow
-};
+import { EditableIcon } from '../admin/editable/EditableIcon';
 
 interface NosServicesViewProps {
   blocks?: CMSBlock[];
   onSelectBlock?: (blockId: string) => void;
+  selectedBlockId?: string | null;
+  renderBlockEditor?: (block: CMSBlock) => React.ReactNode;
+  onUpdateBlockSetting?: (blockId: string, key: string, value: any) => void;
 }
 
-export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSelectBlock }) => {
+export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSelectBlock, selectedBlockId, renderBlockEditor, onUpdateBlockSetting }) => {
   const list = [
     {
       icon: ClipboardList,
@@ -79,9 +76,6 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                 return (
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center max-w-3xl mx-auto">
-                      <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3 py-0.5 rounded-full border border-blue-100 uppercase tracking-widest mb-4 inline-block">
-                        {block.settings.badge || "Nos Services"}
-                      </span>
                       <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-5">
                         {block.settings.title}
                       </h1>
@@ -96,23 +90,29 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                       {(block.settings.items || []).map((srv: any, idx: number) => {
-                        const Icon = iconMap[srv.iconName] || HelpCircle;
                         return (
                           <div key={idx} className="corporate-card rounded-3xl border border-slate-200/80 flex flex-col justify-between overflow-hidden bg-white h-full">
                             <div className="flex flex-col h-full justify-between">
                               <div>
                                 <div className="w-full aspect-[37/20] overflow-hidden bg-slate-100 border-b border-slate-100 relative group">
-                                  <img 
-                                    src={srv.image} 
+                                  <img
+                                    src={srv.image}
                                     alt={srv.title}
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                   />
                                 </div>
                                 <div className="p-5 space-y-4">
                                   <div className="space-y-3">
-                                    <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366]">
-                                      <Icon className="w-5 h-5" />
-                                    </div>
+                                    <EditableIcon
+                                      value={srv.iconName}
+                                      onSave={(iconName) => {
+                                        const items = [...(block.settings.items || [])];
+                                        items[idx] = { ...items[idx], iconName };
+                                        onUpdateBlockSetting?.(block.id, 'items', items);
+                                      }}
+                                      className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366]"
+                                      iconClassName="w-5 h-5"
+                                    />
                                     <div>
                                       <h3 className="font-serif text-base font-bold text-[#002366] leading-snug min-h-[40px] flex items-center">
                                         {srv.title}
@@ -153,32 +153,29 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                         {block.settings.description || "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M"}
                       </p>
                     </div>
-                    <div className="relative w-full flex overflow-x-hidden bg-slate-50 py-6 border-y border-slate-200/60">
-                      <div className="flex gap-16 animate-marquee whitespace-nowrap">
+                    <div className="relative w-full flex overflow-x-hidden py-4">
+                      <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
                         {(() => {
                           const collabs = block.settings.items || partners;
                           const repeated = [...collabs, ...collabs, ...collabs];
                           return repeated.map((partner, pIdx) => (
-                            <div
-                              key={pIdx}
-                              className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
-                            >
-                              {partner.logo ? (
-                                <img
-                                  src={partner.logo}
-                                  alt={`${partner.name} logo`}
-                                  className="h-10 w-auto max-w-[120px] object-contain shrink-0"
-                                />
-                              ) : (
-                                <div className="w-10 h-10 rounded-xl bg-[#002366] flex items-center justify-center font-bold text-white text-sm shrink-0">
-                                  {partner.name.charAt(0)}
-                                </div>
-                              )}
-                              <div className="text-left">
-                                <p className="text-xs font-extrabold text-[#002366]">{partner.name}</p>
-                                <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">{partner.label}</p>
-                              </div>
-                            </div>
+                            partner.logo ? (
+                              <img
+                                key={pIdx}
+                                src={partner.logo}
+                                alt={`${partner.name} logo`}
+                                title={partner.name}
+                                className="h-14 w-auto max-w-[150px] object-contain shrink-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
+                              />
+                            ) : (
+                              <span
+                                key={pIdx}
+                                title={partner.name}
+                                className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-[#002366] transition-colors"
+                              >
+                                {partner.name}
+                              </span>
+                            )
                           ));
                         })()}
                       </div>
@@ -194,14 +191,14 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
             <div
               key={block.id}
               className={`relative transition-all ${
-                onSelectBlock 
+                onSelectBlock
                   ? `cursor-pointer border-2 border-dashed rounded-3xl group/block my-2 ${
-                      block.enabled 
-                        ? 'border-transparent hover:border-[#C5A85C] hover:ring-2 hover:ring-[#C5A85C]/30 hover:ring-offset-2' 
+                      block.enabled
+                        ? 'border-transparent hover:border-[#002366] hover:ring-2 hover:ring-[#002366]/20 hover:ring-offset-2'
                         : 'border-slate-350 opacity-40 hover:opacity-75 bg-slate-50/50'
-                    }` 
+                    }`
                   : ''
-              }`}
+              } ${selectedBlockId === block.id ? '!border-[#002366] ring-2 ring-[#002366]/25 ring-offset-2' : ''}`}
               onClick={(e) => {
                 if (onSelectBlock) {
                   e.stopPropagation();
@@ -210,11 +207,12 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
               }}
             >
               {onSelectBlock && (
-                <div className="absolute top-3 right-3 bg-[#C5A85C] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none opacity-0 group-hover/block:opacity-100 transition-opacity">
+                <div className="absolute top-3 right-3 bg-[#002366] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none opacity-0 group-hover/block:opacity-100 transition-opacity">
                   {block.enabled ? `Modifier: ${block.type}` : `Masqué: ${block.type}`}
                 </div>
               )}
               {renderBlockContent()}
+              {selectedBlockId === block.id && renderBlockEditor && renderBlockEditor(block)}
             </div>
           );
         })}
@@ -229,10 +227,6 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
       {/* Header Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
-          <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3 py-0.5 rounded-full border border-blue-100 uppercase tracking-widest mb-4 inline-block">
-            Nos Services
-          </span>
-
           <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-5">
             Nos Domaines d'Expertise Stratégiques
           </h1>
@@ -304,29 +298,26 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
           <p className="text-xs text-slate-400 mt-1">Des entreprises leaders de leur secteur partenaires du Cabinet RE2M</p>
         </div>
 
-        <div className="relative w-full flex overflow-x-hidden bg-slate-50 py-6 border-y border-slate-200/60">
-          <div className="flex gap-16 animate-marquee whitespace-nowrap">
+        <div className="relative w-full flex overflow-x-hidden py-4">
+          <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
             {[...partners, ...partners, ...partners].map((partner, idx) => (
-              <div 
-                key={idx}
-                className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
-              >
-                {partner.logo ? (
-                  <img 
-                    src={partner.logo} 
-                    alt={`${partner.name} logo`} 
-                    className="h-10 w-auto max-w-[120px] object-contain shrink-0"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-xl bg-[#002366] flex items-center justify-center font-bold text-white text-sm shrink-0">
-                    {partner.name.charAt(0)}
-                  </div>
-                )}
-                <div className="text-left">
-                  <p className="text-xs font-extrabold text-[#002366]">{partner.name}</p>
-                  <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">{partner.label}</p>
-                </div>
-              </div>
+              partner.logo ? (
+                <img
+                  key={idx}
+                  src={partner.logo}
+                  alt={`${partner.name} logo`}
+                  title={partner.name}
+                  className="h-14 w-auto max-w-[150px] object-contain shrink-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
+                />
+              ) : (
+                <span
+                  key={idx}
+                  title={partner.name}
+                  className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-[#002366] transition-colors"
+                >
+                  {partner.name}
+                </span>
+              )
             ))}
           </div>
         </div>

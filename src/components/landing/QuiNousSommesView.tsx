@@ -6,9 +6,11 @@ import { CMSBlock } from '../../types/cms';
 interface QuiNousSommesViewProps {
   blocks?: CMSBlock[];
   onSelectBlock?: (blockId: string) => void;
+  selectedBlockId?: string | null;
+  renderBlockEditor?: (block: CMSBlock) => React.ReactNode;
 }
 
-export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, onSelectBlock }) => {
+export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, onSelectBlock, selectedBlockId, renderBlockEditor }) => {
   if (blocks && blocks.length > 0) {
     return (
       <div className="animate-fadeIn space-y-12 bg-white text-[#0f172a] pb-16">
@@ -29,9 +31,6 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
                     <div className="absolute inset-0 bg-gradient-to-b from-[#002366]/55 via-[#002366]/25 to-[#002366]/55" />
                     <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                       <div className="max-w-3xl mx-auto space-y-4">
-                        <span className="text-xs font-bold text-sky-200 bg-[#002366]/70 px-3.5 py-1 rounded-full border border-sky-500/40 uppercase tracking-widest inline-block shadow-sm">
-                          {block.settings.badge || "Qui Sommes-Nous"}
-                        </span>
                         <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-white leading-tight drop-shadow-[0_2px_8px_rgba(0,35,102,0.8)]">
                           {block.settings.title}
                         </h1>
@@ -123,34 +122,31 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
                         {block.settings.description || "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M"}
                       </p>
                     </div>
-                    <div className="relative w-full flex overflow-x-hidden bg-slate-50 py-6 border-y border-slate-200/60">
-                      <div className="flex gap-16 animate-marquee whitespace-nowrap">
+                    <div className="relative w-full flex overflow-x-hidden py-4">
+                      <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
                         {(() => {
                           const collabs = block.settings.items || partners;
                           const repeated = [...collabs, ...collabs, ...collabs];
                           return repeated.map((partner, pIdx) => (
-                          <div
-                            key={pIdx}
-                            className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
-                          >
-                            {partner.logo ? (
+                            partner.logo ? (
                               <img
+                                key={pIdx}
                                 src={partner.logo}
                                 alt={`${partner.name} logo`}
-                                className="h-10 w-auto max-w-[120px] object-contain shrink-0"
+                                title={partner.name}
+                                className="h-14 w-auto max-w-[150px] object-contain shrink-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
                               />
                             ) : (
-                              <div className="w-10 h-10 rounded-xl bg-[#002366] flex items-center justify-center font-bold text-white text-sm shrink-0">
-                                {partner.name.charAt(0)}
-                              </div>
-                            )}
-                            <div className="text-left">
-                              <p className="text-xs font-extrabold text-[#002366]">{partner.name}</p>
-                              <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">{partner.label}</p>
-                            </div>
-                          </div>
-                        ));
-                      })()}
+                              <span
+                                key={pIdx}
+                                title={partner.name}
+                                className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-[#002366] transition-colors"
+                              >
+                                {partner.name}
+                              </span>
+                            )
+                          ));
+                        })()}
                       </div>
                     </div>
                   </section>
@@ -165,11 +161,11 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
               key={block.id}
               className={`relative transition-all ${onSelectBlock
                   ? `cursor-pointer border-2 border-dashed rounded-3xl group/block my-2 ${block.enabled
-                    ? 'border-transparent hover:border-[#C5A85C] hover:ring-2 hover:ring-[#C5A85C]/30 hover:ring-offset-2'
+                    ? 'border-transparent hover:border-[#002366] hover:ring-2 hover:ring-[#002366]/20 hover:ring-offset-2'
                     : 'border-slate-350 opacity-40 hover:opacity-75 bg-slate-50/50'
                   }`
                   : ''
-                }`}
+                } ${selectedBlockId === block.id ? '!border-[#002366] ring-2 ring-[#002366]/25 ring-offset-2' : ''}`}
               onClick={(e) => {
                 if (onSelectBlock) {
                   e.stopPropagation();
@@ -178,11 +174,12 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
               }}
             >
               {onSelectBlock && (
-                <div className="absolute top-3 right-3 bg-[#C5A85C] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none opacity-0 group-hover/block:opacity-100 transition-opacity">
+                <div className="absolute top-3 right-3 bg-[#002366] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none opacity-0 group-hover/block:opacity-100 transition-opacity">
                   {block.enabled ? `Modifier: ${block.type}` : `Masqué: ${block.type}`}
                 </div>
               )}
               {renderBlockContent()}
+              {selectedBlockId === block.id && renderBlockEditor && renderBlockEditor(block)}
             </div>
           );
         })}
@@ -206,10 +203,6 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-bold text-sky-200 bg-[#002366]/70 px-3.5 py-1 rounded-full border border-sky-500/40 uppercase tracking-widest inline-block shadow-sm">
-              Qui Sommes-Nous
-            </span>
-
             <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-white leading-tight drop-shadow-[0_2px_8px_rgba(0,35,102,0.8)]">
               Cabinet RE2M • L'Excellence Achats & Logistique
             </h1>
@@ -332,29 +325,26 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
           <p className="text-xs text-slate-400 mt-1">Des entreprises leaders de leur secteur partenaires du Cabinet RE2M</p>
         </div>
 
-        <div className="relative w-full flex overflow-x-hidden bg-slate-50 py-6 border-y border-slate-200/60">
-          <div className="flex gap-16 animate-marquee whitespace-nowrap">
+        <div className="relative w-full flex overflow-x-hidden py-4">
+          <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
             {[...partners, ...partners, ...partners].map((partner, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
-              >
-                {partner.logo ? (
-                  <img
-                    src={partner.logo}
-                    alt={`${partner.name} logo`}
-                    className="h-10 w-auto max-w-[120px] object-contain shrink-0"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-xl bg-[#002366] flex items-center justify-center font-bold text-white text-sm shrink-0">
-                    {partner.name.charAt(0)}
-                  </div>
-                )}
-                <div className="text-left">
-                  <p className="text-xs font-extrabold text-[#002366]">{partner.name}</p>
-                  <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">{partner.label}</p>
-                </div>
-              </div>
+              partner.logo ? (
+                <img
+                  key={idx}
+                  src={partner.logo}
+                  alt={`${partner.name} logo`}
+                  title={partner.name}
+                  className="h-14 w-auto max-w-[150px] object-contain shrink-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
+                />
+              ) : (
+                <span
+                  key={idx}
+                  title={partner.name}
+                  className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-[#002366] transition-colors"
+                >
+                  {partner.name}
+                </span>
+              )
             ))}
           </div>
         </div>

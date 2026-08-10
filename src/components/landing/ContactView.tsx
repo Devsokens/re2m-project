@@ -6,11 +6,15 @@ import { PageSlug, CMSBlock } from '../../types/cms';
 interface ContactViewProps {
   blocks?: CMSBlock[];
   onSelectBlock?: (blockId: string) => void;
+  selectedBlockId?: string | null;
+  renderBlockEditor?: (block: CMSBlock) => React.ReactNode;
 }
 
-export const ContactView: React.FC<ContactViewProps> = ({ 
-  blocks, 
-  onSelectBlock 
+export const ContactView: React.FC<ContactViewProps> = ({
+  blocks,
+  onSelectBlock,
+  selectedBlockId,
+  renderBlockEditor
 }) => {
   const renderBlock = (block: CMSBlock) => {
     if (!block.enabled) return null;
@@ -21,12 +25,6 @@ export const ContactView: React.FC<ContactViewProps> = ({
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 animate-fadeIn space-y-12 bg-white text-[#0f172a]">
             {/* Header */}
             <div className="text-center max-w-3xl mx-auto">
-              {block.settings.badge && (
-                <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest mb-6 inline-block">
-                  {block.settings.badge}
-                </span>
-              )}
-
               <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-8">
                 {block.settings.title || "Prenez Contact avec le Cabinet RE2M"}
               </h1>
@@ -132,10 +130,10 @@ export const ContactView: React.FC<ContactViewProps> = ({
             <div
               key={block.id}
               className={`relative transition-all ${
-                onSelectBlock 
-                  ? 'hover:outline-2 hover:outline-dashed hover:outline-[#C5A85C] hover:outline-offset-2 cursor-pointer group/block' 
+                onSelectBlock
+                  ? 'hover:outline-2 hover:outline-dashed hover:outline-[#002366] hover:outline-offset-2 cursor-pointer group/block'
                   : ''
-              }`}
+              } ${selectedBlockId === block.id ? 'outline-2 outline-dashed outline-[#002366] outline-offset-2' : ''}`}
               onClick={(e) => {
                 if (onSelectBlock) {
                   e.stopPropagation();
@@ -144,11 +142,12 @@ export const ContactView: React.FC<ContactViewProps> = ({
               }}
             >
               {onSelectBlock && (
-                <div className="absolute top-2 left-2 z-50 bg-[#C5A85C] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow opacity-0 group-hover/block:opacity-100 transition-opacity pointer-events-none uppercase tracking-wider">
+                <div className="absolute top-2 left-2 z-50 bg-[#002366] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow opacity-0 group-hover/block:opacity-100 transition-opacity pointer-events-none uppercase tracking-wider">
                   Modifier : {block.type}
                 </div>
               )}
               {renderBlock(block)}
+              {selectedBlockId === block.id && renderBlockEditor && renderBlockEditor(block)}
             </div>
           );
         })}
@@ -161,10 +160,6 @@ export const ContactView: React.FC<ContactViewProps> = ({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 animate-fadeIn space-y-12 bg-white text-[#0f172a]">
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto">
-        <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest mb-6 inline-block">
-          Nous Contacter
-        </span>
-
         <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-8">
           Prenez Contact avec le Cabinet RE2M
         </h1>

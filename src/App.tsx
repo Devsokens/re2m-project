@@ -4,9 +4,12 @@ import { INITIAL_MEMBERS, INITIAL_LOGS } from './data/mockMembers';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { OfflineBanner } from './components/layout/OfflineBanner';
+import { BackToTop } from './components/layout/BackToTop';
 import { AccueilView } from './components/landing/AccueilView';
 import { QuiNousSommesView } from './components/landing/QuiNousSommesView';
 import { NosServicesView } from './components/landing/NosServicesView';
+import { BlogView } from './components/landing/BlogView';
+import { ActualitesView } from './components/landing/ActualitesView';
 import { ContactView } from './components/landing/ContactView';
 import { MemberCardPublic } from './components/card/MemberCardPublic';
 import { AdminLayout } from './components/admin/AdminLayout';
@@ -46,19 +49,15 @@ export function App() {
     return saved ? JSON.parse(saved) : INITIAL_LOGS;
   });
 
-  // View state: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact' | 'profile' | 'admin' | 'admin-login'
-  const [currentView, setCurrentView] = useState<'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact' | 'profile' | 'admin' | 'admin-login'>('accueil');
-  const [previousView, setPreviousView] = useState<'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact' | 'profile' | 'admin' | 'admin-login'>('accueil');
+  // View state: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'blog' | 'actualites' | 'contact' | 'profile' | 'admin' | 'admin-login'
+  const [currentView, setCurrentView] = useState<'accueil' | 'qui-nous-sommes' | 'nos-services' | 'blog' | 'actualites' | 'contact' | 'profile' | 'admin' | 'admin-login'>('accueil');
+  const [previousView, setPreviousView] = useState<'accueil' | 'qui-nous-sommes' | 'nos-services' | 'blog' | 'actualites' | 'contact' | 'profile' | 'admin' | 'admin-login'>('accueil');
 
-  const handleNavigate = (view: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact' | 'profile' | 'admin' | 'admin-login') => {
-    let targetView = view;
-    if (view === 'admin-login') {
-      targetView = 'admin';
-    }
+  const handleNavigate = (view: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'blog' | 'actualites' | 'contact' | 'profile' | 'admin' | 'admin-login') => {
     if (currentView !== 'profile') {
       setPreviousView(currentView);
     }
-    setCurrentView(targetView);
+    setCurrentView(view);
   };
 
   // Selected member for profile view
@@ -90,6 +89,37 @@ export function App() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
   }, []);
+
+  // Reveal page sections as the user scrolls, on every public view
+  useEffect(() => {
+    if (currentView === 'admin') return;
+
+    const sections = Array.from(document.querySelectorAll('main section')) as HTMLElement[];
+    sections.forEach((el) => el.classList.add('reveal-init'));
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
+    sections.forEach((el) => observer.observe(el));
+
+    // Safety net in case an element is never intersected (e.g. very short pages)
+    const fallback = window.setTimeout(() => {
+      sections.forEach((el) => el.classList.add('is-visible'));
+    }, 2000);
+
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
+  }, [currentView]);
 
   const handleInstallPWA = async () => {
     if (!deferredPrompt) return;
@@ -178,7 +208,7 @@ export function App() {
       )}
 
       {/* Main Navbar */}
-      {currentView !== 'admin' && (
+      {currentView !== 'admin' && currentView !== 'admin-login' && (
         <Navbar
           currentView={currentView}
           setCurrentView={handleNavigate}
@@ -212,8 +242,12 @@ export function App() {
           />
         )}
 
+        {currentView === 'blog' && <BlogView />}
+
+        {currentView === 'actualites' && <ActualitesView />}
+
         {currentView === 'contact' && (
-          <ContactView 
+          <ContactView
             blocks={previewBlocks['contact'] || cmsStorage.getPublishedLayout('contact')}
           />
         )}
@@ -268,7 +302,12 @@ export function App() {
       )}
 
       {/* Main Footer */}
-      <Footer setCurrentView={handleNavigate} />
+      {currentView !== 'admin' && currentView !== 'admin-login' && (
+        <Footer setCurrentView={handleNavigate} />
+      )}
+
+      {/* Back to top */}
+      {currentView !== 'admin' && currentView !== 'admin-login' && <BackToTop />}
 
     </div>
   );

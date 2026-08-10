@@ -1,33 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Hero } from './Hero';
-import { Award, CheckCircle, Sparkles, TrendingUp, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Award, CheckCircle, Sparkles, TrendingUp, ArrowRight } from 'lucide-react';
 import { partners } from '../../data/partners';
+import { articles } from '../../data/articles';
+import { news } from '../../data/news';
 import { CMSBlock } from '../../types/cms';
 import { cmsStorage } from '../../utils/cmsStorage';
+import { EditableText } from '../admin/editable/EditableText';
+import { EditableImage } from '../admin/editable/EditableImage';
 
 interface AccueilViewProps {
   onStartDemo: () => void;
-  onNavigate: (view: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'contact') => void;
+  onNavigate: (view: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'blog' | 'actualites' | 'contact') => void;
   blocks?: CMSBlock[];
   onSelectBlock?: (blockId: string) => void;
+  selectedBlockId?: string | null;
+  renderBlockEditor?: (block: CMSBlock) => React.ReactNode;
+  onUpdateBlockSetting?: (blockId: string, key: string, value: any) => void;
 }
 
-export const AccueilView: React.FC<AccueilViewProps> = ({ 
-  onStartDemo, 
-  onNavigate, 
-  blocks, 
-  onSelectBlock 
+export const AccueilView: React.FC<AccueilViewProps> = ({
+  onStartDemo,
+  onNavigate,
+  blocks,
+  onSelectBlock,
+  selectedBlockId,
+  renderBlockEditor,
+  onUpdateBlockSetting
 }) => {
   const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
-  const [testiIndex, setTestiIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const stats = [
     { value: '25', label: "Ans d'Expérience" },
@@ -143,92 +144,136 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 const displayServices = allServices.slice(0, limit);
 
                 return (
-                  <section className="bg-slate-50 py-16 border-y border-slate-200 animate-fadeIn">
+                  <section className="bg-[#002366] py-16 border-y border-blue-900 animate-fadeIn overflow-hidden">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                      <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-                        <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest inline-block">
-                          Quelques-uns de nos services
-                        </span>
-                        <h2 className="font-serif text-3xl font-extrabold text-[#002366] leading-tight">
-                          {block.settings.title || "Quelques-uns de nos services"}
-                        </h2>
-                        <p className="text-slate-500 text-sm sm:text-base">
-                          {block.settings.description || "Des solutions sur mesure pour optimiser votre performance"}
-                        </p>
-                      </div>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        {displayServices.map((srv: any, idx: number) => (
-                          <div key={idx} className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col justify-between h-full group hover:shadow-lg transition-all duration-300">
-                            <div>
-                              <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
-                                <img 
-                                  src={srv.image || "/service_01.jpg"} 
-                                  alt={srv.title}
-                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                              </div>
-                              <div className="p-6 space-y-3">
-                                <h4 className="font-serif text-lg font-bold text-[#002366]">{srv.title}</h4>
-                                <p className="text-xs text-slate-500 leading-relaxed text-justify">
-                                  {srv.desc}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="px-6 pb-6 pt-2">
-                              <button 
+                        {/* Cards block - left, floats continuously */}
+                        <div className="relative z-10 order-2 lg:order-1 flex items-center justify-center lg:justify-start -space-x-8 sm:-space-x-12 py-6 sm:py-10 animate-blockFloat lg:-ml-10 xl:-ml-20">
+                          {displayServices.map((srv: any, idx: number) => {
+                            const rotateClass = idx % 3 === 0 ? '-rotate-6' : idx % 3 === 2 ? 'rotate-6' : 'rotate-0';
+                            const liftClass = idx % 3 === 1 ? '-translate-y-6' : 'translate-y-2';
+                            const zClass = idx % 3 === 1 ? 'z-20' : 'z-10';
+                            return (
+                              <div
+                                key={idx}
                                 onClick={() => onNavigate('nos-services')}
-                                className="text-xs font-bold text-blue-800 hover:text-blue-900 flex items-center gap-1 group/btn cursor-pointer"
+                                style={{ animationDelay: `${idx * 0.15}s` }}
+                                className={`animate-cardFadeUp w-48 sm:w-60 shrink-0 corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 shadow-xl cursor-pointer transition-all duration-500 ease-out hover:-translate-y-8 hover:rotate-0 hover:shadow-2xl hover:z-30 ${rotateClass} ${liftClass} ${zClass}`}
                               >
-                                Découvrir <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                                <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                                  <img
+                                    src={srv.image || "/service_01.jpg"}
+                                    alt={srv.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div className="p-5 space-y-2">
+                                  <h4 className="font-serif text-sm sm:text-base font-bold text-[#002366]">{srv.title}</h4>
+                                  <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">
+                                    {srv.desc}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
 
+                        {/* Text - right */}
+                        <div className="relative z-20 order-1 lg:order-2 space-y-4 text-center lg:text-left">
+                          <EditableText
+                            as="h2"
+                            label="Titre"
+                            value={block.settings.title || "Quelques-uns de nos services"}
+                            onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
+                            className="font-serif text-3xl font-extrabold text-white leading-tight"
+                          />
+                          <EditableText
+                            as="p"
+                            label="Description"
+                            multiline
+                            value={block.settings.description || "Des solutions sur mesure pour optimiser votre performance"}
+                            onSave={(v) => onUpdateBlockSetting?.(block.id, 'description', v)}
+                            className="text-blue-100/80 text-sm sm:text-base"
+                          />
+                          <button
+                            onClick={() => onNavigate('nos-services')}
+                            className="text-xs font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2.5 rounded-xl inline-flex items-center gap-1 group/btn cursor-pointer mt-2 transition-colors"
+                          >
+                            Découvrir tous nos services <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
+                          </button>
+                        </div>
+
+                      </div>
                     </div>
                   </section>
                 );
-              case 'FounderSection':
+              case 'FounderSection': {
+                const founderImage = block.settings.image || "/team_01.jpg";
+                const founderTitle = block.settings.title || "Notre valeur ajoutée";
+                const founderSubtitle = block.settings.subtitle || "Pourquoi choisir le Cabinet RE2M ?";
+                const founderQuote = block.settings.quote || "Gagner grâce aux Achats et à la Logistique";
+                const founderParagraphs: string[] = block.settings.paragraphs || [];
+
                 return (
                   <section className="bg-white py-16 border-b border-slate-200 animate-fadeIn">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                        
+
                         <div className="lg:col-span-5 flex justify-center">
                           <div className="relative max-w-sm w-full rounded-3xl overflow-hidden shadow-xl border border-slate-200/80 bg-white p-1">
-                            <img
-                              src={block.settings.image || "/team_01.jpg"}
+                            <EditableImage
+                              src={founderImage}
                               alt="Roch-Emmanuel MVE-MBORO - Fondateur"
+                              onSave={(v) => onUpdateBlockSetting?.(block.id, 'image', v)}
                               className="w-full h-auto rounded-2xl object-contain"
                             />
                           </div>
                         </div>
 
                         <div className="lg:col-span-7 space-y-5">
-                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#002366] text-xs font-semibold uppercase tracking-wider border border-blue-100">
-                            <Sparkles className="w-3.5 h-3.5" />
-                            {block.settings.title || "Notre valeur ajoutée"}
-                          </div>
+                          <EditableText
+                            as="div"
+                            label="Badge"
+                            value={founderTitle}
+                            onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
+                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#002366] text-xs font-semibold uppercase tracking-wider border border-blue-100"
+                          />
 
-                          <h2 className="font-serif text-3xl font-extrabold text-[#002366]">
-                            {block.settings.subtitle || "Pourquoi choisir le Cabinet RE2M ?"}
-                          </h2>
+                          <EditableText
+                            as="h2"
+                            label="Titre"
+                            value={founderSubtitle}
+                            onSave={(v) => onUpdateBlockSetting?.(block.id, 'subtitle', v)}
+                            className="font-serif text-3xl font-extrabold text-[#002366]"
+                          />
 
-                          <p className="text-slate-600 text-xs sm:text-sm leading-relaxed text-justify font-bold italic text-blue-900">
-                            {block.settings.quote || "Gagner grâce aux Achats et à la Logistique"}
-                          </p>
+                          <EditableText
+                            as="p"
+                            label="Citation"
+                            value={founderQuote}
+                            onSave={(v) => onUpdateBlockSetting?.(block.id, 'quote', v)}
+                            className="text-slate-600 text-xs sm:text-sm leading-relaxed text-justify font-bold italic text-blue-900"
+                          />
 
                           <div className="space-y-4 text-slate-600 text-xs sm:text-sm leading-relaxed text-justify">
-                            {(block.settings.paragraphs || []).map((paragraph: string, pIdx: number) => (
-                              <p key={pIdx}>
-                                {paragraph}
-                              </p>
+                            {founderParagraphs.map((paragraph: string, pIdx: number) => (
+                              <EditableText
+                                key={pIdx}
+                                as="p"
+                                label={`Paragraphe ${pIdx + 1}`}
+                                multiline
+                                value={paragraph}
+                                onSave={(v) => {
+                                  const updated = [...founderParagraphs];
+                                  updated[pIdx] = v;
+                                  onUpdateBlockSetting?.(block.id, 'paragraphs', updated);
+                                }}
+                              />
                             ))}
                           </div>
 
-                          <div 
+                          <div
                             onClick={() => setIsCertificateModalOpen(true)}
                             className="p-4 rounded-xl bg-white border border-slate-200 flex items-center gap-3 text-xs text-slate-700 cursor-pointer hover:border-blue-800 hover:bg-blue-50/40 transition-all shadow-sm group/cert"
                             title="Cliquer pour afficher la certification PNUD"
@@ -244,15 +289,13 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                     </div>
                   </section>
                 );
+              }
               case 'Testimonials':
                 return (
                   <section className="bg-slate-50 py-16 border-y border-slate-200 animate-fadeIn">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                       
                       <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-                        <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest inline-block">
-                          Témoignages
-                        </span>
                         <h2 className="font-serif text-3xl font-extrabold text-[#002366] leading-tight">
                           {block.settings.title || "Ce que disent nos clients"}
                         </h2>
@@ -263,18 +306,14 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
 
                       {(() => {
                         const items = block.settings.items || testimonials;
-                        const isSlider = items.length > 4;
-                        const displayedTestimonials = isSlider
-                          ? items.slice(testiIndex, testiIndex + (isMobile ? 1 : 2))
-                          : items;
-
+                        const repeated = [...items, ...items, ...items];
                         return (
-                          <div className="space-y-8">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                              {displayedTestimonials.map((testi: any, tIdx: number) => (
-                                <div 
-                                  key={tIdx} 
-                                  className="corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300 min-h-[220px]"
+                          <div className="relative w-full overflow-x-hidden py-4">
+                            <div className="flex gap-6 animate-marquee-testimonials whitespace-nowrap">
+                              {repeated.map((testi: any, tIdx: number) => (
+                                <div
+                                  key={tIdx}
+                                  className="whitespace-normal shrink-0 w-80 sm:w-96 corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300 min-h-[240px]"
                                 >
                                   <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
                                     ”
@@ -287,8 +326,8 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                                   </div>
 
                                   <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
-                                    <img 
-                                      src={testi.logo} 
+                                    <img
+                                      src={testi.logo}
                                       alt={`${testi.company} logo`}
                                       className="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-white shrink-0"
                                     />
@@ -300,53 +339,6 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                                 </div>
                               ))}
                             </div>
-
-                            {isSlider && (
-                              <div className="flex items-center justify-center gap-4 mt-8 select-none">
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setTestiIndex(prev => Math.max(0, prev - 1));
-                                  }}
-                                  disabled={testiIndex === 0}
-                                  className="p-2.5 rounded-full border border-slate-200 bg-white text-[#002366] hover:border-[#002366] hover:bg-slate-50 transition-all disabled:opacity-30 disabled:hover:bg-white disabled:hover:border-slate-200 cursor-pointer shadow-sm"
-                                  title="Précédent"
-                                >
-                                  <ArrowLeft className="w-4 h-4" />
-                                </button>
-                                
-                                <div className="flex gap-2">
-                                  {Array.from({ length: items.length - (isMobile ? 0 : 1) }).map((_, idx) => (
-                                    <button
-                                      key={idx}
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setTestiIndex(idx);
-                                      }}
-                                      className={`w-2 h-2 rounded-full transition-all cursor-pointer ${
-                                        testiIndex === idx ? 'bg-[#C5A85C] w-4' : 'bg-slate-300'
-                                      }`}
-                                      aria-label={`Aller à la diapositive ${idx + 1}`}
-                                    />
-                                  ))}
-                                </div>
-
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setTestiIndex(prev => Math.min(items.length - (isMobile ? 1 : 2), prev + 1));
-                                  }}
-                                  disabled={testiIndex >= items.length - (isMobile ? 1 : 2)}
-                                  className="p-2.5 rounded-full border border-slate-200 bg-white text-[#002366] hover:border-[#002366] hover:bg-slate-50 transition-all disabled:opacity-30 disabled:hover:bg-white disabled:hover:border-slate-200 cursor-pointer shadow-sm"
-                                  title="Suivant"
-                                >
-                                  <ArrowRight className="w-4 h-4" />
-                                </button>
-                              </div>
-                            )}
                           </div>
                         );
                       })()}
@@ -366,32 +358,29 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                       </p>
                     </div>
 
-                    <div className="relative w-full flex overflow-x-hidden bg-slate-50 py-6 border-y border-slate-200/60">
-                      <div className="flex gap-16 animate-marquee whitespace-nowrap">
+                    <div className="relative w-full flex overflow-x-hidden py-4">
+                      <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
                         {(() => {
                           const collabs = block.settings.items || partners;
                           const repeated = [...collabs, ...collabs, ...collabs];
                           return repeated.map((partner, idx) => (
-                            <div 
-                              key={idx}
-                              className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
-                            >
-                              {partner.logo ? (
-                                <img 
-                                  src={partner.logo} 
-                                  alt={`${partner.name} logo`} 
-                                  className="h-10 w-auto max-w-[120px] object-contain shrink-0"
-                                />
-                              ) : (
-                                <div className="w-10 h-10 rounded-xl bg-[#002366] flex items-center justify-center font-bold text-white text-sm shrink-0">
-                                  {partner.name.charAt(0)}
-                                </div>
-                              )}
-                              <div className="text-left">
-                                <p className="text-xs font-extrabold text-[#002366]">{partner.name}</p>
-                                <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">{partner.label}</p>
-                              </div>
-                            </div>
+                            partner.logo ? (
+                              <img
+                                key={idx}
+                                src={partner.logo}
+                                alt={`${partner.name} logo`}
+                                title={partner.name}
+                                className="h-14 w-auto max-w-[150px] object-contain shrink-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
+                              />
+                            ) : (
+                              <span
+                                key={idx}
+                                title={partner.name}
+                                className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-[#002366] transition-colors"
+                              >
+                                {partner.name}
+                              </span>
+                            )
                           ));
                         })()}
                       </div>
@@ -407,14 +396,14 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
             <div
               key={block.id}
               className={`relative transition-all ${
-                onSelectBlock 
+                onSelectBlock
                   ? `cursor-pointer border-2 border-dashed rounded-3xl group/block my-2 ${
-                      block.enabled 
-                        ? 'border-transparent hover:border-[#C5A85C] hover:ring-2 hover:ring-[#C5A85C]/30 hover:ring-offset-2' 
+                      block.enabled
+                        ? 'border-transparent hover:border-[#002366] hover:ring-2 hover:ring-[#002366]/20 hover:ring-offset-2'
                         : 'border-slate-350 opacity-40 hover:opacity-75 bg-slate-50/50'
-                    }` 
+                    }`
                   : ''
-              }`}
+              } ${selectedBlockId === block.id ? '!border-[#002366] ring-2 ring-[#002366]/25 ring-offset-2' : ''}`}
               onClick={(e) => {
                 if (onSelectBlock) {
                   e.stopPropagation();
@@ -423,36 +412,117 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
               }}
             >
               {onSelectBlock && (
-                <div className="absolute top-3 right-3 bg-[#C5A85C] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none opacity-0 group-hover/block:opacity-100 transition-opacity">
+                <div className="absolute top-3 right-3 bg-[#002366] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none opacity-0 group-hover/block:opacity-100 transition-opacity">
                   {block.enabled ? `Modifier: ${block.type}` : `Masqué: ${block.type}`}
                 </div>
               )}
               {renderBlockContent()}
+              {selectedBlockId === block.id && renderBlockEditor && renderBlockEditor(block)}
+              {block.type === 'ServicesPreview' && (
+                <>
+                  <section className="bg-white py-16 border-b border-slate-200">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                      <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
+                        <h2 className="font-serif text-3xl font-extrabold text-[#002366] leading-tight">
+                          Actualités du Cabinet
+                        </h2>
+                        <p className="text-slate-500 text-sm sm:text-base">
+                          Partenariats, formations, événements : les dernières sorties du Cabinet RE2M.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {news.slice(0, 3).map((item, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => onNavigate('actualites')}
+                            className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300"
+                          >
+                            <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                              <img
+                                src={item.image}
+                                alt={item.title}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                              <span className="absolute top-3 left-3 text-[10px] font-bold text-[#002366] bg-white/90 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                {item.tag}
+                              </span>
+                            </div>
+                            <div className="p-5 space-y-2 flex-1">
+                              <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{item.title}</h4>
+                              <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">{item.excerpt}</p>
+                            </div>
+                          </div>
+                        ))}
+
+                        <button
+                          onClick={() => onNavigate('actualites')}
+                          className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center gap-3 text-[#002366] transition-colors cursor-pointer min-h-[220px] group/more"
+                        >
+                          <div className="w-11 h-11 rounded-full bg-blue-50 flex items-center justify-center group-hover/more:bg-blue-100 transition-colors">
+                            <ArrowRight className="w-5 h-5 group-hover/more:translate-x-0.5 transition-transform" />
+                          </div>
+                          <span className="text-xs font-bold uppercase tracking-wider text-center px-4">Voir toutes les actualités</span>
+                        </button>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="bg-[#002366] py-16 border-y border-blue-900">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                      <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
+                        <h2 className="font-serif text-3xl font-extrabold text-white leading-tight">
+                          Nos blogs &amp; analyses
+                        </h2>
+                        <p className="text-blue-100/80 text-sm sm:text-base">
+                          Les réflexions et retours d'expérience de nos consultants sur les Achats et la Logistique.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {articles.slice(0, 3).map((article, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => onNavigate('blog')}
+                            className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300"
+                          >
+                            <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                              <img
+                                src={article.image}
+                                alt={article.title}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                            </div>
+                            <div className="p-5 space-y-2 flex-1">
+                              <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{article.title}</h4>
+                              <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">{article.excerpt}</p>
+                            </div>
+                          </div>
+                        ))}
+
+                        <button
+                          onClick={() => onNavigate('blog')}
+                          className="rounded-3xl border border-dashed border-white/30 bg-white/5 hover:bg-white/10 flex flex-col items-center justify-center gap-3 text-white transition-colors cursor-pointer min-h-[220px] group/more"
+                        >
+                          <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center group-hover/more:bg-white/20 group-hover/more:translate-x-1 transition-all">
+                            <ArrowRight className="w-5 h-5 group-hover/more:translate-x-0.5 transition-transform" />
+                          </div>
+                          <span className="text-xs font-bold uppercase tracking-wider text-center px-4">Voir tous les articles</span>
+                        </button>
+                      </div>
+                    </div>
+                  </section>
+                </>
+              )}
             </div>
           );
         })}
-
-        {/* Demo Call to action */}
-        <section className="bg-[#002366] text-white py-12 text-center rounded-3xl max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 shadow-xl">
-          <div className="max-w-2xl mx-auto space-y-4">
-            <h3 className="font-serif text-2xl font-bold">Cabinet Connected & PWA</h3>
-            <p className="text-xs text-slate-300">
-              En complément de nos services d'audit, explorez notre système de cartes membres dématérialisées virtuelles.
-            </p>
-            <button
-              onClick={onStartDemo}
-              className="bg-white text-[#002366] font-bold px-6 py-2.5 rounded-xl hover:bg-slate-100 transition-colors text-xs cursor-pointer"
-            >
-              Lancer la démo des Cartes Virtuelles
-            </button>
-          </div>
-        </section>
 
         {/* Certificate Modal */}
         {isCertificateModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
             <div className="bg-white rounded-3xl p-6 max-w-3xl w-full shadow-2xl relative border border-slate-200 space-y-4 animate-scaleUp">
-              
+
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <h3 className="font-serif text-base sm:text-lg font-bold text-[#002366]">
                   Aperçu du Certificat Officiel
@@ -549,98 +619,215 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
       </section>
 
       {/* 1.5 SECTION QUELQUES-UNS DE NOS SERVICES */}
+      <section className="bg-[#002366] py-16 border-y border-blue-900 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
+
+            {/* Cards block - left, floats continuously */}
+            <div className="relative z-10 order-2 lg:order-1 flex items-center justify-center lg:justify-start -space-x-8 sm:-space-x-12 py-6 sm:py-10 animate-blockFloat lg:-ml-10 xl:-ml-20">
+              {[
+                {
+                  title: "Audit & Conseil",
+                  desc: "Diagnostic complet de vos fonctions Achats et Logistique. Recommandations stratégiques pour l'optimisation de vos processus et l'amélioration de votre performance.",
+                  image: "/service_01.jpg"
+                },
+                {
+                  title: "Formation Certifiante",
+                  desc: "Formations pratiques et opérationnelles en gestion des achats, contrats, stocks, inventaires, négociation et relation fournisseurs. Programme sur mesure.",
+                  image: "/service_02.jpg"
+                },
+                {
+                  title: "Accompagnement & Coaching",
+                  desc: "Coaching et accompagnement personnalisé pour la mise en œuvre de solutions innovantes. Transfert de compétences et outils d'amélioration continue.",
+                  image: "/service_03.jpg"
+                }
+              ].map((srv, idx) => {
+                const rotateClass = idx % 3 === 0 ? '-rotate-6' : idx % 3 === 2 ? 'rotate-6' : 'rotate-0';
+                const liftClass = idx % 3 === 1 ? '-translate-y-6' : 'translate-y-2';
+                const zClass = idx % 3 === 1 ? 'z-20' : 'z-10';
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => onNavigate('nos-services')}
+                    style={{ animationDelay: `${idx * 0.15}s` }}
+                    className={`animate-cardFadeUp w-48 sm:w-60 shrink-0 corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 shadow-xl cursor-pointer transition-all duration-500 ease-out hover:-translate-y-8 hover:rotate-0 hover:shadow-2xl hover:z-30 ${rotateClass} ${liftClass} ${zClass}`}
+                  >
+                    <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                      <img
+                        src={srv.image}
+                        alt={srv.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-5 space-y-2">
+                      <h4 className="font-serif text-sm sm:text-base font-bold text-[#002366]">{srv.title}</h4>
+                      <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">
+                        {srv.desc}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Text - right */}
+            <div className="relative z-20 order-1 lg:order-2 space-y-4 text-center lg:text-left">
+              <h2 className="font-serif text-3xl font-extrabold text-white leading-tight">
+                Nos principales expertises
+              </h2>
+              <p className="text-blue-100/80 text-sm sm:text-base">
+                Découvrez un aperçu condensé des prestations offertes par le cabinet pour structurer et rentabiliser vos chaînes logistiques.
+              </p>
+              <button
+                onClick={() => onNavigate('nos-services')}
+                className="text-xs font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2.5 rounded-xl inline-flex items-center gap-1 group/btn cursor-pointer mt-2 transition-colors"
+              >
+                Découvrir tous nos services <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* 1.6 SECTION ACTUALITÉS (aperçu) */}
+      <section className="bg-white py-16 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
+            <h2 className="font-serif text-3xl font-extrabold text-[#002366] leading-tight">
+              Actualités du Cabinet
+            </h2>
+            <p className="text-slate-500 text-sm sm:text-base">
+              Partenariats, formations, événements : les dernières sorties du Cabinet RE2M.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {news.slice(0, 3).map((item, idx) => (
+              <div
+                key={idx}
+                onClick={() => onNavigate('actualites')}
+                className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300"
+              >
+                <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <span className="absolute top-3 left-3 text-[10px] font-bold text-[#002366] bg-white/90 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    {item.tag}
+                  </span>
+                </div>
+                <div className="p-5 space-y-2 flex-1">
+                  <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{item.title}</h4>
+                  <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">{item.excerpt}</p>
+                </div>
+              </div>
+            ))}
+
+            <button
+              onClick={() => onNavigate('actualites')}
+              className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center gap-3 text-[#002366] transition-colors cursor-pointer min-h-[220px] group/more"
+            >
+              <div className="w-11 h-11 rounded-full bg-blue-50 flex items-center justify-center group-hover/more:bg-blue-100 transition-colors">
+                <ArrowRight className="w-5 h-5 group-hover/more:translate-x-0.5 transition-transform" />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-center px-4">Voir toutes les actualités</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 1.7 SECTION BLOG (aperçu) */}
+      <section className="bg-[#002366] py-16 border-y border-blue-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
+            <h2 className="font-serif text-3xl font-extrabold text-white leading-tight">
+              Nos blogs &amp; analyses
+            </h2>
+            <p className="text-blue-100/80 text-sm sm:text-base">
+              Les réflexions et retours d'expérience de nos consultants sur les Achats et la Logistique.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {articles.slice(0, 3).map((article, idx) => (
+              <div
+                key={idx}
+                onClick={() => onNavigate('blog')}
+                className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300"
+              >
+                <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                  <img
+                    src={article.image}
+                    alt={article.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className="p-5 space-y-2 flex-1">
+                  <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{article.title}</h4>
+                  <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">{article.excerpt}</p>
+                </div>
+              </div>
+            ))}
+
+            <button
+              onClick={() => onNavigate('blog')}
+              className="rounded-3xl border border-dashed border-white/30 bg-white/5 hover:bg-white/10 flex flex-col items-center justify-center gap-3 text-white transition-colors cursor-pointer min-h-[220px] group/more"
+            >
+              <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center group-hover/more:bg-white/20 group-hover/more:translate-x-1 transition-all">
+                <ArrowRight className="w-5 h-5 group-hover/more:translate-x-0.5 transition-transform" />
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-center px-4">Voir tous les articles</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. SECTION TÉMOIGNAGES */}
       <section className="bg-slate-50 py-16 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-            <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest inline-block">
-              Quelques-uns de nos services
-            </span>
             <h2 className="font-serif text-3xl font-extrabold text-[#002366] leading-tight">
-              Nos principales expertises
+              Ce que disent nos clients
             </h2>
             <p className="text-slate-500 text-sm sm:text-base">
-              Découvrez un aperçu condensé des prestations offertes par le cabinet pour structurer et rentabiliser vos chaînes logistiques.
+              Découvrez les retours d'expérience des leaders sectoriels accompagnés par le Cabinet RE2M.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <div className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col justify-between h-full group hover:shadow-lg transition-all duration-300">
-              <div>
-                <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
-                  <img 
-                    src="/service_01.jpg" 
-                    alt="Audit & Conseil"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-6 space-y-3">
-                  <h4 className="font-serif text-lg font-bold text-[#002366]">Audit & Conseil</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed text-justify">
-                    Diagnostic complet de vos fonctions Achats et Logistique. Recommandations stratégiques pour l'optimisation de vos processus et l'amélioration de votre performance.
-                  </p>
-                </div>
-              </div>
-              <div className="px-6 pb-6 pt-2">
-                <button 
-                  onClick={() => onNavigate('nos-services')}
-                  className="text-xs font-bold text-blue-800 hover:text-blue-900 flex items-center gap-1 group/btn cursor-pointer"
+          <div className="relative w-full overflow-x-hidden py-4">
+            <div className="flex gap-6 animate-marquee-testimonials whitespace-nowrap">
+              {[...testimonials, ...testimonials, ...testimonials].map((testi, idx) => (
+                <div
+                  key={idx}
+                  className="whitespace-normal shrink-0 w-80 sm:w-96 corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300 min-h-[240px]"
                 >
-                  Découvrir <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
-                </button>
-              </div>
-            </div>
+                  <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
+                    ”
+                  </span>
 
-            <div className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col justify-between h-full group hover:shadow-lg transition-all duration-300">
-              <div>
-                <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
-                  <img 
-                    src="/service_02.jpg" 
-                    alt="Formation Certifiante"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-6 space-y-3">
-                  <h4 className="font-serif text-lg font-bold text-[#002366]">Formation Certifiante</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed text-justify">
-                    Formations pratiques et opérationnelles en gestion des achats, contrats, stocks, inventaires, négociation et relation fournisseurs. Programme sur mesure.
-                  </p>
-                </div>
-              </div>
-              <div className="px-6 pb-6 pt-2">
-                <button 
-                  onClick={() => onNavigate('nos-services')}
-                  className="text-xs font-bold text-blue-800 hover:text-blue-900 flex items-center gap-1 group/btn cursor-pointer"
-                >
-                  Découvrir <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
-                </button>
-              </div>
-            </div>
+                  <div className="space-y-4 relative z-10">
+                    <p className="text-slate-600 text-sm italic leading-relaxed text-justify">
+                      {testi.text}
+                    </p>
+                  </div>
 
-            <div className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col justify-between h-full group hover:shadow-lg transition-all duration-300">
-              <div>
-                <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
-                  <img 
-                    src="/service_03.jpg" 
-                    alt="Accompagnement"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+                  <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
+                    <img
+                      src={testi.logo}
+                      alt={`${testi.company} logo`}
+                      className="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-white shrink-0"
+                    />
+                    <div>
+                      <h4 className="font-serif text-sm font-bold text-[#002366]">{testi.company}</h4>
+                      <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{testi.service}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="p-6 space-y-3">
-                  <h4 className="font-serif text-lg font-bold text-[#002366]">Accompagnement & Coaching</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed text-justify">
-                    Coaching et accompagnement personnalisé pour la mise en œuvre de solutions innovantes. Transfert de compétences et outils d'amélioration continue.
-                  </p>
-                </div>
-              </div>
-              <div className="px-6 pb-6 pt-2">
-                <button 
-                  onClick={() => onNavigate('nos-services')}
-                  className="text-xs font-bold text-blue-800 hover:text-blue-900 flex items-center gap-1 group/btn cursor-pointer"
-                >
-                  Découvrir <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
-                </button>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -651,12 +838,12 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
       <section className="bg-white py-16 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
+
             <div className="lg:col-span-5 flex justify-center">
               <div className="relative max-w-sm w-full rounded-3xl overflow-hidden shadow-xl border border-slate-200/80 bg-white p-1">
-                <img 
-                  src="/more-info.jpg" 
-                  alt="Roch-Emmanuel MVE-MBORO - Fondateur" 
+                <img
+                  src="/more-info.jpg"
+                  alt="Roch-Emmanuel MVE-MBORO - Fondateur"
                   className="w-full h-auto rounded-2xl object-contain"
                 />
               </div>
@@ -688,7 +875,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 </p>
               </div>
 
-              <div 
+              <div
                 onClick={() => setIsCertificateModalOpen(true)}
                 className="p-4 rounded-xl bg-white border border-slate-200 flex items-center gap-3 text-xs text-slate-700 cursor-pointer hover:border-blue-800 hover:bg-blue-50/40 transition-all shadow-sm group/cert"
                 title="Cliquer pour afficher la certification PNUD"
@@ -704,56 +891,6 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
         </div>
       </section>
 
-      {/* 3. SECTION TÉMOIGNAGES */}
-      <section className="bg-slate-50 py-16 border-y border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-            <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-widest inline-block">
-              Témoignages
-            </span>
-            <h2 className="font-serif text-3xl font-extrabold text-[#002366] leading-tight">
-              Ce que disent nos clients
-            </h2>
-            <p className="text-slate-500 text-sm sm:text-base">
-              Découvrez les retours d'expérience des leaders sectoriels accompagnés par le Cabinet RE2M.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {testimonials.map((testi, idx) => (
-              <div 
-                key={idx} 
-                className="corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300"
-              >
-                <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
-                  ”
-                </span>
-
-                <div className="space-y-4 relative z-10">
-                  <p className="text-slate-600 text-sm italic leading-relaxed text-justify">
-                    {testi.text}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
-                  <img 
-                    src={testi.logo} 
-                    alt={`${testi.company} logo`}
-                    className="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-white shrink-0"
-                  />
-                  <div>
-                    <h4 className="font-serif text-sm font-bold text-[#002366]">{testi.company}</h4>
-                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{testi.service}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </section>
-
       {/* 4. SECTION IL NOUS FONT CONFIANCE */}
       <section className="py-12 bg-white overflow-hidden border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center">
@@ -761,47 +898,28 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
           <p className="text-xs text-slate-400 mt-1">Des entreprises leaders de leur secteur partenaires du Cabinet RE2M</p>
         </div>
 
-        <div className="relative w-full flex overflow-x-hidden bg-slate-50 py-6 border-y border-slate-200/60">
-          <div className="flex gap-16 animate-marquee whitespace-nowrap">
+        <div className="relative w-full flex overflow-x-hidden py-4">
+          <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
             {[...partners, ...partners, ...partners].map((partner, idx) => (
-              <div 
-                key={idx}
-                className="flex items-center gap-4 bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-md shrink-0 transition-transform hover:scale-105"
-              >
-                {partner.logo ? (
-                  <img 
-                    src={partner.logo} 
-                    alt={`${partner.name} logo`} 
-                    className="h-10 w-auto max-w-[120px] object-contain shrink-0"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-xl bg-[#002366] flex items-center justify-center font-bold text-white text-sm shrink-0">
-                    {partner.name.charAt(0)}
-                  </div>
-                )}
-                <div className="text-left">
-                  <p className="text-xs font-extrabold text-[#002366]">{partner.name}</p>
-                  <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">{partner.label}</p>
-                </div>
-              </div>
+              partner.logo ? (
+                <img
+                  key={idx}
+                  src={partner.logo}
+                  alt={`${partner.name} logo`}
+                  title={partner.name}
+                  className="h-14 w-auto max-w-[150px] object-contain shrink-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
+                />
+              ) : (
+                <span
+                  key={idx}
+                  title={partner.name}
+                  className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-[#002366] transition-colors"
+                >
+                  {partner.name}
+                </span>
+              )
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Demo Call to action */}
-      <section className="bg-[#002366] text-white py-12 text-center rounded-3xl max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 shadow-xl">
-        <div className="max-w-2xl mx-auto space-y-4">
-          <h3 className="font-serif text-2xl font-bold">Cabinet Connected & PWA</h3>
-          <p className="text-xs text-slate-300">
-            En complément de nos services d'audit, explorez notre système de cartes membres dématérialisées virtuelles.
-          </p>
-          <button
-            onClick={onStartDemo}
-            className="bg-white text-[#002366] font-bold px-6 py-2.5 rounded-xl hover:bg-slate-100 transition-colors text-xs cursor-pointer"
-          >
-            Lancer la démo des Cartes Virtuelles
-          </button>
         </div>
       </section>
 
