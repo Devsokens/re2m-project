@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 interface SlideOverProps {
@@ -11,7 +12,7 @@ interface SlideOverProps {
 }
 
 export const SlideOver: React.FC<SlideOverProps> = ({ isOpen, onClose, title, subtitle, children, footer }) => {
-  return (
+  return createPortal(
     <div className={`fixed inset-0 z-50 ${isOpen ? '' : 'pointer-events-none'}`}>
       {/* Backdrop */}
       <div
@@ -51,7 +52,8 @@ export const SlideOver: React.FC<SlideOverProps> = ({ isOpen, onClose, title, su
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

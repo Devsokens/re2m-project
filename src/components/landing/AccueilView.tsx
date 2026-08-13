@@ -8,6 +8,8 @@ import { CMSBlock } from '../../types/cms';
 import { cmsStorage } from '../../utils/cmsStorage';
 import { EditableText } from '../admin/editable/EditableText';
 import { EditableImage } from '../admin/editable/EditableImage';
+import { TeamSection } from './TeamSection';
+import { Member } from '../../types/member';
 
 interface AccueilViewProps {
   onStartDemo: () => void;
@@ -17,6 +19,7 @@ interface AccueilViewProps {
   selectedBlockId?: string | null;
   renderBlockEditor?: (block: CMSBlock) => React.ReactNode;
   onUpdateBlockSetting?: (blockId: string, key: string, value: any) => void;
+  members?: Member[];
 }
 
 export const AccueilView: React.FC<AccueilViewProps> = ({
@@ -26,7 +29,8 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
   onSelectBlock,
   selectedBlockId,
   renderBlockEditor,
-  onUpdateBlockSetting
+  onUpdateBlockSetting,
+  members = []
 }) => {
   const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
 
@@ -506,6 +510,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 </div>
               )}
               {renderBlockContent()}
+              {block.type === 'FounderSection' && <TeamSection members={members} />}
               {block.type === 'ServicesPreview' && (
                 <>
                   <section className="bg-white py-16 border-b border-slate-200">
@@ -978,6 +983,8 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
           </div>
         </div>
       </section>
+
+      <TeamSection members={members} />
 
       {/* 4. SECTION IL NOUS FONT CONFIANCE */}
       <section className="py-12 bg-white overflow-hidden border-b border-slate-100">

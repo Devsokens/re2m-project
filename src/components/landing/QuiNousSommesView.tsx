@@ -2,15 +2,18 @@ import React from 'react';
 import { BookOpen, ShieldCheck, CheckCircle } from 'lucide-react';
 import { partners } from '../../data/partners';
 import { CMSBlock } from '../../types/cms';
+import { TeamSection } from './TeamSection';
+import { Member } from '../../types/member';
 
 interface QuiNousSommesViewProps {
   blocks?: CMSBlock[];
   onSelectBlock?: (blockId: string) => void;
   selectedBlockId?: string | null;
   renderBlockEditor?: (block: CMSBlock) => React.ReactNode;
+  members?: Member[];
 }
 
-export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, onSelectBlock, selectedBlockId, renderBlockEditor }) => {
+export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, onSelectBlock, selectedBlockId, renderBlockEditor, members = [] }) => {
   if (blocks && blocks.length > 0) {
     return (
       <div className="animate-fadeIn space-y-12 bg-white text-[#0f172a] pb-16">
@@ -178,6 +181,7 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
                   {block.enabled ? `Modifier: ${block.type}` : `Masqué: ${block.type}`}
                 </div>
               )}
+              {block.type === 'Collaborations' && <TeamSection members={members} />}
               {renderBlockContent()}
               {selectedBlockId === block.id && renderBlockEditor && renderBlockEditor(block)}
             </div>
@@ -317,6 +321,8 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
           </div>
         </section>
       </div>
+
+      <TeamSection members={members} />
 
       {/* SECTION IL NOUS FONT CONFIANCE */}
       <section className="py-12 bg-white overflow-hidden border-t border-slate-100">

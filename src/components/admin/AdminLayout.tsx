@@ -12,6 +12,8 @@ import {
   Mail,
   Inbox,
   Users,
+  UserCog,
+  MessageSquareQuote,
   Settings,
   LogOut,
   ChevronRight,
@@ -24,6 +26,11 @@ import {
 import { GestionCMS } from './CMS/GestionCMS';
 import { BlogAdmin } from './content/BlogAdmin';
 import { ActualiteAdmin } from './content/ActualiteAdmin';
+import { AccountsAdmin } from './content/AccountsAdmin';
+import { TestimonialsAdmin } from './content/TestimonialsAdmin';
+import { NewsletterAdmin } from './content/NewsletterAdmin';
+import { RequestsAdmin } from './content/RequestsAdmin';
+import { SettingsAdmin } from './content/SettingsAdmin';
 import { PageSlug, CMSBlock } from '../../types/cms';
 
 interface AdminLayoutProps {
@@ -46,9 +53,11 @@ type AdminTab =
   | 'content-editor'
   | 'content-news'
   | 'content-blog'
+  | 'team'
+  | 'testimonials'
   | 'newsletter'
   | 'requests'
-  | 'users'
+  | 'accounts'
   | 'settings';
 
 interface NavLeaf {
@@ -74,9 +83,11 @@ const NAV_STRUCTURE: (NavLeaf | NavGroup)[] = [
       { tab: 'content-blog', label: 'Blog', icon: FileText }
     ]
   },
+  { tab: 'team', label: "Gestion de l'équipe", icon: Users },
+  { tab: 'testimonials', label: 'Témoignages', icon: MessageSquareQuote },
   { tab: 'newsletter', label: 'Newsletter', icon: Mail },
   { tab: 'requests', label: 'Demandes', icon: Inbox },
-  { tab: 'users', label: 'Gestion des utilisateurs', icon: Users },
+  { tab: 'accounts', label: 'Gestion des utilisateurs', icon: UserCog },
   { tab: 'settings', label: 'Paramètres', icon: Settings }
 ];
 
@@ -87,9 +98,11 @@ const NAV_LABELS: Record<AdminTab, string> = {
   'content-editor': 'Éditeur visuel',
   'content-news': 'Actualité',
   'content-blog': 'Blog',
+  'team': "Gestion de l'équipe",
+  'testimonials': 'Témoignages',
   'newsletter': 'Newsletter',
   'requests': 'Demandes',
-  'users': 'Gestion des utilisateurs',
+  'accounts': 'Gestion des utilisateurs',
   'settings': 'Paramètres'
 };
 
@@ -176,7 +189,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       >
         <Icon className="w-4 h-4 shrink-0" />
         <span className="truncate">{item.label}</span>
-        {item.tab === 'users' && (
+        {item.tab === 'team' && (
           <span className={`ml-auto text-[10px] font-extrabold px-1.5 py-0.5 rounded-md ${isActive ? 'bg-blue-50 text-[#002366]' : 'bg-white/10 text-white/80'}`}>
             {members.length}
           </span>
@@ -329,11 +342,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
           {adminTab === 'content-blog' && <BlogAdmin />}
 
-          {adminTab === 'newsletter' && <ComingSoon label="Newsletter" />}
-
-          {adminTab === 'requests' && <ComingSoon label="Demandes" />}
-
-          {adminTab === 'users' && (
+          {adminTab === 'team' && (
             <MemberTable
               members={members}
               onAddMember={handleOpenAddForm}
@@ -346,7 +355,15 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             />
           )}
 
-          {adminTab === 'settings' && <ComingSoon label="Paramètres" />}
+          {adminTab === 'testimonials' && <TestimonialsAdmin />}
+
+          {adminTab === 'newsletter' && <NewsletterAdmin />}
+
+          {adminTab === 'requests' && <RequestsAdmin />}
+
+          {adminTab === 'accounts' && <AccountsAdmin />}
+
+          {adminTab === 'settings' && <SettingsAdmin />}
         </main>
       </div>
 

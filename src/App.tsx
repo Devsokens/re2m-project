@@ -11,6 +11,7 @@ import { NosServicesView } from './components/landing/NosServicesView';
 import { BlogView } from './components/landing/BlogView';
 import { ActualitesView } from './components/landing/ActualitesView';
 import { ContactView } from './components/landing/ContactView';
+import { TestimonialSubmissionForm } from './components/landing/TestimonialSubmissionForm';
 import { MemberCardPublic } from './components/card/MemberCardPublic';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminLogin } from './components/admin/AdminLogin';
@@ -187,6 +188,12 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Public, unauthenticated testimonial submission link (?testimonial=TOKEN)
+  const testimonialToken = new URLSearchParams(window.location.search).get('testimonial');
+  if (testimonialToken) {
+    return <TestimonialSubmissionForm token={testimonialToken} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#0f172a] font-sans selection:bg-[#002366] selection:text-white">
       
@@ -227,12 +234,14 @@ export function App() {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             blocks={previewBlocks['accueil'] || cmsStorage.getPublishedLayout('accueil')}
+            members={members}
           />
         )}
 
         {currentView === 'qui-nous-sommes' && (
-          <QuiNousSommesView 
+          <QuiNousSommesView
             blocks={previewBlocks['qui-nous-sommes'] || cmsStorage.getPublishedLayout('qui-nous-sommes')}
+            members={members}
           />
         )}
 
