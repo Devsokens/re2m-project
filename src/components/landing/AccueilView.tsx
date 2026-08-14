@@ -543,7 +543,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                             </div>
                             <div className="p-5 space-y-2 flex-1">
                               <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{item.title}</h4>
-                              <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">{item.excerpt}</p>
+                              <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3" dangerouslySetInnerHTML={{ __html: item.excerpt }} />
                             </div>
                           </div>
                         ))}
@@ -814,7 +814,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 </div>
                 <div className="p-5 space-y-2 flex-1">
                   <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{item.title}</h4>
-                  <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">{item.excerpt}</p>
+                  <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3" dangerouslySetInnerHTML={{ __html: item.excerpt }} />
                 </div>
               </div>
             ))}

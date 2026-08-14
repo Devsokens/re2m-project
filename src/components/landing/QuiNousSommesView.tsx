@@ -4,16 +4,19 @@ import { partners } from '../../data/partners';
 import { CMSBlock } from '../../types/cms';
 import { TeamSection } from './TeamSection';
 import { Member } from '../../types/member';
+import { EditableText } from '../admin/editable/EditableText';
+import { EditableImage } from '../admin/editable/EditableImage';
 
 interface QuiNousSommesViewProps {
   blocks?: CMSBlock[];
   onSelectBlock?: (blockId: string) => void;
   selectedBlockId?: string | null;
   renderBlockEditor?: (block: CMSBlock) => React.ReactNode;
+  onUpdateBlockSetting?: (blockId: string, key: string, value: any) => void;
   members?: Member[];
 }
 
-export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, onSelectBlock, selectedBlockId, renderBlockEditor, members = [] }) => {
+export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, onSelectBlock, selectedBlockId, renderBlockEditor, onUpdateBlockSetting, members = [] }) => {
   if (blocks && blocks.length > 0) {
     return (
       <div className="animate-fadeIn space-y-12 bg-white text-[#0f172a] pb-16">
@@ -24,48 +27,101 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
             switch (block.type) {
               case 'HeaderBanner':
                 return (
-                  <div
-                    className="relative w-full py-24 bg-cover bg-no-repeat"
-                    style={{
-                      backgroundImage: `url(${block.settings.backgroundImage || '/qui_nous_sommes_bg.jpg'})`,
-                      backgroundPosition: 'center 15%'
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#002366]/55 via-[#002366]/25 to-[#002366]/55" />
+                  <div className="relative w-full py-24 overflow-hidden">
+                    <EditableImage
+                      src={block.settings.backgroundImage || '/qui_nous_sommes_bg.jpg'}
+                      alt="Bannière"
+                      onSave={(v) => onUpdateBlockSetting?.(block.id, 'backgroundImage', v)}
+                      containerClassName="absolute inset-0 w-full h-full"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#002366]/55 via-[#002366]/25 to-[#002366]/55 pointer-events-none" />
                     <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                       <div className="max-w-3xl mx-auto space-y-4">
-                        <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-white leading-tight drop-shadow-[0_2px_8px_rgba(0,35,102,0.8)]">
-                          {block.settings.title}
-                        </h1>
-                        <p className="text-slate-100 text-sm sm:text-base leading-relaxed drop-shadow-[0_1px_4px_rgba(0,35,102,0.9)] font-medium">
-                          {block.settings.description}
-                        </p>
+                        <EditableText
+                          as="h1"
+                          label="Titre"
+                          value={block.settings.title}
+                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
+                          className="font-serif text-3xl sm:text-4xl font-extrabold text-white leading-tight drop-shadow-[0_2px_8px_rgba(0,35,102,0.8)]"
+                        />
+                        <EditableText
+                          as="p"
+                          label="Description"
+                          multiline
+                          value={block.settings.description}
+                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'description', v)}
+                          className="text-slate-100 text-sm sm:text-base leading-relaxed drop-shadow-[0_1px_4px_rgba(0,35,102,0.9)] font-medium"
+                        />
                       </div>
                     </div>
                   </div>
                 );
-              case 'PresentationGrid':
+              case 'PresentationGrid': {
+                const commitments = block.settings.commitments || [];
                 return (
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-4">
                       <div className="space-y-6">
-                        <h2 className="font-serif text-2xl font-bold text-[#002366]">{block.settings.title}</h2>
-                        <p className="text-slate-600 text-sm leading-relaxed">
-                          {block.settings.desc1}
-                        </p>
-                        <p className="text-slate-600 text-sm leading-relaxed">
-                          {block.settings.desc2}
-                        </p>
+                        <EditableText
+                          as="h2"
+                          label="Titre"
+                          value={block.settings.title}
+                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
+                          className="font-serif text-2xl font-bold text-[#002366]"
+                        />
+                        <EditableText
+                          as="p"
+                          label="Paragraphe 1"
+                          multiline
+                          value={block.settings.desc1}
+                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'desc1', v)}
+                          className="text-slate-600 text-sm leading-relaxed"
+                        />
+                        <EditableText
+                          as="p"
+                          label="Paragraphe 2"
+                          multiline
+                          value={block.settings.desc2}
+                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'desc2', v)}
+                          className="text-slate-600 text-sm leading-relaxed"
+                        />
                       </div>
                       <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200/80 space-y-6">
-                        <h3 className="font-serif text-xl font-bold text-[#002366]">{block.settings.commitmentsTitle || "Nos Engagements Clés"}</h3>
+                        <EditableText
+                          as="h3"
+                          label="Titre des engagements"
+                          value={block.settings.commitmentsTitle || "Nos Engagements Clés"}
+                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'commitmentsTitle', v)}
+                          className="font-serif text-xl font-bold text-[#002366]"
+                        />
                         <div className="space-y-4">
-                          {(block.settings.commitments || []).map((comm: any, cIdx: number) => (
+                          {commitments.map((comm: any, cIdx: number) => (
                             <div key={cIdx} className="flex gap-3">
                               <CheckCircle className="w-5 h-5 text-blue-800 shrink-0 mt-0.5" />
-                              <div>
-                                <h4 className="font-bold text-sm text-[#002366]">{comm.title}</h4>
-                                <p className="text-xs text-slate-500">{comm.desc}</p>
+                              <div className="flex-1">
+                                <EditableText
+                                  as="h4"
+                                  label={`Engagement ${cIdx + 1} — titre`}
+                                  value={comm.title}
+                                  onSave={(v) => {
+                                    const updated = [...commitments];
+                                    updated[cIdx] = { ...updated[cIdx], title: v };
+                                    onUpdateBlockSetting?.(block.id, 'commitments', updated);
+                                  }}
+                                  className="font-bold text-sm text-[#002366]"
+                                />
+                                <EditableText
+                                  as="p"
+                                  label={`Engagement ${cIdx + 1} — description`}
+                                  value={comm.desc}
+                                  onSave={(v) => {
+                                    const updated = [...commitments];
+                                    updated[cIdx] = { ...updated[cIdx], desc: v };
+                                    onUpdateBlockSetting?.(block.id, 'commitments', updated);
+                                  }}
+                                  className="text-xs text-slate-500"
+                                />
                               </div>
                             </div>
                           ))}
@@ -74,7 +130,9 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
                     </div>
                   </div>
                 );
-              case 'DirectorMessage':
+              }
+              case 'DirectorMessage': {
+                const directorParagraphs: string[] = block.settings.paragraphs || [];
                 return (
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <section className="bg-slate-50 p-8 sm:p-12 rounded-3xl border border-slate-200 shadow-lg space-y-8">
@@ -82,26 +140,53 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
                         <h2 className="font-serif text-2xl sm:text-3xl font-extrabold text-[#002366]">
                           Mot du <em>Directeur</em>
                         </h2>
-                        <p className="text-xs text-slate-500 mt-1">{block.settings.subtitle || "Bienvenue au Cabinet RE2M, votre partenaire stratégique"}</p>
                       </div>
                       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                         <div className="lg:col-span-8 space-y-4 text-slate-700 text-xs sm:text-sm leading-relaxed text-justify">
-                          <h3 className="font-serif text-base font-bold text-[#002366]">
-                            {block.settings.subtitle}
-                          </h3>
-                          {(block.settings.paragraphs || []).map((p: string, pIdx: number) => (
-                            <p key={pIdx}>{p}</p>
+                          <EditableText
+                            as="h3"
+                            label="Sous-titre"
+                            value={block.settings.subtitle || "Bienvenue au Cabinet RE2M, votre partenaire stratégique"}
+                            onSave={(v) => onUpdateBlockSetting?.(block.id, 'subtitle', v)}
+                            className="font-serif text-base font-bold text-[#002366]"
+                          />
+                          {directorParagraphs.map((p: string, pIdx: number) => (
+                            <EditableText
+                              key={pIdx}
+                              as="p"
+                              label={`Paragraphe ${pIdx + 1}`}
+                              multiline
+                              value={p}
+                              onSave={(v) => {
+                                const updated = [...directorParagraphs];
+                                updated[pIdx] = v;
+                                onUpdateBlockSetting?.(block.id, 'paragraphs', updated);
+                              }}
+                            />
                           ))}
                           <div className="pt-4 text-right">
-                            <strong className="block text-sm font-serif text-[#002366]">{block.settings.directorName || "Roch-Emmanuel MVE-MBORO"}</strong>
-                            <span className="text-[11px] text-slate-500">{block.settings.directorTitle || "Directeur Général, Cabinet RE2M"}</span>
+                            <EditableText
+                              as="strong"
+                              label="Nom du directeur"
+                              value={block.settings.directorName || "Roch-Emmanuel MVE-MBORO"}
+                              onSave={(v) => onUpdateBlockSetting?.(block.id, 'directorName', v)}
+                              className="block text-sm font-serif text-[#002366]"
+                            />
+                            <EditableText
+                              as="span"
+                              label="Fonction"
+                              value={block.settings.directorTitle || "Directeur Général, Cabinet RE2M"}
+                              onSave={(v) => onUpdateBlockSetting?.(block.id, 'directorTitle', v)}
+                              className="text-[11px] text-slate-500"
+                            />
                           </div>
                         </div>
                         <div className="lg:col-span-4 flex flex-col items-center">
                           <div className="p-1 rounded-2xl bg-white border border-slate-200 shadow-md max-w-[250px] w-full">
-                            <img
+                            <EditableImage
                               src={block.settings.image || "/team_01.jpg"}
                               alt={`${block.settings.directorName || "Roch-Emmanuel MVE-MBORO"} - Directeur Général`}
+                              onSave={(v) => onUpdateBlockSetting?.(block.id, 'image', v)}
                               className="w-full h-auto rounded-xl object-contain"
                             />
                           </div>
@@ -114,16 +199,25 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
                     </section>
                   </div>
                 );
+              }
               case 'Collaborations':
                 return (
                   <section className="py-12 bg-white overflow-hidden border-t border-slate-100">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center">
-                      <h3 className="font-serif text-2xl font-bold text-[#002366]">
-                        {block.settings.title || "Ils nous font confiance"}
-                      </h3>
-                      <p className="text-xs text-slate-400 mt-1">
-                        {block.settings.description || "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M"}
-                      </p>
+                      <EditableText
+                        as="h3"
+                        label="Titre"
+                        value={block.settings.title || "Ils nous font confiance"}
+                        onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
+                        className="font-serif text-2xl font-bold text-[#002366]"
+                      />
+                      <EditableText
+                        as="p"
+                        label="Description"
+                        value={block.settings.description || "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M"}
+                        onSave={(v) => onUpdateBlockSetting?.(block.id, 'description', v)}
+                        className="text-xs text-slate-400 mt-1"
+                      />
                     </div>
                     <div className="relative w-full flex overflow-x-hidden py-4">
                       <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
@@ -162,28 +256,17 @@ export const QuiNousSommesView: React.FC<QuiNousSommesViewProps> = ({ blocks, on
           return (
             <div
               key={block.id}
-              className={`relative transition-all ${onSelectBlock
-                  ? `cursor-pointer border-2 border-dashed rounded-3xl group/block my-2 ${block.enabled
-                    ? 'border-transparent hover:border-[#002366] hover:ring-2 hover:ring-[#002366]/20 hover:ring-offset-2'
-                    : 'border-slate-350 opacity-40 hover:opacity-75 bg-slate-50/50'
-                  }`
-                  : ''
-                } ${selectedBlockId === block.id ? '!border-[#002366] ring-2 ring-[#002366]/25 ring-offset-2' : ''}`}
-              onClick={(e) => {
-                if (onSelectBlock) {
-                  e.stopPropagation();
-                  onSelectBlock(block.id);
-                }
-              }}
+              className={`relative transition-all ${
+                onSelectBlock && !block.enabled ? 'rounded-3xl my-2 opacity-40 bg-slate-50/50' : ''
+              }`}
             >
-              {onSelectBlock && (
-                <div className="absolute top-3 right-3 bg-[#002366] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none opacity-0 group-hover/block:opacity-100 transition-opacity">
-                  {block.enabled ? `Modifier: ${block.type}` : `Masqué: ${block.type}`}
+              {onSelectBlock && !block.enabled && (
+                <div className="absolute top-3 right-3 bg-[#002366] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none">
+                  Masqué: {block.type}
                 </div>
               )}
               {block.type === 'Collaborations' && <TeamSection members={members} />}
               {renderBlockContent()}
-              {selectedBlockId === block.id && renderBlockEditor && renderBlockEditor(block)}
             </div>
           );
         })}

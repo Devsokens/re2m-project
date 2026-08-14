@@ -3,6 +3,8 @@ import { ClipboardList, GraduationCap, UsersRound, CheckCircle, Workflow } from 
 import { partners } from '../../data/partners';
 import { CMSBlock } from '../../types/cms';
 import { EditableIcon } from '../admin/editable/EditableIcon';
+import { EditableText } from '../admin/editable/EditableText';
+import { EditableImage } from '../admin/editable/EditableImage';
 
 interface NosServicesViewProps {
   blocks?: CMSBlock[];
@@ -76,28 +78,45 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                 return (
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center max-w-3xl mx-auto">
-                      <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-5">
-                        {block.settings.title}
-                      </h1>
-                      <p className="text-slate-500 text-sm sm:text-base">
-                        {block.settings.description}
-                      </p>
+                      <EditableText
+                        as="h1"
+                        label="Titre"
+                        value={block.settings.title}
+                        onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
+                        className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-5"
+                      />
+                      <EditableText
+                        as="p"
+                        label="Description"
+                        multiline
+                        value={block.settings.description}
+                        onSave={(v) => onUpdateBlockSetting?.(block.id, 'description', v)}
+                        className="text-slate-500 text-sm sm:text-base"
+                      />
                     </div>
                   </div>
                 );
-              case 'ServicesList':
+              case 'ServicesList': {
+                const serviceItems = block.settings.items || [];
                 return (
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                      {(block.settings.items || []).map((srv: any, idx: number) => {
+                      {serviceItems.map((srv: any, idx: number) => {
+                        const saveField = (key: string, v: any) => {
+                          const items = [...serviceItems];
+                          items[idx] = { ...items[idx], [key]: v };
+                          onUpdateBlockSetting?.(block.id, 'items', items);
+                        };
+                        const details: string[] = srv.details || [];
                         return (
                           <div key={idx} className="corporate-card rounded-3xl border border-slate-200/80 flex flex-col justify-between overflow-hidden bg-white h-full">
                             <div className="flex flex-col h-full justify-between">
                               <div>
                                 <div className="w-full aspect-[37/20] overflow-hidden bg-slate-100 border-b border-slate-100 relative group">
-                                  <img
+                                  <EditableImage
                                     src={srv.image}
                                     alt={srv.title}
+                                    onSave={(v) => saveField('image', v)}
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                   />
                                 </div>
@@ -105,28 +124,43 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                                   <div className="space-y-3">
                                     <EditableIcon
                                       value={srv.iconName}
-                                      onSave={(iconName) => {
-                                        const items = [...(block.settings.items || [])];
-                                        items[idx] = { ...items[idx], iconName };
-                                        onUpdateBlockSetting?.(block.id, 'items', items);
-                                      }}
+                                      onSave={(iconName) => saveField('iconName', iconName)}
                                       className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366]"
                                       iconClassName="w-5 h-5"
                                     />
                                     <div>
-                                      <h3 className="font-serif text-base font-bold text-[#002366] leading-snug min-h-[40px] flex items-center">
-                                        {srv.title}
-                                      </h3>
-                                      <p className="text-xs text-slate-500 mt-1 leading-relaxed min-h-[72px]">
-                                        {srv.desc}
-                                      </p>
+                                      <EditableText
+                                        as="h3"
+                                        label="Titre"
+                                        value={srv.title}
+                                        onSave={(v) => saveField('title', v)}
+                                        className="font-serif text-base font-bold text-[#002366] leading-snug min-h-[40px] flex items-center"
+                                      />
+                                      <EditableText
+                                        as="p"
+                                        label="Description"
+                                        multiline
+                                        value={srv.desc}
+                                        onSave={(v) => saveField('desc', v)}
+                                        className="text-xs text-slate-500 mt-1 leading-relaxed min-h-[72px]"
+                                      />
                                     </div>
                                   </div>
                                   <ul className="space-y-1.5 border-t border-slate-100 pt-3">
-                                    {(srv.details || []).map((det: string, detIdx: number) => (
+                                    {details.map((det: string, detIdx: number) => (
                                       <li key={detIdx} className="flex items-start gap-2 text-xs text-slate-600">
                                         <CheckCircle className="w-4 h-4 text-blue-800 shrink-0 mt-0.5" />
-                                        <span className="leading-tight">{det}</span>
+                                        <EditableText
+                                          as="span"
+                                          label={`Détail ${detIdx + 1}`}
+                                          value={det}
+                                          onSave={(v) => {
+                                            const updated = [...details];
+                                            updated[detIdx] = v;
+                                            saveField('details', updated);
+                                          }}
+                                          className="leading-tight"
+                                        />
                                       </li>
                                     ))}
                                   </ul>
@@ -142,16 +176,25 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                     </div>
                   </div>
                 );
+              }
               case 'Collaborations':
                 return (
                   <section className="py-12 bg-white overflow-hidden border-t border-slate-100">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center">
-                      <h3 className="font-serif text-2xl font-bold text-[#002366]">
-                        {block.settings.title || "Ils nous font confiance"}
-                      </h3>
-                      <p className="text-xs text-slate-400 mt-1">
-                        {block.settings.description || "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M"}
-                      </p>
+                      <EditableText
+                        as="h3"
+                        label="Titre"
+                        value={block.settings.title || "Ils nous font confiance"}
+                        onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
+                        className="font-serif text-2xl font-bold text-[#002366]"
+                      />
+                      <EditableText
+                        as="p"
+                        label="Description"
+                        value={block.settings.description || "Des entreprises leaders de leur secteur partenaires du Cabinet RE2M"}
+                        onSave={(v) => onUpdateBlockSetting?.(block.id, 'description', v)}
+                        className="text-xs text-slate-400 mt-1"
+                      />
                     </div>
                     <div className="relative w-full flex overflow-x-hidden py-4">
                       <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
@@ -191,28 +234,15 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
             <div
               key={block.id}
               className={`relative transition-all ${
-                onSelectBlock
-                  ? `cursor-pointer border-2 border-dashed rounded-3xl group/block my-2 ${
-                      block.enabled
-                        ? 'border-transparent hover:border-[#002366] hover:ring-2 hover:ring-[#002366]/20 hover:ring-offset-2'
-                        : 'border-slate-350 opacity-40 hover:opacity-75 bg-slate-50/50'
-                    }`
-                  : ''
-              } ${selectedBlockId === block.id ? '!border-[#002366] ring-2 ring-[#002366]/25 ring-offset-2' : ''}`}
-              onClick={(e) => {
-                if (onSelectBlock) {
-                  e.stopPropagation();
-                  onSelectBlock(block.id);
-                }
-              }}
+                onSelectBlock && !block.enabled ? 'rounded-3xl my-2 opacity-40 bg-slate-50/50' : ''
+              }`}
             >
-              {onSelectBlock && (
-                <div className="absolute top-3 right-3 bg-[#002366] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none opacity-0 group-hover/block:opacity-100 transition-opacity">
-                  {block.enabled ? `Modifier: ${block.type}` : `Masqué: ${block.type}`}
+              {onSelectBlock && !block.enabled && (
+                <div className="absolute top-3 right-3 bg-[#002366] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none">
+                  Masqué: {block.type}
                 </div>
               )}
               {renderBlockContent()}
-              {selectedBlockId === block.id && renderBlockEditor && renderBlockEditor(block)}
             </div>
           );
         })}

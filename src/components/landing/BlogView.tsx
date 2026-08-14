@@ -41,11 +41,10 @@ export const BlogView: React.FC = () => {
                 </span>
               ))}
             </div>
-            <div className="space-y-4 text-sm text-slate-600 leading-relaxed text-justify">
-              {selected.content.map((paragraph, idx) => (
-                <p key={idx}>{paragraph}</p>
-              ))}
-            </div>
+            <div
+              className="space-y-4 text-sm text-slate-600 leading-relaxed text-justify [&_p]:mb-4"
+              dangerouslySetInnerHTML={{ __html: selected.content }}
+            />
           </article>
 
           {/* Suggested articles - right */}

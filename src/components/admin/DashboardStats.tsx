@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Member } from '../../types/member';
 import { articles } from '../../data/articles';
 import { news } from '../../data/news';
+import { newsletters } from '../../data/newsletters';
 import {
   Eye,
   Inbox,
   Newspaper,
   FileText,
   Mail,
-  Award,
   TrendingUp
 } from 'lucide-react';
 
@@ -16,9 +16,34 @@ interface DashboardStatsProps {
   members: Member[];
 }
 
-// Mock traffic trend (no backend yet) — last 14 days of site visits
-const VISITS_TREND = [420, 460, 445, 510, 540, 500, 580, 610, 590, 650, 700, 680, 740, 812];
-const VISITS_LABELS = ['J-13', 'J-12', 'J-11', 'J-10', 'J-9', 'J-8', 'J-7', 'J-6', 'J-5', 'J-4', 'J-3', 'J-2', 'J-1', "Auj."];
+// Mock traffic trends (no backend yet) — one dataset per time granularity
+type VisitsPeriod = 'day' | 'week' | 'month' | 'year';
+
+const VISITS_DATASETS: Record<VisitsPeriod, { data: number[]; labels: string[] }> = {
+  day: {
+    data: [38, 42, 30, 55, 60, 58, 72, 65, 80, 74, 90, 85, 95, 102, 98, 110, 104, 118, 112, 126, 120, 132, 128, 140],
+    labels: ['0h', '', '2h', '', '4h', '', '6h', '', '8h', '', '10h', '', '12h', '', '14h', '', '16h', '', '18h', '', '20h', '', '22h', '']
+  },
+  week: {
+    data: [420, 460, 445, 510, 540, 500, 812],
+    labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+  },
+  month: {
+    data: [2100, 2400, 2250, 2600, 2800, 2550, 3100, 2950, 3300, 3500, 3200, 3800, 4100, 3900, 4400, 4600, 4200, 4800, 5100, 4950, 5300, 5500, 5200, 5800, 6100, 5900, 6400, 6600, 6300, 6800],
+    labels: Array.from({ length: 30 }, (_, i) => (i % 5 === 0 ? String(i + 1) : ''))
+  },
+  year: {
+    data: [12500, 14200, 13800, 16400, 18100, 17200, 19800, 21400, 20600, 23100, 24800, 26200],
+    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
+  }
+};
+
+const PERIOD_LABELS: Record<VisitsPeriod, string> = {
+  day: 'Jour',
+  week: 'Semaine',
+  month: 'Mois',
+  year: 'Année'
+};
 
 // Mock request-type breakdown for the "Demandes" module
 const REQUEST_BREAKDOWN = [
@@ -176,7 +201,9 @@ const KpiCard: React.FC<{ label: string; value: string | number; trend?: string;
 );
 
 export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
-  const sortedTopConsultants = [...members].sort((a, b) => b.scanCount - a.scanCount).slice(0, 4);
+  const [visitsPeriod, setVisitsPeriod] = useState<VisitsPeriod>('week');
+  const activeDataset = VISITS_DATASETS[visitsPeriod];
+  const periodTotal = activeDataset.data.reduce((a, b) => a + b, 0);
 
   const deptCounts: Record<string, number> = {};
   members.forEach((m) => {
@@ -184,12 +211,16 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
   });
   const deptData = Object.entries(deptCounts).map(([label, value]) => ({ label, value }));
 
+  const latestArticle = articles[0];
+  const latestNews = news[0];
+  const latestNewsletter = newsletters[0];
+
   return (
     <div className="space-y-8 animate-fadeIn text-[#0f172a]">
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-        <KpiCard label="Visites (14j)" value={VISITS_TREND.reduce((a, b) => a + b, 0).toLocaleString('fr-FR')} trend="+12.4%" icon={Eye} />
+        <KpiCard label="Visites (semaine)" value={VISITS_DATASETS.week.data.reduce((a, b) => a + b, 0).toLocaleString('fr-FR')} trend="+12.4%" icon={Eye} />
         <KpiCard label="Demandes Reçues" value={TOTAL_REQUESTS} trend="+5 cette semaine" icon={Inbox} />
         <KpiCard label="Articles Blog" value={articles.length} icon={FileText} />
         <KpiCard label="Actualités Publiées" value={news.length} icon={Newspaper} />
@@ -199,14 +230,26 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
       {/* Visits trend + Requests donut */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-7 bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
               <h3 className="font-serif text-base font-bold text-[#002366]">Flux des visites</h3>
-              <p className="text-xs text-slate-400 font-medium">Trafic du site sur les 14 derniers jours</p>
+              <p className="text-xs text-slate-400 font-medium">{periodTotal.toLocaleString('fr-FR')} visites sur la période</p>
             </div>
-            <Eye className="w-5 h-5 text-blue-800" />
+            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl p-1 shrink-0">
+              {(Object.keys(PERIOD_LABELS) as VisitsPeriod[]).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setVisitsPeriod(p)}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer transition-all ${
+                    visitsPeriod === p ? 'bg-[#002366] text-white shadow-sm' : 'text-slate-500 hover:text-[#002366]'
+                  }`}
+                >
+                  {PERIOD_LABELS[p]}
+                </button>
+              ))}
+            </div>
           </div>
-          <LineAreaChart data={VISITS_TREND} labels={VISITS_LABELS} />
+          <LineAreaChart data={activeDataset.data} labels={activeDataset.labels} />
         </div>
 
         <div className="lg:col-span-5 bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
@@ -221,7 +264,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
         </div>
       </div>
 
-      {/* Department breakdown + Top consultants */}
+      {/* Department breakdown + Content overview */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-5 bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -240,36 +283,50 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
         <div className="lg:col-span-7 bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
-              <h3 className="font-serif text-base font-bold text-[#002366]">Consultants les plus visités</h3>
-              <p className="text-xs text-slate-400 font-medium">Classement selon le volume de scans QR Code</p>
+              <h3 className="font-serif text-base font-bold text-[#002366]">Contenu publié</h3>
+              <p className="text-xs text-slate-400 font-medium">Aperçu Blog, Actualités & Newsletter</p>
             </div>
-            <Award className="w-5 h-5 text-blue-800" />
           </div>
 
           <div className="space-y-4">
-            {sortedTopConsultants.map((consultant, index) => (
-              <div
-                key={consultant.id}
-                className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between hover:bg-slate-50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center font-bold text-xs text-blue-900">
-                    #{index + 1}
-                  </div>
-                  <div>
-                    <p className="font-serif text-sm font-bold text-[#002366]">
-                      {consultant.civility} {consultant.firstName} {consultant.lastName}
-                    </p>
-                    <p className="text-xs text-slate-500 font-medium">{consultant.title}</p>
-                  </div>
+            <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between hover:bg-slate-50 transition-colors">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366] shrink-0">
+                  <FileText className="w-4 h-4" />
                 </div>
-
-                <div className="text-right">
-                  <span className="text-sm font-bold text-blue-900">{consultant.scanCount} scans</span>
-                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{consultant.department}</p>
+                <div className="min-w-0">
+                  <p className="font-serif text-sm font-bold text-[#002366]">Blog</p>
+                  <p className="text-xs text-slate-500 truncate max-w-[220px]">Dernier : {latestArticle?.title || '—'}</p>
                 </div>
               </div>
-            ))}
+              <span className="text-sm font-bold text-blue-900 shrink-0">{articles.length} articles</span>
+            </div>
+
+            <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between hover:bg-slate-50 transition-colors">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366] shrink-0">
+                  <Newspaper className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-serif text-sm font-bold text-[#002366]">Actualités</p>
+                  <p className="text-xs text-slate-500 truncate max-w-[220px]">Dernière : {latestNews?.title || '—'}</p>
+                </div>
+              </div>
+              <span className="text-sm font-bold text-blue-900 shrink-0">{news.length} publiées</span>
+            </div>
+
+            <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between hover:bg-slate-50 transition-colors">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366] shrink-0">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-serif text-sm font-bold text-[#002366]">Newsletter</p>
+                  <p className="text-xs text-slate-500 truncate max-w-[220px]">Dernière : {latestNewsletter?.subject || '—'}</p>
+                </div>
+              </div>
+              <span className="text-sm font-bold text-blue-900 shrink-0">{newsletters.length} envoyées</span>
+            </div>
           </div>
         </div>
       </div>

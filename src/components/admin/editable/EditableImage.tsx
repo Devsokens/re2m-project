@@ -17,13 +17,20 @@ export const EditableImage: React.FC<EditableImageProps> = ({
   alt,
   onSave,
   className = '',
-  containerClassName = 'relative group/field w-full'
+  containerClassName
 }) => {
   const isEditMode = useIsEditMode();
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   if (!isEditMode) {
+    if (containerClassName) {
+      return (
+        <div className={containerClassName}>
+          <img src={src} alt={alt} className={className} />
+        </div>
+      );
+    }
     return <img src={src} alt={alt} className={className} />;
   }
 
@@ -46,7 +53,7 @@ export const EditableImage: React.FC<EditableImageProps> = ({
   };
 
   return (
-    <div className={containerClassName}>
+    <div className={containerClassName || 'relative group/field w-full'}>
       <label className="relative cursor-pointer w-full h-full block" onClick={(e) => e.stopPropagation()}>
         <input
           ref={inputRef}

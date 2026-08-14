@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Plus, Pencil, Trash2, Newspaper } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
+import { RichTextEditor } from '../RichTextEditor';
+import { ImageUploadField } from '../ImageUploadField';
 import { NewsItem, news as initialNews } from '../../../data/news';
 
 const emptyDraft: NewsItem = {
@@ -64,44 +66,49 @@ export const ActualiteAdmin: React.FC = () => {
         </button>
       </div>
 
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {items.map((item, idx) => (
           <div
             key={idx}
-            className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col sm:flex-row"
+            className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm group flex flex-col"
           >
-            <div className="sm:w-56 aspect-[37/25] sm:aspect-auto overflow-hidden bg-slate-100 relative shrink-0">
+            <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
               <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+              <span className="absolute top-3 left-3 text-[10px] font-bold text-[#002366] bg-white/90 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                {item.tag}
+              </span>
             </div>
-            <div className="p-4 space-y-1.5 flex-1 flex flex-col justify-center">
-              <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider">
-                <span className="text-blue-800 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">{item.tag}</span>
-                <span className="text-slate-400">{new Date(item.date).toLocaleDateString('fr-FR')}</span>
+            <div className="p-4 space-y-2 flex-1 flex flex-col">
+              <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{item.title}</h4>
+              <p
+                className="text-[11px] text-slate-500 leading-relaxed line-clamp-2 flex-1"
+                dangerouslySetInnerHTML={{ __html: item.excerpt }}
+              />
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                <span className="text-[10px] text-slate-400 font-semibold">{new Date(item.date).toLocaleDateString('fr-FR')}</span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => openEdit(idx)}
+                    className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 text-[#002366] flex items-center justify-center hover:bg-blue-100 cursor-pointer transition-colors"
+                    title="Modifier"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(idx)}
+                    className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
+                    title="Supprimer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
-              <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug">{item.title}</h4>
-              <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">{item.excerpt}</p>
-            </div>
-            <div className="flex sm:flex-col items-center justify-end gap-1.5 p-4 shrink-0">
-              <button
-                onClick={() => openEdit(idx)}
-                className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-[#002366] flex items-center justify-center hover:bg-blue-100 cursor-pointer transition-colors"
-                title="Modifier"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => handleDelete(idx)}
-                className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
-                title="Supprimer"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
             </div>
           </div>
         ))}
 
         {items.length === 0 && (
-          <div className="flex flex-col items-center justify-center text-center gap-3 py-16 corporate-card rounded-3xl border border-dashed border-slate-300 bg-white">
+          <div className="col-span-full flex flex-col items-center justify-center text-center gap-3 py-16 corporate-card rounded-3xl border border-dashed border-slate-300 bg-white">
             <Newspaper className="w-8 h-8 text-slate-300" />
             <p className="text-xs text-slate-400">Aucune actualité pour le moment.</p>
           </div>
@@ -161,23 +168,18 @@ export const ActualiteAdmin: React.FC = () => {
           </div>
         </div>
 
-        <div>
-          <label className={labelClass}>Image (URL)</label>
-          <input
-            className={inputClass}
-            value={draft.image}
-            onChange={(e) => setDraft({ ...draft, image: e.target.value })}
-            placeholder="/service_01.jpg"
-          />
-        </div>
+        <ImageUploadField
+          label="Image"
+          value={draft.image}
+          onChange={(v) => setDraft({ ...draft, image: v })}
+        />
 
         <div>
           <label className={labelClass}>Extrait</label>
-          <textarea
-            className={`${inputClass} resize-y`}
-            rows={5}
+          <RichTextEditor
             value={draft.excerpt}
-            onChange={(e) => setDraft({ ...draft, excerpt: e.target.value })}
+            onChange={(html) => setDraft({ ...draft, excerpt: html })}
+            placeholder="Rédigez l'actualité..."
           />
         </div>
       </SlideOver>

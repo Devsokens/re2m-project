@@ -8,16 +8,19 @@ import { QuiNousSommesView } from '../../landing/QuiNousSommesView';
 import { NosServicesView } from '../../landing/NosServicesView';
 import { ContactView } from '../../landing/ContactView';
 import { EditModeProvider } from '../../../contexts/EditModeContext';
+import { Member } from '../../../types/member';
 import { Globe, RefreshCw, Check, ListOrdered } from 'lucide-react';
 
 interface GestionCMSProps {
   onTogglePreview: (slug: PageSlug, blocks: CMSBlock[] | null) => void;
   activePreviewSlug: PageSlug | null;
+  members?: Member[];
 }
 
 export const GestionCMS: React.FC<GestionCMSProps> = ({
   onTogglePreview,
-  activePreviewSlug
+  activePreviewSlug,
+  members = []
 }) => {
   const [selectedPage, setSelectedPage] = useState<PageSlug>('accueil');
   const [draftBlocks, setDraftBlocks] = useState<CMSBlock[]>([]);
@@ -266,6 +269,7 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
               onUpdateBlockSetting={handleUpdateBlockSetting}
               onStartDemo={() => {}}
               onNavigate={() => {}}
+              members={members}
             />
           )}
 
@@ -275,6 +279,8 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
               onSelectBlock={handleSelectBlockFromPreview}
               selectedBlockId={editingBlock?.id ?? null}
               renderBlockEditor={renderBlockEditor}
+              onUpdateBlockSetting={handleUpdateBlockSetting}
+              members={members}
             />
           )}
 
@@ -294,6 +300,7 @@ export const GestionCMS: React.FC<GestionCMSProps> = ({
               onSelectBlock={handleSelectBlockFromPreview}
               selectedBlockId={editingBlock?.id ?? null}
               renderBlockEditor={renderBlockEditor}
+              onUpdateBlockSetting={handleUpdateBlockSetting}
             />
           )}
         </EditModeProvider>

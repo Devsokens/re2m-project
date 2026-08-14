@@ -335,6 +335,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             <GestionCMS
               onTogglePreview={onTogglePreview}
               activePreviewSlug={activePreviewSlug}
+              members={members}
             />
           )}
 

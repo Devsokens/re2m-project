@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Plus, Pencil, Trash2, FileText } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
+import { RichTextEditor } from '../RichTextEditor';
+import { ImageUploadField } from '../ImageUploadField';
 import { Article, articles as initialArticles } from '../../../data/articles';
 
 const emptyDraft: Article = {
   title: '',
   excerpt: '',
-  content: [''],
+  content: '',
   author: 'Cabinet RE2M',
   date: new Date().toISOString().slice(0, 10),
   image: '/service_01.jpg',
@@ -165,15 +167,11 @@ export const BlogAdmin: React.FC = () => {
           </div>
         </div>
 
-        <div>
-          <label className={labelClass}>Image (URL)</label>
-          <input
-            className={inputClass}
-            value={draft.image}
-            onChange={(e) => setDraft({ ...draft, image: e.target.value })}
-            placeholder="/service_01.jpg"
-          />
-        </div>
+        <ImageUploadField
+          label="Image de couverture"
+          value={draft.image}
+          onChange={(v) => setDraft({ ...draft, image: v })}
+        />
 
         <div>
           <label className={labelClass}>Extrait</label>
@@ -187,12 +185,10 @@ export const BlogAdmin: React.FC = () => {
 
         <div>
           <label className={labelClass}>Contenu</label>
-          <textarea
-            className={`${inputClass} resize-y`}
-            rows={8}
-            value={draft.content.join('\n\n')}
-            onChange={(e) => setDraft({ ...draft, content: e.target.value.split('\n\n') })}
-            placeholder="Un paragraphe par ligne vide"
+          <RichTextEditor
+            value={draft.content}
+            onChange={(html) => setDraft({ ...draft, content: html })}
+            placeholder="Rédigez l'article..."
           />
         </div>
 
