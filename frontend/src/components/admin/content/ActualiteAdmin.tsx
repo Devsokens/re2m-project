@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, Newspaper } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
 import { RichTextEditor } from '../RichTextEditor';
 import { ImageUploadField } from '../ImageUploadField';
-import { NewsItem, news as initialNews } from '../../../data/news';
+import { NewsItem, NewsInput, newsStore } from '../../../data/news';
 
-const emptyDraft: NewsItem = {
+const emptyDraft: NewsInput = {
   title: '',
   excerpt: '',
   date: new Date().toISOString().slice(0, 10),
@@ -17,37 +17,47 @@ const inputClass = 'w-full bg-slate-50 text-slate-800 text-xs rounded-xl px-3 py
 const labelClass = 'block text-xs font-bold text-slate-500 uppercase mb-1.5';
 
 export const ActualiteAdmin: React.FC = () => {
-  const [items, setItems] = useState<NewsItem[]>(initialNews);
+  const [items, setItems] = useState<NewsItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [draft, setDraft] = useState<NewsItem>(emptyDraft);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<NewsInput>(emptyDraft);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    newsStore.list().then(setItems).catch((err) => console.error('Impossible de charger les actualités :', err));
+  }, []);
 
   const openCreate = () => {
-    setEditingIndex(null);
+    setEditingId(null);
     setDraft(emptyDraft);
     setIsOpen(true);
   };
 
-  const openEdit = (idx: number) => {
-    setEditingIndex(idx);
-    setDraft(items[idx]);
+  const openEdit = (item: NewsItem) => {
+    setEditingId(item.id);
+    setDraft(item);
     setIsOpen(true);
   };
 
-  const handleDelete = (idx: number) => {
-    if (window.confirm('Supprimer cette actualité ?')) {
-      setItems((prev) => prev.filter((_, i) => i !== idx));
-    }
+  const handleDelete = (id: string) => {
+    if (!window.confirm('Supprimer cette actualité ?')) return;
+    newsStore
+      .remove(id)
+      .then(() => setItems((prev) => prev.filter((n) => n.id !== id)))
+      .catch((err) => console.error('Échec de la suppression :', err));
   };
 
   const handleSave = () => {
-    if (!draft.title.trim()) return;
-    if (editingIndex === null) {
-      setItems((prev) => [draft, ...prev]);
-    } else {
-      setItems((prev) => prev.map((n, i) => (i === editingIndex ? draft : n)));
-    }
-    setIsOpen(false);
+    if (!draft.title.trim() || saving) return;
+    setSaving(true);
+    const request = editingId === null ? newsStore.create(draft) : newsStore.update(editingId, draft);
+    request
+      .then((saved) => {
+        setItems((prev) => (editingId === null ? [saved, ...prev] : prev.map((n) => (n.id === saved.id ? saved : n))));
+        setIsOpen(false);
+      })
+      .catch((err) => console.error("Échec de l'enregistrement :", err))
+      .finally(() => setSaving(false));
   };
 
   return (
@@ -67,9 +77,9 @@ export const ActualiteAdmin: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {items.map((item, idx) => (
+        {items.map((item) => (
           <div
-            key={idx}
+            key={item.id}
             className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm group flex flex-col"
           >
             <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
@@ -88,14 +98,14 @@ export const ActualiteAdmin: React.FC = () => {
                 <span className="text-[10px] text-slate-400 font-semibold">{new Date(item.date).toLocaleDateString('fr-FR')}</span>
                 <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => openEdit(idx)}
+                    onClick={() => openEdit(item)}
                     className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 text-[#002366] flex items-center justify-center hover:bg-blue-100 cursor-pointer transition-colors"
                     title="Modifier"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(idx)}
+                    onClick={() => handleDelete(item.id)}
                     className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
                     title="Supprimer"
                   >
@@ -118,7 +128,7 @@ export const ActualiteAdmin: React.FC = () => {
       <SlideOver
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        title={editingIndex === null ? 'Nouvelle actualité' : "Modifier l'actualité"}
+        title={editingId === null ? 'Nouvelle actualité' : "Modifier l'actualité"}
         subtitle="Actualités du Cabinet RE2M"
         footer={
           <>
@@ -130,9 +140,10 @@ export const ActualiteAdmin: React.FC = () => {
             </button>
             <button
               onClick={handleSave}
-              className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all"
+              disabled={saving}
+              className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all disabled:opacity-50"
             >
-              Enregistrer
+              {saving ? 'Enregistrement...' : 'Enregistrer'}
             </button>
           </>
         }

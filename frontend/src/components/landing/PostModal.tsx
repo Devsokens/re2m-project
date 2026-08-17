@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, ArrowLeft, Globe, Smile, Send, UserCircle2, MessageCircle } from 'lucide-react';
 import { LikeButton } from './LikeButton';
 import { CommentSection } from './CommentSection';
-import { addComment, getComments } from '../../utils/engagementStore';
+import { addComment, getComments, EngagementTargetType } from '../../utils/engagementStore';
 import { stripHtml, getInitials } from '../../utils/text';
 
 const VISITOR_NAME_KEY = 're2m_visitor_name';
@@ -12,7 +12,8 @@ const VISITOR_NAME_SET_KEY = 're2m_visitor_name_set';
 const QUICK_EMOJIS = ['😀', '😂', '😍', '👏', '🙏', '👍', '🔥', '❤️', '🎉', '😢', '😮', '🤔', '💯', '🙌', '✨', '😅', '😎', '👌'];
 
 export interface PostModalItem {
-  key: string;
+  id: string;
+  targetType: EngagementTargetType;
   author: string;
   authorIcon: React.ElementType;
   date: string; // ISO
@@ -39,12 +40,20 @@ export const PostModal: React.FC<PostModalProps> = ({ item, otherItems, mode, on
   const [nameInput, setNameInput] = useState('');
   const [commentText, setCommentText] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [commentCount, setCommentCount] = useState(0);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setCommentText('');
-  }, [item?.key]);
+  }, [item?.id]);
+
+  useEffect(() => {
+    if (!item || mode !== 'blog') return;
+    getComments(item.targetType, item.id)
+      .then((comments) => setCommentCount(comments.length))
+      .catch((err) => console.error('Impossible de charger les commentaires :', err));
+  }, [item, mode, refreshKey]);
 
   useEffect(() => {
     if (!showEmojiPicker) return;
@@ -60,13 +69,15 @@ export const PostModal: React.FC<PostModalProps> = ({ item, otherItems, mode, on
   if (!item) return null;
   const AuthorIcon = item.authorIcon;
   const initials = getInitials(visitorName);
-  const commentCount = mode === 'blog' ? getComments(item.key).length : 0;
 
   const finalizeSend = (name: string) => {
     if (!commentText.trim()) return;
-    addComment(item.key, name.trim() || 'Anonyme', commentText.trim());
-    setCommentText('');
-    setRefreshKey((k) => k + 1);
+    addComment(item.targetType, item.id, name.trim() || 'Anonyme', commentText.trim())
+      .then(() => {
+        setCommentText('');
+        setRefreshKey((k) => k + 1);
+      })
+      .catch((err) => console.error('Échec de l\'envoi du commentaire :', err));
   };
 
   const handleSendComment = () => {
@@ -144,7 +155,7 @@ export const PostModal: React.FC<PostModalProps> = ({ item, otherItems, mode, on
 
           <div className="px-4 sm:px-5 py-3 flex items-center justify-between border-b border-slate-100">
             <div className="flex items-center gap-4">
-              <LikeButton itemKey={item.key} size="md" />
+              <LikeButton targetType={item.targetType} targetId={item.id} size="md" />
               {mode === 'blog' && (
                 <span className="flex items-center gap-1.5 text-sm font-bold text-slate-500">
                   <MessageCircle className="w-4 h-4" /> {commentCount}
@@ -156,7 +167,7 @@ export const PostModal: React.FC<PostModalProps> = ({ item, otherItems, mode, on
 
           {mode === 'blog' && (
             <div className="px-4 sm:px-5">
-              <CommentSection key={`${item.key}-${refreshKey}`} itemKey={item.key} hideForm />
+              <CommentSection key={`${item.id}-${refreshKey}`} targetType={item.targetType} targetId={item.id} hideForm />
             </div>
           )}
 
@@ -168,7 +179,7 @@ export const PostModal: React.FC<PostModalProps> = ({ item, otherItems, mode, on
               <div className="space-y-3 pb-2">
                 {otherItems.map((other) => (
                   <button
-                    key={other.key}
+                    key={other.id}
                     onClick={() => onSelectItem(other)}
                     className="w-full flex items-center gap-3 text-left cursor-pointer group"
                   >

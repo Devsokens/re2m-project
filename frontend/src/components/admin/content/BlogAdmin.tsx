@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, FileText } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
 import { RichTextEditor } from '../RichTextEditor';
 import { ImageUploadField } from '../ImageUploadField';
-import { Article, articles as initialArticles } from '../../../data/articles';
+import { Article, ArticleInput, articlesStore } from '../../../data/articles';
 
-const emptyDraft: Article = {
+const emptyDraft: ArticleInput = {
   title: '',
   excerpt: '',
   content: '',
@@ -20,37 +20,47 @@ const inputClass = 'w-full bg-slate-50 text-slate-800 text-xs rounded-xl px-3 py
 const labelClass = 'block text-xs font-bold text-slate-500 uppercase mb-1.5';
 
 export const BlogAdmin: React.FC = () => {
-  const [items, setItems] = useState<Article[]>(initialArticles);
+  const [items, setItems] = useState<Article[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [draft, setDraft] = useState<Article>(emptyDraft);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<ArticleInput>(emptyDraft);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    articlesStore.list().then(setItems).catch((err) => console.error('Impossible de charger les articles :', err));
+  }, []);
 
   const openCreate = () => {
-    setEditingIndex(null);
+    setEditingId(null);
     setDraft(emptyDraft);
     setIsOpen(true);
   };
 
-  const openEdit = (idx: number) => {
-    setEditingIndex(idx);
-    setDraft(items[idx]);
+  const openEdit = (article: Article) => {
+    setEditingId(article.id);
+    setDraft(article);
     setIsOpen(true);
   };
 
-  const handleDelete = (idx: number) => {
-    if (window.confirm('Supprimer cet article ?')) {
-      setItems((prev) => prev.filter((_, i) => i !== idx));
-    }
+  const handleDelete = (id: string) => {
+    if (!window.confirm('Supprimer cet article ?')) return;
+    articlesStore
+      .remove(id)
+      .then(() => setItems((prev) => prev.filter((a) => a.id !== id)))
+      .catch((err) => console.error('Échec de la suppression :', err));
   };
 
   const handleSave = () => {
-    if (!draft.title.trim()) return;
-    if (editingIndex === null) {
-      setItems((prev) => [draft, ...prev]);
-    } else {
-      setItems((prev) => prev.map((a, i) => (i === editingIndex ? draft : a)));
-    }
-    setIsOpen(false);
+    if (!draft.title.trim() || saving) return;
+    setSaving(true);
+    const request = editingId === null ? articlesStore.create(draft) : articlesStore.update(editingId, draft);
+    request
+      .then((saved) => {
+        setItems((prev) => (editingId === null ? [saved, ...prev] : prev.map((a) => (a.id === saved.id ? saved : a))));
+        setIsOpen(false);
+      })
+      .catch((err) => console.error("Échec de l'enregistrement :", err))
+      .finally(() => setSaving(false));
   };
 
   return (
@@ -70,9 +80,9 @@ export const BlogAdmin: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {items.map((article, idx) => (
+        {items.map((article) => (
           <div
-            key={idx}
+            key={article.id}
             className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm group flex flex-col"
           >
             <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
@@ -88,14 +98,14 @@ export const BlogAdmin: React.FC = () => {
                 <span className="text-[10px] text-slate-400 font-semibold">{article.author}</span>
                 <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => openEdit(idx)}
+                    onClick={() => openEdit(article)}
                     className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 text-[#002366] flex items-center justify-center hover:bg-blue-100 cursor-pointer transition-colors"
                     title="Modifier"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(idx)}
+                    onClick={() => handleDelete(article.id)}
                     className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
                     title="Supprimer"
                   >
@@ -118,7 +128,7 @@ export const BlogAdmin: React.FC = () => {
       <SlideOver
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        title={editingIndex === null ? 'Nouvel article' : "Modifier l'article"}
+        title={editingId === null ? 'Nouvel article' : "Modifier l'article"}
         subtitle="Blog du Cabinet RE2M"
         footer={
           <>
@@ -130,9 +140,10 @@ export const BlogAdmin: React.FC = () => {
             </button>
             <button
               onClick={handleSave}
-              className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all"
+              disabled={saving}
+              className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all disabled:opacity-50"
             >
-              Enregistrer
+              {saving ? 'Enregistrement...' : 'Enregistrer'}
             </button>
           </>
         }

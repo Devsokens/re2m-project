@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Hero } from './Hero';
 import { Award, CheckCircle, Sparkles, TrendingUp, ArrowRight, Plus, MessageSquareQuote, X } from 'lucide-react';
 import { partners } from '../../data/partners';
-import { articles } from '../../data/articles';
-import { news } from '../../data/news';
+import { Article, articlesStore } from '../../data/articles';
+import { NewsItem, newsStore } from '../../data/news';
 import { CMSBlock } from '../../types/cms';
 import { cmsStorage } from '../../utils/cmsStorage';
 import { EditableText } from '../admin/editable/EditableText';
@@ -59,6 +59,13 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
       .then((servicesBlocks) => setServicesPageBlock(servicesBlocks.find((b) => b.type === 'ServicesList')))
       .catch((err) => console.error('Impossible de charger les services :', err));
   }, [onUpdateBlockSetting]);
+
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  useEffect(() => {
+    newsStore.list().then(setNews).catch((err) => console.error('Impossible de charger les actualités :', err));
+    articlesStore.list().then(setArticles).catch((err) => console.error('Impossible de charger les articles :', err));
+  }, []);
 
   const stats = [
     { value: '25', label: "Ans d'Expérience" },

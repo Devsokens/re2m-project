@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MessageCircle, Send } from 'lucide-react';
-import { EngagementComment, addComment, getComments } from '../../utils/engagementStore';
+import { EngagementComment, EngagementTargetType, addComment, getComments } from '../../utils/engagementStore';
 import { getInitials } from '../../utils/text';
 
 interface CommentSectionProps {
-  itemKey: string;
+  targetType: EngagementTargetType;
+  targetId: string;
   hideForm?: boolean;
 }
 
@@ -13,17 +14,26 @@ const formatRelative = (iso: string) => {
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 };
 
-export const CommentSection: React.FC<CommentSectionProps> = ({ itemKey, hideForm = false }) => {
-  const [comments, setComments] = useState<EngagementComment[]>(() => getComments(itemKey));
+export const CommentSection: React.FC<CommentSectionProps> = ({ targetType, targetId, hideForm = false }) => {
+  const [comments, setComments] = useState<EngagementComment[]>([]);
   const [author, setAuthor] = useState('');
   const [text, setText] = useState('');
+
+  useEffect(() => {
+    getComments(targetType, targetId)
+      .then(setComments)
+      .catch((err) => console.error('Impossible de charger les commentaires :', err));
+  }, [targetType, targetId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!author.trim() || !text.trim()) return;
-    const updated = addComment(itemKey, author.trim(), text.trim());
-    setComments(updated);
-    setText('');
+    addComment(targetType, targetId, author.trim(), text.trim())
+      .then((comment) => {
+        setComments((prev) => [...prev, comment]);
+        setText('');
+      })
+      .catch((err) => console.error('Échec de l\'envoi du commentaire :', err));
   };
 
   return (

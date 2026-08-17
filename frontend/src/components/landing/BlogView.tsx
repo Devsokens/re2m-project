@@ -1,15 +1,16 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { MessageCircle, UserCircle2, Search } from 'lucide-react';
-import { articles, Article } from '../../data/articles';
+import { articlesStore, Article } from '../../data/articles';
 import { LikeButton } from './LikeButton';
 import { PostModal, PostModalItem } from './PostModal';
-import { slugify, getComments } from '../../utils/engagementStore';
+import { getComments } from '../../utils/engagementStore';
 
 const formatDate = (date: string) =>
   new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 const toPostModalItem = (article: Article): PostModalItem => ({
-  key: slugify(article.title),
+  id: article.id,
+  targetType: 'article',
   author: article.author,
   authorIcon: UserCircle2,
   date: article.date,
@@ -19,17 +20,32 @@ const toPostModalItem = (article: Article): PostModalItem => ({
 
 export const BlogView: React.FC = () => {
   const [email, setEmail] = useState('');
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    articlesStore.list().then(setArticles).catch((err) => console.error('Impossible de charger les articles :', err));
+  }, []);
+
+  useEffect(() => {
+    if (articles.length === 0) return;
+    Promise.all(
+      articles.map((a) => getComments('article', a.id).then((comments) => [a.id, comments.length] as const))
+    )
+      .then((entries) => setCommentCounts(Object.fromEntries(entries)))
+      .catch((err) => console.error('Impossible de charger les commentaires :', err));
+  }, [articles]);
 
   const sortedArticles = useMemo(
     () => [...articles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-    []
+    [articles]
   );
 
   const [selected, setSelected] = useState<Article | null>(null);
   const [query, setQuery] = useState('');
 
   const handleSelectOther = (other: PostModalItem) => {
-    const match = articles.find((a) => slugify(a.title) === other.key);
+    const match = articles.find((a) => a.id === other.id);
     if (match) setSelected(match);
   };
 
@@ -68,15 +84,17 @@ export const BlogView: React.FC = () => {
         </div>
 
         {filteredArticles.length === 0 && (
-          <p className="text-sm text-slate-400 text-center py-16">Aucun article ne correspond à "{query}".</p>
+          <p className="text-sm text-slate-400 text-center py-16">
+            {articles.length === 0 ? 'Aucun article pour le moment.' : `Aucun article ne correspond à "${query}".`}
+          </p>
         )}
 
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-          {filteredArticles.map((article, idx) => {
-            const commentCount = getComments(slugify(article.title)).length;
+          {filteredArticles.map((article) => {
+            const commentCount = commentCounts[article.id] ?? 0;
             return (
               <div
-                key={idx}
+                key={article.id}
                 onClick={() => setSelected(article)}
                 className="corporate-card rounded-2xl sm:rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col group hover:shadow-lg transition-all duration-300 cursor-pointer"
               >
@@ -107,7 +125,7 @@ export const BlogView: React.FC = () => {
                   </button>
                   <div className="flex items-center justify-between pt-2 sm:pt-3 mt-auto border-t border-slate-100">
                     <div className="flex items-center gap-3">
-                      <LikeButton itemKey={slugify(article.title)} />
+                      <LikeButton targetType="article" targetId={article.id} />
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

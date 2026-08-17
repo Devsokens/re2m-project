@@ -1,49 +1,33 @@
-// Lightweight localStorage-backed likes/comments engine for Actualités & Blog.
-// Keyed by a slug derived from the item's title (no backend/ids exist yet).
+import { apiClient } from '../lib/apiClient';
 
-export const slugify = (title: string): string =>
-  title
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+// Backed by the RE2M API (backend/src/routes/engagement.routes.ts) — keyed by
+// a real (targetType, targetId) pair now that Actualités/Blog have real IDs,
+// instead of the old slugify(title) scheme.
+export type EngagementTargetType = 'news' | 'article';
 
-const hashString = (s: string): number => {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) {
-    h = (h * 31 + s.charCodeAt(i)) | 0;
+const VISITOR_KEY_STORAGE = 're2m_visitor_key';
+
+// A stable anonymous identifier for this browser, used server-side to enforce
+// "one like per visitor" (see the likes table's unique constraint).
+export const getVisitorKey = (): string => {
+  let key = localStorage.getItem(VISITOR_KEY_STORAGE);
+  if (!key) {
+    key = crypto.randomUUID();
+    localStorage.setItem(VISITOR_KEY_STORAGE, key);
   }
-  return Math.abs(h);
+  return key;
 };
-
-// Deterministic baseline so freshly-seeded content doesn't look empty.
-const seedLikes = (key: string): number => 8 + (hashString(key) % 45);
-
-const likesKey = (key: string) => `re2m_likes_count_${key}`;
-const likedFlagKey = (key: string) => `re2m_liked_${key}`;
-const commentsKey = (key: string) => `re2m_comments_${key}`;
 
 export interface LikeState {
   count: number;
   liked: boolean;
 }
 
-export const getLikeState = (key: string): LikeState => {
-  const stored = localStorage.getItem(likesKey(key));
-  const count = stored !== null ? parseInt(stored, 10) : seedLikes(key);
-  const liked = localStorage.getItem(likedFlagKey(key)) === '1';
-  return { count, liked };
-};
+export const getLikeState = (targetType: EngagementTargetType, targetId: string): Promise<LikeState> =>
+  apiClient.get<LikeState>(`/api/engagement/${targetType}/${targetId}/likes?visitorKey=${encodeURIComponent(getVisitorKey())}`);
 
-export const toggleLike = (key: string): LikeState => {
-  const { count, liked } = getLikeState(key);
-  const nextLiked = !liked;
-  const nextCount = nextLiked ? count + 1 : Math.max(0, count - 1);
-  localStorage.setItem(likesKey(key), String(nextCount));
-  localStorage.setItem(likedFlagKey(key), nextLiked ? '1' : '0');
-  return { count: nextCount, liked: nextLiked };
-};
+export const toggleLike = (targetType: EngagementTargetType, targetId: string): Promise<LikeState> =>
+  apiClient.post<LikeState>(`/api/engagement/${targetType}/${targetId}/likes`, { visitorKey: getVisitorKey() });
 
 export interface EngagementComment {
   id: string;
@@ -52,25 +36,8 @@ export interface EngagementComment {
   date: string; // ISO
 }
 
-export const getComments = (key: string): EngagementComment[] => {
-  const raw = localStorage.getItem(commentsKey(key));
-  return raw ? JSON.parse(raw) : [];
-};
+export const getComments = (targetType: EngagementTargetType, targetId: string): Promise<EngagementComment[]> =>
+  apiClient.get<EngagementComment[]>(`/api/engagement/${targetType}/${targetId}/comments`);
 
-export const addComment = (key: string, author: string, text: string): EngagementComment[] => {
-  const comment: EngagementComment = {
-    id: `CMT-${Date.now()}`,
-    author,
-    text,
-    date: new Date().toISOString()
-  };
-  const updated = [...getComments(key), comment];
-  localStorage.setItem(commentsKey(key), JSON.stringify(updated));
-  return updated;
-};
-
-export const deleteComment = (key: string, id: string): EngagementComment[] => {
-  const updated = getComments(key).filter((c) => c.id !== id);
-  localStorage.setItem(commentsKey(key), JSON.stringify(updated));
-  return updated;
-};
+export const addComment = (targetType: EngagementTargetType, targetId: string, author: string, text: string): Promise<EngagementComment> =>
+  apiClient.post<EngagementComment>(`/api/engagement/${targetType}/${targetId}/comments`, { author, text });

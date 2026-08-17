@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Member } from '../../types/member';
-import { articles } from '../../data/articles';
-import { news } from '../../data/news';
+import { Article, articlesStore } from '../../data/articles';
+import { NewsItem, newsStore } from '../../data/news';
 import { newsletters } from '../../data/newsletters';
 import {
   Eye,
@@ -202,6 +202,14 @@ const KpiCard: React.FC<{ label: string; value: string | number; trend?: string;
 
 export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
   const [visitsPeriod, setVisitsPeriod] = useState<VisitsPeriod>('week');
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [news, setNews] = useState<NewsItem[]>([]);
+
+  useEffect(() => {
+    articlesStore.list().then(setArticles).catch((err) => console.error('Impossible de charger les articles :', err));
+    newsStore.list().then(setNews).catch((err) => console.error('Impossible de charger les actualités :', err));
+  }, []);
+
   const activeDataset = VISITS_DATASETS[visitsPeriod];
   const periodTotal = activeDataset.data.reduce((a, b) => a + b, 0);
 

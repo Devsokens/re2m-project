@@ -1,9 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Building2, Search } from 'lucide-react';
-import { news, NewsItem } from '../../data/news';
+import { newsStore, NewsItem } from '../../data/news';
 import { LikeButton } from './LikeButton';
 import { PostModal, PostModalItem } from './PostModal';
-import { slugify } from '../../utils/engagementStore';
 import { stripHtml } from '../../utils/text';
 
 const formatDate = (date: string) =>
@@ -12,7 +11,8 @@ const formatDate = (date: string) =>
 const VOIR_PLUS_THRESHOLD = 140;
 
 const toPostModalItem = (item: NewsItem): PostModalItem => ({
-  key: slugify(item.title),
+  id: item.id,
+  targetType: 'news',
   author: 'Cabinet RE2M',
   authorIcon: Building2,
   date: item.date,
@@ -22,9 +22,15 @@ const toPostModalItem = (item: NewsItem): PostModalItem => ({
 });
 
 export const ActualitesView: React.FC = () => {
+  const [news, setNews] = useState<NewsItem[]>([]);
+
+  useEffect(() => {
+    newsStore.list().then(setNews).catch((err) => console.error('Impossible de charger les actualités :', err));
+  }, []);
+
   const sortedNews = useMemo(
     () => [...news].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-    []
+    [news]
   );
 
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
@@ -33,7 +39,7 @@ export const ActualitesView: React.FC = () => {
   const openModalFor = (item: NewsItem) => setSelectedNews(item);
 
   const handleSelectOther = (other: PostModalItem) => {
-    const match = news.find((n) => slugify(n.title) === other.key);
+    const match = news.find((n) => n.id === other.id);
     if (match) setSelectedNews(match);
   };
 
@@ -67,15 +73,17 @@ export const ActualitesView: React.FC = () => {
         </div>
 
         {filteredNews.length === 0 && (
-          <p className="text-sm text-slate-400 text-center py-16">Aucune actualité ne correspond à "{query}".</p>
+          <p className="text-sm text-slate-400 text-center py-16">
+            {news.length === 0 ? 'Aucune actualité pour le moment.' : `Aucune actualité ne correspond à "${query}".`}
+          </p>
         )}
 
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-          {filteredNews.map((item, idx) => {
+          {filteredNews.map((item) => {
             const isLong = stripHtml(item.excerpt).length > VOIR_PLUS_THRESHOLD;
             return (
               <div
-                key={idx}
+                key={item.id}
                 className={`corporate-card rounded-2xl sm:rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col group hover:shadow-lg transition-all duration-300 ${
                   isLong ? 'cursor-pointer' : ''
                 }`}
@@ -109,7 +117,7 @@ export const ActualitesView: React.FC = () => {
                     </button>
                   )}
                   <div className="flex items-center justify-between pt-2 sm:pt-3 mt-auto border-t border-slate-100">
-                    <LikeButton itemKey={slugify(item.title)} />
+                    <LikeButton targetType="news" targetId={item.id} />
                     <span className="text-[9px] sm:text-[10px] text-slate-400">{formatDate(item.date)}</span>
                   </div>
                 </div>

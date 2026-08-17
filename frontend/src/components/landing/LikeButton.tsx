@@ -1,25 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
-import { getLikeState, toggleLike } from '../../utils/engagementStore';
+import { EngagementTargetType, getLikeState, toggleLike } from '../../utils/engagementStore';
 
 interface LikeButtonProps {
-  itemKey: string;
+  targetType: EngagementTargetType;
+  targetId: string;
   size?: 'sm' | 'md';
   className?: string;
 }
 
-export const LikeButton: React.FC<LikeButtonProps> = ({ itemKey, size = 'sm', className = '' }) => {
-  const [state, setState] = useState(() => getLikeState(itemKey));
+export const LikeButton: React.FC<LikeButtonProps> = ({ targetType, targetId, size = 'sm', className = '' }) => {
+  const [state, setState] = useState({ count: 0, liked: false });
   const [pulse, setPulse] = useState(false);
+
+  useEffect(() => {
+    getLikeState(targetType, targetId)
+      .then(setState)
+      .catch((err) => console.error('Impossible de charger les likes :', err));
+  }, [targetType, targetId]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const next = toggleLike(itemKey);
-    setState(next);
-    if (next.liked) {
+    // Optimistic update so the click feels instant, then reconcile with the server.
+    const optimistic = { count: state.liked ? state.count - 1 : state.count + 1, liked: !state.liked };
+    setState(optimistic);
+    if (optimistic.liked) {
       setPulse(true);
       setTimeout(() => setPulse(false), 300);
     }
+    toggleLike(targetType, targetId)
+      .then(setState)
+      .catch((err) => {
+        console.error('Échec du like :', err);
+        setState(state);
+      });
   };
 
   const isSmall = size === 'sm';
