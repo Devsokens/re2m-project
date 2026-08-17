@@ -13,6 +13,7 @@ import { formationsRouter } from './routes/formations.routes.js';
 import { newsRouter } from './routes/news.routes.js';
 import { articlesRouter } from './routes/articles.routes.js';
 import { engagementRouter } from './routes/engagement.routes.js';
+import { requestsRouter } from './routes/requests.routes.js';
 
 export const app = express();
 
@@ -38,6 +39,7 @@ app.use('/api/formations', formationsRouter);
 app.use('/api/news', newsRouter);
 app.use('/api/articles', articlesRouter);
 app.use('/api/engagement', engagementRouter);
+app.use('/api/requests', requestsRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

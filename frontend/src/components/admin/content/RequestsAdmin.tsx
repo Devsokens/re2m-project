@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Mail, Phone, Building2, CalendarClock, XCircle, MessageCircleReply, Inbox } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
-import { ServiceRequest, RequestType, RequestStatus, requests as initialRequests } from '../../../data/requests';
+import { ServiceRequest, RequestType, RequestStatus, requestsStore } from '../../../data/requests';
 
 const TYPE_OPTIONS: RequestType[] = ['Audit & Conseil', 'Formation', 'Partenariat', 'Autre'];
 
@@ -12,13 +12,18 @@ const STATUS_META: Record<RequestStatus, { label: string; className: string }> =
 };
 
 export const RequestsAdmin: React.FC = () => {
-  const [items, setItems] = useState<ServiceRequest[]>(initialRequests);
+  const [items, setItems] = useState<ServiceRequest[]>([]);
   const [typeFilter, setTypeFilter] = useState<RequestType | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<RequestStatus | 'all'>('all');
   const [isOpen, setIsOpen] = useState(false);
   const [activeRequest, setActiveRequest] = useState<ServiceRequest | null>(null);
   const [action, setAction] = useState<'refuse' | 'schedule' | null>(null);
   const [meetingDate, setMeetingDate] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    requestsStore.list().then(setItems).catch((err) => console.error('Impossible de charger les demandes :', err));
+  }, []);
 
   const filtered = useMemo(() => {
     return items.filter((r) => {
@@ -36,16 +41,17 @@ export const RequestsAdmin: React.FC = () => {
   };
 
   const handleConfirm = () => {
-    if (!activeRequest || !action) return;
-    const nextStatus: RequestStatus = action === 'refuse' ? 'refused' : 'scheduled';
-    setItems((prev) =>
-      prev.map((r) =>
-        r.id === activeRequest.id
-          ? { ...r, status: nextStatus, meetingDate: action === 'schedule' ? meetingDate : r.meetingDate }
-          : r
-      )
-    );
-    setIsOpen(false);
+    if (!activeRequest || !action || saving) return;
+    setSaving(true);
+    const request =
+      action === 'refuse' ? requestsStore.refuse(activeRequest.id) : requestsStore.schedule(activeRequest.id, meetingDate);
+    request
+      .then((updated) => {
+        setItems((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+        setIsOpen(false);
+      })
+      .catch((err) => console.error('Échec de la mise à jour :', err))
+      .finally(() => setSaving(false));
   };
 
   return (
@@ -158,10 +164,10 @@ export const RequestsAdmin: React.FC = () => {
             </button>
             <button
               onClick={handleConfirm}
-              disabled={!action || (action === 'schedule' && !meetingDate)}
+              disabled={!action || (action === 'schedule' && !meetingDate) || saving}
               className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Confirmer
+              {saving ? 'Enregistrement...' : 'Confirmer'}
             </button>
           </>
         }
