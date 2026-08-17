@@ -19,6 +19,7 @@ app.use(
 );
 app.use(express.json({ limit: '2mb' }));
 
+app.get('/', (_req, res) => res.redirect('/api-docs'));
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
