@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, MessageSquareQuote, Send, CheckCircle2 } from 'lucide-react';
 import { testimonialsStore } from '../../utils/testimonialsStore';
-import { ImageUploadField } from '../admin/ImageUploadField';
 
 interface PublicTestimonialModalProps {
   isOpen: boolean;
@@ -18,6 +17,8 @@ export const PublicTestimonialModal: React.FC<PublicTestimonialModalProps> = ({ 
   const [text, setText] = useState('');
   const [logo, setLogo] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   if (!isOpen) return null;
 
@@ -29,13 +30,23 @@ export const PublicTestimonialModal: React.FC<PublicTestimonialModalProps> = ({ 
       setService('');
       setText('');
       setLogo('');
+      setError('');
     }, 300);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    testimonialsStore.submitPublic({ company, service, text, logo });
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setError('');
+    try {
+      await testimonialsStore.submitPublic({ company, service, text, logo });
+      setSubmitted(true);
+    } catch (err) {
+      setError('Impossible d\'envoyer votre témoignage pour le moment. Réessayez plus tard.');
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return createPortal(
@@ -79,7 +90,10 @@ export const PublicTestimonialModal: React.FC<PublicTestimonialModalProps> = ({ 
                 <label className={labelClass}>Service concerné</label>
                 <input required value={service} onChange={(e) => setService(e.target.value)} className={inputClass} placeholder="Ex : Formation Achats" />
               </div>
-              <ImageUploadField label="Logo de l'entreprise (optionnel)" value={logo} onChange={setLogo} />
+              <div>
+                <label className={labelClass}>Logo de l'entreprise (URL, optionnel)</label>
+                <input value={logo} onChange={(e) => setLogo(e.target.value)} className={inputClass} placeholder="https://..." />
+              </div>
               <div>
                 <label className={labelClass}>Votre témoignage</label>
                 <textarea
@@ -91,12 +105,14 @@ export const PublicTestimonialModal: React.FC<PublicTestimonialModalProps> = ({ 
                   placeholder="Partagez votre expérience avec le Cabinet RE2M..."
                 />
               </div>
+              {error && <p className="text-xs text-rose-600 text-center">{error}</p>}
               <button
                 type="submit"
-                className="group w-full bg-[#002366] hover:bg-blue-900 text-white font-bold py-3.5 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-xs cursor-pointer hover:-translate-y-0.5"
+                disabled={isSubmitting}
+                className="group w-full bg-[#002366] hover:bg-blue-900 text-white font-bold py-3.5 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-xs cursor-pointer hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <Send className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                <span>Envoyer mon témoignage</span>
+                <span>{isSubmitting ? 'Envoi...' : 'Envoyer mon témoignage'}</span>
               </button>
             </form>
           </>

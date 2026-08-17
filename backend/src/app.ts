@@ -8,6 +8,8 @@ import { authRouter } from './routes/auth.routes.js';
 import { membersRouter, activityLogsRouter } from './routes/members.routes.js';
 import { cmsRouter } from './routes/cms.routes.js';
 import { uploadsRouter } from './routes/uploads.routes.js';
+import { testimonialsRouter } from './routes/testimonials.routes.js';
+import { formationsRouter } from './routes/formations.routes.js';
 
 export const app = express();
 
@@ -28,6 +30,8 @@ app.use('/api/members', membersRouter);
 app.use('/api/activity-logs', activityLogsRouter);
 app.use('/api/cms', cmsRouter);
 app.use('/api/uploads', uploadsRouter);
+app.use('/api/testimonials', testimonialsRouter);
+app.use('/api/formations', formationsRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

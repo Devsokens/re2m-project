@@ -1,92 +1,53 @@
+import { apiClient } from '../lib/apiClient';
+
+export type TestimonialStatus = 'soumis' | 'publié' | 'rejeté';
 export type TestimonialSource = 'public' | 'lien-privé' | 'admin';
 
-export interface PendingTestimonial {
-  id: string;
-  token: string;
-  company: string;
-  service: string;
-  text: string;
-  logo: string;
-  submittedAt: string;
-  source?: TestimonialSource;
-}
-
-export interface RejectedTestimonial {
+export interface Testimonial {
   id: string;
   company: string;
   service: string;
   text: string;
   logo: string;
+  status: TestimonialStatus;
+  source: TestimonialSource;
   submittedAt: string;
-  rejectedAt: string;
+  rejectedAt?: string | null;
 }
 
-const PENDING_KEY = 're2m_pending_testimonials';
-const REJECTED_KEY = 're2m_rejected_testimonials';
-const TOKENS_KEY = 're2m_testimonial_tokens';
+export interface TestimonialInput {
+  company: string;
+  service: string;
+  text: string;
+  logo: string;
+}
 
-const readJSON = <T>(key: string, fallback: T): T => {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-};
-
-const writeJSON = (key: string, value: unknown) => {
-  localStorage.setItem(key, JSON.stringify(value));
-};
-
+// Backed by the RE2M API (backend/src/routes/testimonials.routes.ts) — a
+// single table with a status column, replacing the old localStorage +
+// CMS-block hybrid. GET /api/testimonials returns only "publié" rows to
+// anonymous callers and everything to an authenticated admin.
 export const testimonialsStore = {
-  // Share tokens — one per client invitation link
-  createShareToken(): string {
-    const token = Math.random().toString(36).slice(2, 10);
-    const tokens = readJSON<string[]>(TOKENS_KEY, []);
-    writeJSON(TOKENS_KEY, [...tokens, token]);
-    return token;
-  },
+  list: (): Promise<Testimonial[]> => apiClient.get<Testimonial[]>('/api/testimonials'),
 
-  isValidToken(token: string): boolean {
-    const tokens = readJSON<string[]>(TOKENS_KEY, []);
-    return tokens.includes(token);
-  },
+  create: (input: TestimonialInput): Promise<Testimonial> => apiClient.post<Testimonial>('/api/testimonials', input),
 
-  // Pending client submissions ("soumis"), awaiting admin review — from a private link or the public site
-  getPending(): PendingTestimonial[] {
-    return readJSON<PendingTestimonial[]>(PENDING_KEY, []);
-  },
+  update: (id: string, input: TestimonialInput): Promise<Testimonial> => apiClient.put<Testimonial>(`/api/testimonials/${id}`, input),
 
-  addPending(entry: Omit<PendingTestimonial, 'id' | 'submittedAt'>): void {
-    const pending = this.getPending();
-    const newEntry: PendingTestimonial = {
-      ...entry,
-      id: `PEND-${Date.now()}`,
-      submittedAt: new Date().toISOString()
-    };
-    writeJSON(PENDING_KEY, [newEntry, ...pending]);
-  },
+  submitPublic: (input: TestimonialInput): Promise<void> => apiClient.post('/api/testimonials/public', input),
 
-  // Public submission, no invitation token required — still lands in the pending queue for review
-  submitPublic(entry: { company: string; service: string; text: string; logo: string }): void {
-    this.addPending({ ...entry, token: '', source: 'public' });
-  },
+  createShareToken: (): Promise<string> => apiClient.post<{ token: string }>('/api/testimonials/tokens').then((r) => r.token),
 
-  removePending(id: string): void {
-    writeJSON(PENDING_KEY, this.getPending().filter((p) => p.id !== id));
-  },
+  isValidToken: (token: string): Promise<boolean> =>
+    apiClient
+      .get<{ valid: boolean }>(`/api/testimonials/tokens/${token}`)
+      .then((r) => r.valid)
+      .catch(() => false),
 
-  // Rejected ("rejeté") — kept for record instead of being deleted outright
-  getRejected(): RejectedTestimonial[] {
-    return readJSON<RejectedTestimonial[]>(REJECTED_KEY, []);
-  },
+  submitViaToken: (token: string, input: TestimonialInput): Promise<void> => apiClient.post(`/api/testimonials/submit/${token}`, input),
 
-  addRejected(entry: Omit<RejectedTestimonial, 'rejectedAt'>): void {
-    const rejected = this.getRejected();
-    writeJSON(REJECTED_KEY, [{ ...entry, rejectedAt: new Date().toISOString() }, ...rejected]);
-  },
+  approve: (id: string): Promise<Testimonial> => apiClient.patch<Testimonial>(`/api/testimonials/${id}/approve`),
 
-  removeRejected(id: string): void {
-    writeJSON(REJECTED_KEY, this.getRejected().filter((r) => r.id !== id));
-  }
+  reject: (id: string): Promise<Testimonial> => apiClient.patch<Testimonial>(`/api/testimonials/${id}/reject`),
+
+  republish: (id: string): Promise<Testimonial> => apiClient.patch<Testimonial>(`/api/testimonials/${id}/republish`)
 };

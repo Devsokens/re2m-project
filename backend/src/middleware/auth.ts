@@ -31,6 +31,30 @@ export const requireAuth = asyncHandler(async (req: Request, _res: Response, nex
   next();
 });
 
+// For routes that behave differently for admins vs the public (e.g. a list
+// endpoint that shows everything to an admin but only published rows to
+// anyone else) — populates req.user when a valid token is present, but never
+// rejects the request when it's absent or invalid.
+export const optionalAuth = asyncHandler(async (req: Request, _res: Response, next: NextFunction) => {
+  const header = req.headers.authorization;
+  const token = header?.startsWith('Bearer ') ? header.slice(7) : null;
+  if (!token) return next();
+
+  const { data: authData } = await supabaseAnon.auth.getUser(token);
+  if (!authData.user) return next();
+
+  const { data: account } = await supabaseAdmin
+    .from('user_accounts')
+    .select('id, name, email, role, status')
+    .eq('id', authData.user.id)
+    .maybeSingle();
+
+  if (account && account.status === 'active') {
+    req.user = { id: account.id, email: account.email, name: account.name, role: userRoleSchema.parse(account.role) };
+  }
+  next();
+});
+
 export const requireRole = (...allowed: UserRole[]) => (req: Request, _res: Response, next: NextFunction) => {
   if (!req.user) throw unauthorized();
   if (!allowed.includes(req.user.role)) {

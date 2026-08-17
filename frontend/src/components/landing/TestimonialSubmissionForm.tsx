@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { MessageSquareQuote, ShieldCheck, Send, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { MessageSquareQuote, ShieldCheck, Send, CheckCircle2, Loader2 } from 'lucide-react';
 import { testimonialsStore } from '../../utils/testimonialsStore';
-import { ImageUploadField } from '../admin/ImageUploadField';
 
 interface TestimonialSubmissionFormProps {
   token: string;
@@ -13,14 +12,36 @@ export const TestimonialSubmissionForm: React.FC<TestimonialSubmissionFormProps>
   const [text, setText] = useState('');
   const [logo, setLogo] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [isValid, setIsValid] = useState<boolean | null>(null);
 
-  const isValid = testimonialsStore.isValidToken(token);
+  useEffect(() => {
+    testimonialsStore.isValidToken(token).then(setIsValid);
+  }, [token]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    testimonialsStore.addPending({ company, service, text, logo, token });
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setError('');
+    try {
+      await testimonialsStore.submitViaToken(token, { company, service, text, logo });
+      setSubmitted(true);
+    } catch (err) {
+      setError('Impossible d\'envoyer votre témoignage pour le moment. Réessayez plus tard.');
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (isValid === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="w-6 h-6 text-[#002366] animate-spin" />
+      </div>
+    );
+  }
 
   if (!isValid) {
     return (
@@ -91,7 +112,15 @@ export const TestimonialSubmissionForm: React.FC<TestimonialSubmissionFormProps>
             />
           </div>
 
-          <ImageUploadField label="Logo de l'entreprise (optionnel)" value={logo} onChange={setLogo} />
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Logo de l'entreprise (URL, optionnel)</label>
+            <input
+              value={logo}
+              onChange={(e) => setLogo(e.target.value)}
+              className="w-full bg-slate-50 text-slate-800 text-xs rounded-xl px-3 py-3 border border-slate-200 focus:border-[#002366] focus:bg-white focus:outline-none"
+              placeholder="https://..."
+            />
+          </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Votre témoignage</label>
@@ -105,12 +134,15 @@ export const TestimonialSubmissionForm: React.FC<TestimonialSubmissionFormProps>
             />
           </div>
 
+          {error && <p className="text-xs text-rose-600 text-center">{error}</p>}
+
           <button
             type="submit"
-            className="group w-full bg-[#002366] hover:bg-blue-900 text-white font-bold py-3.5 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-xs cursor-pointer hover:-translate-y-0.5"
+            disabled={isSubmitting}
+            className="group w-full bg-[#002366] hover:bg-blue-900 text-white font-bold py-3.5 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 text-xs cursor-pointer hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <Send className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            <span>Envoyer mon témoignage</span>
+            <span>{isSubmitting ? 'Envoi...' : 'Envoyer mon témoignage'}</span>
           </button>
         </form>
       </div>

@@ -12,6 +12,7 @@ import { TeamSection } from './TeamSection';
 import { Member } from '../../types/member';
 import { PublicTestimonialModal } from './PublicTestimonialModal';
 import { apiClient, ApiError } from '../../lib/apiClient';
+import { testimonialsStore, Testimonial } from '../../utils/testimonialsStore';
 
 interface AccueilViewProps {
   onStartDemo: () => void;
@@ -36,6 +37,16 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
 }) => {
   const [isCertificateModalOpen, setIsCertificateModalOpen] = useState(false);
   const [isTestimonialModalOpen, setIsTestimonialModalOpen] = useState(false);
+
+  // Published testimonials now live in their own table (see Témoignages admin
+  // module) instead of being embedded in this CMS block's settings.items.
+  const [publishedTestimonials, setPublishedTestimonials] = useState<Testimonial[]>([]);
+  useEffect(() => {
+    testimonialsStore
+      .list()
+      .then((rows) => setPublishedTestimonials(rows.filter((r) => r.status === 'publié')))
+      .catch((err) => console.error('Impossible de charger les témoignages :', err));
+  }, []);
 
   // Cross-page lookup: the "ServicesPreview" block pulls its services list
   // straight from the "nos-services" page's own ServicesList block. Edit mode
@@ -352,12 +363,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 );
               }
               case 'Testimonials': {
-                const testiItems = block.settings.items || testimonials;
-                const saveTestiField = (originalIdx: number, key: string, v: string) => {
-                  const updated = [...testiItems];
-                  updated[originalIdx] = { ...updated[originalIdx], [key]: v };
-                  onUpdateBlockSetting?.(block.id, 'items', updated);
-                };
+                const testiItems = publishedTestimonials.length > 0 ? publishedTestimonials : testimonials;
                 const repeatedTesti = [...testiItems, ...testiItems, ...testiItems];
 
                 return (
@@ -382,57 +388,42 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                         />
                       </div>
 
+                      {onUpdateBlockSetting && (
+                        <p className="text-center text-[11px] text-slate-400 mb-4">
+                          Les témoignages se gèrent désormais depuis le module <strong className="text-[#002366]">Témoignages</strong> (barre latérale) — le titre et la description ci-dessus restent modifiables ici.
+                        </p>
+                      )}
+
                       <div className="relative w-full overflow-x-hidden py-4">
                         <div className="flex gap-6 animate-marquee-testimonials whitespace-nowrap">
-                          {repeatedTesti.map((testi: any, tIdx: number) => {
-                            const originalIdx = tIdx % testiItems.length;
-                            return (
-                              <div
-                                key={tIdx}
-                                className="whitespace-normal shrink-0 w-80 sm:w-96 corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300 min-h-[240px]"
-                              >
-                                <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
-                                  ”
-                                </span>
+                          {repeatedTesti.map((testi: any, tIdx: number) => (
+                            <div
+                              key={tIdx}
+                              className="whitespace-normal shrink-0 w-80 sm:w-96 corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300 min-h-[240px]"
+                            >
+                              <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
+                                ”
+                              </span>
 
-                                <div className="space-y-4 relative z-10">
-                                  <EditableText
-                                    as="p"
-                                    label="Témoignage"
-                                    multiline
-                                    value={testi.text}
-                                    onSave={(v) => saveTestiField(originalIdx, 'text', v)}
-                                    className="text-slate-600 text-sm italic leading-relaxed text-justify"
-                                  />
-                                </div>
+                              <div className="space-y-4 relative z-10">
+                                <p className="text-slate-600 text-sm italic leading-relaxed text-justify">{testi.text}</p>
+                              </div>
 
-                                <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
-                                  <EditableImage
+                              <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
+                                {testi.logo && (
+                                  <img
                                     src={testi.logo}
                                     alt={`${testi.company} logo`}
-                                    onSave={(v) => saveTestiField(originalIdx, 'logo', v)}
                                     className="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-white shrink-0"
                                   />
-                                  <div>
-                                    <EditableText
-                                      as="h4"
-                                      label="Entreprise"
-                                      value={testi.company}
-                                      onSave={(v) => saveTestiField(originalIdx, 'company', v)}
-                                      className="font-serif text-sm font-bold text-[#002366]"
-                                    />
-                                    <EditableText
-                                      as="p"
-                                      label="Service"
-                                      value={testi.service}
-                                      onSave={(v) => saveTestiField(originalIdx, 'service', v)}
-                                      className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5"
-                                    />
-                                  </div>
+                                )}
+                                <div>
+                                  <h4 className="font-serif text-sm font-bold text-[#002366]">{testi.company}</h4>
+                                  <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{testi.service}</p>
                                 </div>
                               </div>
-                            );
-                          })}
+                            </div>
+                          ))}
                         </div>
                       </div>
 

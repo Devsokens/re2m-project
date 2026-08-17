@@ -73,8 +73,8 @@ const getStampUrl = (): string | undefined => localStorage.getItem('re2m_certifi
 type DetailTab = 'participants' | 'certification';
 
 export const FormationsAdmin: React.FC = () => {
-  const [formations, setFormations] = useState<Formation[]>(formationsStore.getFormations());
-  const [allParticipants, setAllParticipants] = useState<Participant[]>(formationsStore.getAllParticipants());
+  const [formations, setFormations] = useState<Formation[]>([]);
+  const [participants, setParticipants] = useState<Participant[]>([]);
   const [activeFormationId, setActiveFormationId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<DetailTab>('participants');
 
@@ -100,10 +100,6 @@ export const FormationsAdmin: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const activeFormation = formations.find((f) => f.id === activeFormationId) || null;
-  const participants = useMemo(
-    () => allParticipants.filter((p) => p.formationId === activeFormationId),
-    [allParticipants, activeFormationId]
-  );
   const selectedParticipant = participants.find((p) => p.id === selectedParticipantId) || null;
 
   const filteredParticipants = useMemo(() => {
@@ -113,6 +109,25 @@ export const FormationsAdmin: React.FC = () => {
       (p) => p.fullName.toLowerCase().includes(q) || (p.email || '').toLowerCase().includes(q) || (p.organization || '').toLowerCase().includes(q)
     );
   }, [participants, participantQuery]);
+
+  const loadFormations = () => {
+    formationsStore.list().then(setFormations).catch((err) => console.error('Échec du chargement des formations :', err));
+  };
+
+  useEffect(() => {
+    loadFormations();
+  }, []);
+
+  useEffect(() => {
+    if (!activeFormationId) {
+      setParticipants([]);
+      return;
+    }
+    formationsStore
+      .listParticipants(activeFormationId)
+      .then(setParticipants)
+      .catch((err) => console.error('Échec du chargement des participants :', err));
+  }, [activeFormationId]);
 
   useEffect(() => {
     if (!openMenuId) return;
@@ -137,36 +152,34 @@ export const FormationsAdmin: React.FC = () => {
     setOpenMenuId(id);
   };
 
-  const persistFormations = (updated: Formation[]) => {
-    setFormations(updated);
-    formationsStore.saveFormations(updated);
-  };
-  const persistParticipants = (updated: Participant[]) => {
-    setAllParticipants(updated);
-    formationsStore.saveAllParticipants(updated);
-  };
-
   // --- Formation CRUD ---
   const openCreateFormation = () => {
-    setFormationDraft({ ...emptyFormationDraft, id: `FRM-${String(formations.length + 1).padStart(3, '0')}`, templateId: getDefaultTemplateId() });
+    setFormationDraft({ ...emptyFormationDraft, id: `FRM-${Date.now()}`, templateId: getDefaultTemplateId() });
     setIsFormationFormOpen(true);
   };
   const handleSaveFormation = () => {
     if (!formationDraft.title.trim()) return;
-    persistFormations([formationDraft, ...formations]);
-    setIsFormationFormOpen(false);
+    formationsStore
+      .create(formationDraft)
+      .then((created) => {
+        setFormations((prev) => [created, ...prev]);
+        setIsFormationFormOpen(false);
+      })
+      .catch((err) => console.error('Échec de la création de la formation :', err));
   };
   const handleDeleteFormation = (id: string) => {
-    if (window.confirm('Supprimer cette formation et tous ses participants ?')) {
-      persistFormations(formations.filter((f) => f.id !== id));
-      persistParticipants(allParticipants.filter((p) => p.formationId !== id));
-    }
+    if (!window.confirm('Supprimer cette formation et tous ses participants ?')) return;
+    formationsStore
+      .remove(id)
+      .then(() => setFormations((prev) => prev.filter((f) => f.id !== id)))
+      .catch((err) => console.error('Échec de la suppression :', err));
   };
 
   const openFormationDetail = (id: string) => {
     setActiveFormationId(id);
     setDetailTab('participants');
     setSelectedParticipantId(null);
+    setSelectedIds(new Set());
   };
 
   // --- Participant CRUD ---
@@ -176,25 +189,29 @@ export const FormationsAdmin: React.FC = () => {
   };
   const handleSaveParticipant = () => {
     if (!participantDraft.fullName.trim() || !activeFormationId) return;
-    const newParticipant: Participant = {
-      id: `PAR-${Date.now()}`,
-      formationId: activeFormationId,
-      fullName: participantDraft.fullName,
-      email: participantDraft.email,
-      organization: participantDraft.organization,
-      present: true
-    };
-    persistParticipants([...allParticipants, newParticipant]);
-    setIsParticipantFormOpen(false);
+    formationsStore
+      .addParticipant(activeFormationId, participantDraft)
+      .then((created) => {
+        setParticipants((prev) => [...prev, created]);
+        setFormations((prev) => prev.map((f) => (f.id === activeFormationId ? { ...f, participantCount: (f.participantCount ?? 0) + 1 } : f)));
+        setIsParticipantFormOpen(false);
+      })
+      .catch((err) => console.error('Échec de l\'ajout du participant :', err));
   };
   const handleDeleteParticipant = (id: string) => {
-    persistParticipants(allParticipants.filter((p) => p.id !== id));
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
-    });
-    setSelectedParticipantId((prev) => (prev === id ? null : prev));
+    formationsStore
+      .removeParticipant(id)
+      .then(() => {
+        setParticipants((prev) => prev.filter((p) => p.id !== id));
+        setFormations((prev) => prev.map((f) => (f.id === activeFormationId ? { ...f, participantCount: Math.max(0, (f.participantCount ?? 1) - 1) } : f)));
+        setSelectedIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+        setSelectedParticipantId((prev) => (prev === id ? null : prev));
+      })
+      .catch((err) => console.error('Échec de la suppression du participant :', err));
   };
 
   const openEditParticipant = (p: Participant) => {
@@ -203,14 +220,13 @@ export const FormationsAdmin: React.FC = () => {
   };
   const handleSaveEditParticipant = () => {
     if (!editingParticipantId || !editDraft.fullName.trim()) return;
-    persistParticipants(
-      allParticipants.map((p) =>
-        p.id === editingParticipantId
-          ? { ...p, fullName: editDraft.fullName, email: editDraft.email, organization: editDraft.organization, present: editDraft.present }
-          : p
-      )
-    );
-    setEditingParticipantId(null);
+    formationsStore
+      .updateParticipant(editingParticipantId, editDraft)
+      .then((updated) => {
+        setParticipants((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+        setEditingParticipantId(null);
+      })
+      .catch((err) => console.error('Échec de la mise à jour :', err));
   };
 
   // --- Excel import / template ---
@@ -225,26 +241,31 @@ export const FormationsAdmin: React.FC = () => {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows: any[] = XLSX.utils.sheet_to_json(sheet, { defval: '' });
 
-    const imported: Participant[] = rows
-      .map((row, idx) => {
+    const imported = rows
+      .map((row) => {
         const fullName = row['Nom'] || row['Nom complet'] || row['Name'] || row['nom'] || '';
         if (!fullName) return null;
         return {
-          id: `PAR-${Date.now()}-${idx}`,
-          formationId: activeFormationId,
           fullName: String(fullName),
           email: String(row['Email'] || row['email'] || ''),
           organization: String(row['Organisation'] || row['Entreprise'] || row['organization'] || ''),
           present: true
-        } as Participant;
+        };
       })
-      .filter((p): p is Participant => p !== null);
+      .filter((p): p is { fullName: string; email: string; organization: string; present: boolean } => p !== null);
 
     if (imported.length === 0) {
       window.alert("Aucune ligne valide trouvée. Assurez-vous d'avoir une colonne \"Nom\".");
       return;
     }
-    persistParticipants([...allParticipants, ...imported]);
+
+    formationsStore
+      .addParticipantsBulk(activeFormationId, imported)
+      .then((created) => {
+        setParticipants((prev) => [...prev, ...created]);
+        setFormations((prev) => prev.map((f) => (f.id === activeFormationId ? { ...f, participantCount: (f.participantCount ?? 0) + created.length } : f)));
+      })
+      .catch((err) => console.error('Échec de l\'import Excel :', err));
   };
 
   const handleDownloadTemplate = async () => {
@@ -741,35 +762,32 @@ export const FormationsAdmin: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {formations.map((f) => {
-          const count = allParticipants.filter((p) => p.formationId === f.id).length;
-          return (
-            <div key={f.id} className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col justify-between group">
-              <div onClick={() => openFormationDetail(f.id)} className="cursor-pointer">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366] mb-3">
-                  <GraduationCap className="w-5 h-5" />
-                </div>
-                <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{f.title}</h4>
-                <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-500">
-                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(f.date).toLocaleDateString('fr-FR')}</span>
-                  <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {count}</span>
-                </div>
+        {formations.map((f) => (
+          <div key={f.id} className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex flex-col justify-between group">
+            <div onClick={() => openFormationDetail(f.id)} className="cursor-pointer">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366] mb-3">
+                <GraduationCap className="w-5 h-5" />
               </div>
-              <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
-                <button onClick={() => openFormationDetail(f.id)} className="text-xs font-bold text-[#002366] hover:text-blue-900 cursor-pointer">
-                  Gérer les participants →
-                </button>
-                <button
-                  onClick={() => handleDeleteFormation(f.id)}
-                  className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
-                  title="Supprimer"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+              <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{f.title}</h4>
+              <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-500">
+                <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(f.date).toLocaleDateString('fr-FR')}</span>
+                <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {f.participantCount ?? 0}</span>
               </div>
             </div>
-          );
-        })}
+            <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
+              <button onClick={() => openFormationDetail(f.id)} className="text-xs font-bold text-[#002366] hover:text-blue-900 cursor-pointer">
+                Gérer les participants →
+              </button>
+              <button
+                onClick={() => handleDeleteFormation(f.id)}
+                className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
+                title="Supprimer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        ))}
 
         {formations.length === 0 && (
           <div className="col-span-full flex flex-col items-center justify-center text-center gap-3 py-16 corporate-card rounded-3xl border border-dashed border-slate-300 bg-white">

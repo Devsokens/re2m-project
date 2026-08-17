@@ -2,50 +2,28 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Plus, Pencil, Ban, RotateCcw, Link2, Copy, Check, MessageSquareQuote, Search, Globe } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
 import { ImageUploadField } from '../ImageUploadField';
-import { cmsStorage } from '../../../utils/cmsStorage';
-import { testimonialsStore, PendingTestimonial, RejectedTestimonial } from '../../../utils/testimonialsStore';
+import { testimonialsStore, Testimonial, TestimonialStatus } from '../../../utils/testimonialsStore';
 
-interface Testimonial {
-  id: string;
-  company: string;
-  service: string;
-  text: string;
-  logo: string;
-}
-
-type Status = 'soumis' | 'publié' | 'rejeté';
-type FilterStatus = 'tous' | Status;
-
-interface UnifiedRow {
-  id: string;
-  company: string;
-  service: string;
-  text: string;
-  logo: string;
-  status: Status;
-  submittedAt?: string;
-  source?: string;
-  publishedIdx?: number;
-  pendingRef?: PendingTestimonial;
-  rejectedRef?: RejectedTestimonial;
-}
+type FilterStatus = 'tous' | TestimonialStatus;
 
 const emptyDraft = { company: '', service: '', text: '', logo: '' };
 const inputClass = 'w-full bg-slate-50 text-slate-800 text-xs rounded-xl px-3 py-2.5 border border-slate-200 focus:border-[#002366] focus:bg-white focus:outline-none';
 const labelClass = 'block text-xs font-bold text-slate-500 uppercase mb-1.5';
 
-const STATUS_STYLES: Record<Status, string> = {
+const STATUS_STYLES: Record<TestimonialStatus, string> = {
   soumis: 'text-amber-700 bg-amber-50 border-amber-100',
   publié: 'text-emerald-700 bg-emerald-50 border-emerald-100',
   rejeté: 'text-rose-700 bg-rose-50 border-rose-100'
 };
 
-const genId = () => `TST-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+const SOURCE_LABELS: Record<string, string> = {
+  public: 'Site public',
+  'lien-privé': 'Lien privé',
+  admin: 'Admin'
+};
 
 export const TestimonialsAdmin: React.FC = () => {
-  const [items, setItems] = useState<Testimonial[]>([]);
-  const [pending, setPending] = useState<PendingTestimonial[]>([]);
-  const [rejected, setRejected] = useState<RejectedTestimonial[]>([]);
+  const [rows, setRows] = useState<Testimonial[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState(emptyDraft);
@@ -54,38 +32,13 @@ export const TestimonialsAdmin: React.FC = () => {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('tous');
 
-  const loadItems = async () => {
-    const blocks = await cmsStorage.getDraftLayout('accueil');
-    const block = blocks.find((b) => b.type === 'Testimonials');
-    const rawItems: any[] = block?.settings.items || [];
-    // One-time migration: assign a stable id to any legacy item that doesn't have one yet
-    let mutated = false;
-    const withIds: Testimonial[] = rawItems.map((t) => {
-      if (t.id) return t;
-      mutated = true;
-      return { ...t, id: genId() };
-    });
-    if (mutated && block) {
-      const next = blocks.map((b) => (b.type === 'Testimonials' ? { ...b, settings: { ...b.settings, items: withIds } } : b));
-      await cmsStorage.saveDraftLayout('accueil', next);
-      await cmsStorage.publishLayout('accueil');
-    }
-    setItems(withIds);
+  const loadRows = () => {
+    testimonialsStore.list().then(setRows).catch((err) => console.error('Échec du chargement des témoignages :', err));
   };
 
   useEffect(() => {
-    loadItems().catch((err) => console.error('Échec du chargement des témoignages :', err));
-    setPending(testimonialsStore.getPending());
-    setRejected(testimonialsStore.getRejected());
+    loadRows();
   }, []);
-
-  const persistItems = async (updated: Testimonial[]) => {
-    const blocks = await cmsStorage.getDraftLayout('accueil');
-    const next = blocks.map((b) => (b.type === 'Testimonials' ? { ...b, settings: { ...b.settings, items: updated } } : b));
-    await cmsStorage.saveDraftLayout('accueil', next);
-    await cmsStorage.publishLayout('accueil');
-    setItems(updated);
-  };
 
   const openCreate = () => {
     setEditingId(null);
@@ -93,7 +46,7 @@ export const TestimonialsAdmin: React.FC = () => {
     setIsOpen(true);
   };
 
-  const openEdit = (row: UnifiedRow) => {
+  const openEdit = (row: Testimonial) => {
     setEditingId(row.id);
     setDraft({ company: row.company, service: row.service, text: row.text, logo: row.logo });
     setIsOpen(true);
@@ -101,19 +54,23 @@ export const TestimonialsAdmin: React.FC = () => {
 
   const handleSave = () => {
     if (!draft.company.trim() || !draft.text.trim()) return;
-    if (editingId === null) {
-      persistItems([{ id: genId(), ...draft }, ...items]);
-    } else {
-      persistItems(items.map((t) => (t.id === editingId ? { ...t, ...draft } : t)));
-    }
-    setIsOpen(false);
+    const action = editingId === null ? testimonialsStore.create(draft) : testimonialsStore.update(editingId, draft);
+    action
+      .then((saved) => {
+        setRows((prev) => (editingId === null ? [saved, ...prev] : prev.map((r) => (r.id === saved.id ? saved : r))));
+        setIsOpen(false);
+      })
+      .catch((err) => console.error('Échec de l\'enregistrement :', err));
   };
 
   const handleGenerateLink = () => {
-    const token = testimonialsStore.createShareToken();
-    const url = `${window.location.origin}${window.location.pathname}?testimonial=${token}`;
-    setShareLink(url);
-    setCopied(false);
+    testimonialsStore
+      .createShareToken()
+      .then((token) => {
+        setShareLink(`${window.location.origin}${window.location.pathname}?testimonial=${token}`);
+        setCopied(false);
+      })
+      .catch((err) => console.error('Échec de la génération du lien :', err));
   };
 
   const handleCopy = async () => {
@@ -122,87 +79,46 @@ export const TestimonialsAdmin: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // soumis -> publié
-  const handleApprove = (entry: PendingTestimonial) => {
-    persistItems([{ id: genId(), company: entry.company, service: entry.service, text: entry.text, logo: entry.logo }, ...items]);
-    testimonialsStore.removePending(entry.id);
-    setPending(testimonialsStore.getPending());
+  const handleApprove = (row: Testimonial) => {
+    testimonialsStore
+      .approve(row.id)
+      .then((updated) => setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r))))
+      .catch((err) => console.error('Échec de l\'approbation :', err));
   };
 
-  // soumis -> rejeté (kept, not deleted)
-  const handleRejectPending = (entry: PendingTestimonial) => {
-    testimonialsStore.addRejected({ id: entry.id, company: entry.company, service: entry.service, text: entry.text, logo: entry.logo, submittedAt: entry.submittedAt });
-    testimonialsStore.removePending(entry.id);
-    setPending(testimonialsStore.getPending());
-    setRejected(testimonialsStore.getRejected());
+  const handleReject = (row: Testimonial) => {
+    if (row.status === 'publié' && !window.confirm('Rejeter ce témoignage ? Il ne sera plus affiché sur le site mais restera consultable via le filtre "Rejeté".')) return;
+    testimonialsStore
+      .reject(row.id)
+      .then((updated) => setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r))))
+      .catch((err) => console.error('Échec du rejet :', err));
   };
 
-  // publié -> rejeté (kept, not deleted)
-  const handleRejectPublished = (row: UnifiedRow) => {
-    if (!window.confirm('Rejeter ce témoignage ? Il ne sera plus affiché sur le site mais restera consultable via le filtre "Rejeté".')) return;
-    testimonialsStore.addRejected({ id: row.id, company: row.company, service: row.service, text: row.text, logo: row.logo, submittedAt: new Date().toISOString() });
-    persistItems(items.filter((t) => t.id !== row.id));
-    setRejected(testimonialsStore.getRejected());
+  const handleRepublish = (row: Testimonial) => {
+    testimonialsStore
+      .republish(row.id)
+      .then((updated) => setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r))))
+      .catch((err) => console.error('Échec de la republication :', err));
   };
-
-  // rejeté -> publié
-  const handleRepublish = (row: RejectedTestimonial) => {
-    persistItems([{ id: row.id, company: row.company, service: row.service, text: row.text, logo: row.logo }, ...items]);
-    testimonialsStore.removeRejected(row.id);
-    setRejected(testimonialsStore.getRejected());
-  };
-
-  const unifiedRows: UnifiedRow[] = useMemo(() => {
-    const published: UnifiedRow[] = items.map((t) => ({
-      id: t.id,
-      company: t.company,
-      service: t.service,
-      text: t.text,
-      logo: t.logo,
-      status: 'publié'
-    }));
-    const soumis: UnifiedRow[] = pending.map((p) => ({
-      id: p.id,
-      company: p.company,
-      service: p.service,
-      text: p.text,
-      logo: p.logo,
-      status: 'soumis',
-      submittedAt: p.submittedAt,
-      source: p.source === 'public' ? 'Site public' : 'Lien privé',
-      pendingRef: p
-    }));
-    const rejetes: UnifiedRow[] = rejected.map((r) => ({
-      id: r.id,
-      company: r.company,
-      service: r.service,
-      text: r.text,
-      logo: r.logo,
-      status: 'rejeté',
-      submittedAt: r.rejectedAt,
-      rejectedRef: r
-    }));
-    return [...soumis, ...published, ...rejetes];
-  }, [items, pending, rejected]);
 
   const visibleRows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return unifiedRows.filter((row) => {
+    return rows.filter((row) => {
       // By default (no explicit filter) only show "soumis" and "publié" — rejected stays hidden
       const matchesStatus = statusFilter === 'tous' ? row.status !== 'rejeté' : row.status === statusFilter;
       if (!matchesStatus) return false;
       if (!q) return true;
       return row.company.toLowerCase().includes(q) || row.service.toLowerCase().includes(q) || row.text.toLowerCase().includes(q);
     });
-  }, [unifiedRows, query, statusFilter]);
+  }, [rows, query, statusFilter]);
 
   const counts = useMemo(
     () => ({
-      soumis: unifiedRows.filter((r) => r.status === 'soumis').length,
-      publié: unifiedRows.filter((r) => r.status === 'publié').length,
-      rejeté: unifiedRows.filter((r) => r.status === 'rejeté').length
+      soumis: rows.filter((r) => r.status === 'soumis').length,
+      publié: rows.filter((r) => r.status === 'publié').length,
+      rejeté: rows.filter((r) => r.status === 'rejeté').length
     }),
-    [unifiedRows]
+    [rows]
   );
 
   const FILTERS: { id: FilterStatus; label: string; count?: number }[] = [
@@ -303,23 +219,23 @@ export const TestimonialsAdmin: React.FC = () => {
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-[#002366] truncate">{row.company}</p>
                   <p className="text-[10px] text-slate-400 truncate">{row.service}</p>
-                  {row.source && (
+                  {row.status !== 'publié' && (
                     <p className="text-[9px] text-slate-400 flex items-center gap-1 mt-0.5">
-                      <Globe className="w-2.5 h-2.5" /> {row.source}
+                      <Globe className="w-2.5 h-2.5" /> {SOURCE_LABELS[row.source] || row.source}
                     </p>
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  {row.status === 'soumis' && row.pendingRef && (
+                  {row.status === 'soumis' && (
                     <>
                       <button
-                        onClick={() => handleApprove(row.pendingRef!)}
+                        onClick={() => handleApprove(row)}
                         className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold cursor-pointer transition-colors"
                       >
                         Approuver
                       </button>
                       <button
-                        onClick={() => handleRejectPending(row.pendingRef!)}
+                        onClick={() => handleReject(row)}
                         className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
                         title="Rejeter"
                       >
@@ -337,7 +253,7 @@ export const TestimonialsAdmin: React.FC = () => {
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button
-                        onClick={() => handleRejectPublished(row)}
+                        onClick={() => handleReject(row)}
                         className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
                         title="Rejeter"
                       >
@@ -345,9 +261,9 @@ export const TestimonialsAdmin: React.FC = () => {
                       </button>
                     </>
                   )}
-                  {row.status === 'rejeté' && row.rejectedRef && (
+                  {row.status === 'rejeté' && (
                     <button
-                      onClick={() => handleRepublish(row.rejectedRef!)}
+                      onClick={() => handleRepublish(row)}
                       className="px-2.5 py-1.5 rounded-lg bg-blue-50 border border-blue-100 text-[#002366] text-[10px] font-bold flex items-center gap-1 cursor-pointer hover:bg-blue-100 transition-colors"
                       title="Republier"
                     >
