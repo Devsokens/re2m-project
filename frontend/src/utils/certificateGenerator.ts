@@ -29,7 +29,12 @@ function waitForImages(container: HTMLElement, timeoutMs = 5000): Promise<void> 
 
 // Renders a <CertificateTemplate> off-screen and rasterizes it to a PNG data URL via html2canvas.
 async function renderCertificateToDataUrl(data: CertificateData): Promise<string> {
-  const html2canvas = (await import('html2canvas')).default;
+  // html2canvas-pro (not the plain html2canvas package) — Tailwind v4's
+  // default color palette compiles to oklch(), which the original
+  // html2canvas can't parse and throws on ("unsupported color function
+  // oklch") the moment it walks the certificate's computed styles. The
+  // -pro fork adds support for oklch/oklab/lab/lch/color-mix.
+  const html2canvas = (await import('html2canvas-pro')).default;
 
   const host = document.createElement('div');
   host.style.position = 'fixed';
