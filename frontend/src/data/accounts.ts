@@ -1,4 +1,5 @@
 import { UserRole } from '../types/member';
+import { apiClient } from '../lib/apiClient';
 
 export interface ModulePermission {
   read: boolean;
@@ -26,13 +27,19 @@ export interface UserAccount {
   permissions?: Partial<Record<PermissionModuleKey, ModulePermission>>;
 }
 
-export const accounts: UserAccount[] = [
-  {
-    id: 'ACC-001',
-    name: 'Roch-Emmanuel MVE-MBORO',
-    email: 'admin@cabinet-re2m.com',
-    role: 'SUPER_ADMIN',
-    status: 'active',
-    createdAt: '2026-01-10'
-  }
-];
+export type AccountInput = Pick<UserAccount, 'name' | 'email' | 'role' | 'status' | 'permissions'>;
+export type AccountUpdateInput = Pick<UserAccount, 'name' | 'role' | 'status' | 'permissions'>;
+
+export interface CreatedAccount extends UserAccount {
+  tempPassword: string;
+}
+
+// Backed by the RE2M API (backend/src/routes/accounts.routes.ts), SUPER_ADMIN
+// only. Creating an account also creates a real Supabase Auth login — the
+// returned tempPassword must be shared with the new user out of band.
+export const accountsStore = {
+  list: (): Promise<UserAccount[]> => apiClient.get<UserAccount[]>('/api/accounts'),
+  create: (input: AccountInput): Promise<CreatedAccount> => apiClient.post<CreatedAccount>('/api/accounts', input),
+  update: (id: string, input: AccountUpdateInput): Promise<UserAccount> => apiClient.put<UserAccount>(`/api/accounts/${id}`, input),
+  remove: (id: string): Promise<void> => apiClient.delete(`/api/accounts/${id}`)
+};

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Member } from '../../types/member';
 import { Article, articlesStore } from '../../data/articles';
 import { NewsItem, newsStore } from '../../data/news';
-import { newsletters } from '../../data/newsletters';
+import { Newsletter, newsletterStore } from '../../data/newsletters';
 import {
   Eye,
   Inbox,
@@ -54,7 +54,6 @@ const REQUEST_BREAKDOWN = [
 ];
 
 const TOTAL_REQUESTS = REQUEST_BREAKDOWN.reduce((sum, r) => sum + r.value, 0);
-const NEWSLETTER_SUBSCRIBERS = 312;
 
 const LineAreaChart: React.FC<{ data: number[]; labels: string[] }> = ({ data, labels }) => {
   const width = 600;
@@ -204,10 +203,17 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
   const [visitsPeriod, setVisitsPeriod] = useState<VisitsPeriod>('week');
   const [articles, setArticles] = useState<Article[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
+  const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
+  const [newsletterSubscribers, setNewsletterSubscribers] = useState(0);
 
   useEffect(() => {
     articlesStore.list().then(setArticles).catch((err) => console.error('Impossible de charger les articles :', err));
     newsStore.list().then(setNews).catch((err) => console.error('Impossible de charger les actualités :', err));
+    newsletterStore.list().then(setNewsletters).catch((err) => console.error('Impossible de charger les newsletters :', err));
+    newsletterStore
+      .subscriberCount()
+      .then((r) => setNewsletterSubscribers(r.count))
+      .catch((err) => console.error('Impossible de charger les abonnés :', err));
   }, []);
 
   const activeDataset = VISITS_DATASETS[visitsPeriod];
@@ -232,7 +238,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
         <KpiCard label="Demandes Reçues" value={TOTAL_REQUESTS} trend="+5 cette semaine" icon={Inbox} />
         <KpiCard label="Articles Blog" value={articles.length} icon={FileText} />
         <KpiCard label="Actualités Publiées" value={news.length} icon={Newspaper} />
-        <KpiCard label="Abonnés Newsletter" value={NEWSLETTER_SUBSCRIBERS} trend="+21 ce mois" icon={Mail} />
+        <KpiCard label="Abonnés Newsletter" value={newsletterSubscribers} icon={Mail} />
       </div>
 
       {/* Visits trend + Requests donut */}

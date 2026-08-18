@@ -160,9 +160,11 @@ create table if not exists newsletters (
   subject text not null,
   body_html text not null,
   status text not null default 'draft' check (status in ('draft', 'sent')),
+  recipients_count integer not null default 0,
   sent_at timestamptz,
   created_at timestamptz not null default now()
 );
+alter table newsletters add column if not exists recipients_count integer not null default 0;
 
 create table if not exists newsletter_recipients (
   id uuid primary key default gen_random_uuid(),

@@ -1,44 +1,51 @@
-import React, { useState } from 'react';
-import { Plus, Mail, Paperclip, Send, X, Users, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Plus, Mail, Send, Users, CheckCircle2 } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
 import { RichTextEditor } from '../RichTextEditor';
-import { Newsletter, newsletters as initialNewsletters } from '../../../data/newsletters';
+import { Newsletter, newsletterStore } from '../../../data/newsletters';
 
 const inputClass = 'w-full bg-slate-50 text-slate-800 text-xs rounded-xl px-3 py-2.5 border border-slate-200 focus:border-[#002366] focus:bg-white focus:outline-none';
 const labelClass = 'block text-xs font-bold text-slate-500 uppercase mb-1.5';
 
 export const NewsletterAdmin: React.FC = () => {
-  const [items, setItems] = useState<Newsletter[]>(initialNewsletters);
+  const [items, setItems] = useState<Newsletter[]>([]);
+  const [subscriberCount, setSubscriberCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
-  const [attachment, setAttachment] = useState<File | null>(null);
+  const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    newsletterStore.list().then(setItems).catch((err) => console.error('Impossible de charger les campagnes :', err));
+    newsletterStore
+      .subscriberCount()
+      .then((r) => setSubscriberCount(r.count))
+      .catch((err) => console.error('Impossible de charger le nombre d\'abonnés :', err));
+  }, []);
 
   const openCompose = () => {
     setSubject('');
     setBody('');
-    setAttachment(null);
     setSent(false);
+    setError('');
     setIsOpen(true);
   };
 
   const handleSend = () => {
-    if (!subject.trim() || !body.trim()) return;
-    const newEntry: Newsletter = {
-      id: `NL-${String(items.length + 1).padStart(3, '0')}`,
-      subject,
-      bodyHtml: body,
-      attachment: attachment?.name,
-      recipients: 312,
-      status: 'sent',
-      sentAt: new Date().toISOString().slice(0, 10)
-    };
-    setItems((prev) => [newEntry, ...prev]);
-    setSent(true);
-    setTimeout(() => {
-      setIsOpen(false);
-    }, 1200);
+    if (!subject.trim() || !body.trim() || sending) return;
+    setSending(true);
+    setError('');
+    newsletterStore
+      .send({ subject, bodyHtml: body })
+      .then((created) => {
+        setItems((prev) => [created, ...prev]);
+        setSent(true);
+        setTimeout(() => setIsOpen(false), 1200);
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : "Échec de l'envoi."))
+      .finally(() => setSending(false));
   };
 
   return (
@@ -46,7 +53,9 @@ export const NewsletterAdmin: React.FC = () => {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="font-serif text-xl font-bold text-[#002366]">Newsletter</h2>
-          <p className="text-xs text-slate-500">{items.length} newsletter(s) envoyée(s)</p>
+          <p className="text-xs text-slate-500">
+            {items.length} newsletter(s) envoyée(s) · {subscriberCount} abonné(s)
+          </p>
         </div>
         <button
           onClick={openCompose}
@@ -89,19 +98,26 @@ export const NewsletterAdmin: React.FC = () => {
                   </span>
                 </td>
                 <td className="px-5 py-4">
-                  <span className="text-xs text-slate-400">{new Date(nl.sentAt).toLocaleDateString('fr-FR')}</span>
+                  <span className="text-xs text-slate-400">{nl.sentAt ? new Date(nl.sentAt).toLocaleDateString('fr-FR') : '—'}</span>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        {items.length === 0 && (
+          <div className="flex flex-col items-center justify-center text-center gap-3 py-16">
+            <Mail className="w-8 h-8 text-slate-300" />
+            <p className="text-xs text-slate-400">Aucune newsletter envoyée pour le moment.</p>
+          </div>
+        )}
       </div>
 
       <SlideOver
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         title="Rédiger une newsletter"
-        subtitle="Envoyée à tous les abonnés"
+        subtitle={`Envoyée à ${subscriberCount} abonné(s)`}
         footer={
           sent ? undefined : (
             <>
@@ -113,10 +129,11 @@ export const NewsletterAdmin: React.FC = () => {
               </button>
               <button
                 onClick={handleSend}
-                className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all flex items-center gap-2"
+                disabled={sending}
+                className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 <Send className="w-3.5 h-3.5" />
-                Envoyer
+                {sending ? 'Envoi en cours...' : 'Envoyer'}
               </button>
             </>
           )
@@ -147,30 +164,7 @@ export const NewsletterAdmin: React.FC = () => {
               <RichTextEditor value={body} onChange={setBody} placeholder="Rédigez votre message..." />
             </div>
 
-            <div>
-              <label className={labelClass}>Pièce jointe</label>
-              {attachment ? (
-                <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5">
-                  <span className="text-xs text-slate-600 flex items-center gap-2 truncate">
-                    <Paperclip className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{attachment.name}</span>
-                  </span>
-                  <button onClick={() => setAttachment(null)} className="text-slate-400 hover:text-rose-600 cursor-pointer shrink-0">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex items-center justify-center gap-2 bg-slate-50 border border-dashed border-slate-300 rounded-xl px-3 py-3 text-xs text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors">
-                  <Paperclip className="w-3.5 h-3.5" />
-                  Joindre un fichier
-                  <input
-                    type="file"
-                    className="hidden"
-                    onChange={(e) => setAttachment(e.target.files?.[0] || null)}
-                  />
-                </label>
-              )}
-            </div>
+            {error && <p className="text-xs text-rose-600 font-semibold">{error}</p>}
           </>
         )}
       </SlideOver>

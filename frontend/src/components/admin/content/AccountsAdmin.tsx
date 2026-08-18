@@ -1,19 +1,27 @@
-import React, { useState } from 'react';
-import { Plus, Pencil, Trash2, ShieldCheck, KeyRound, Eye, PencilLine } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Plus, Pencil, Trash2, ShieldCheck, KeyRound, Eye, PencilLine, Copy, CheckCircle2 } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
-import { UserAccount, accounts as initialAccounts, PERMISSION_MODULES, ModulePermission } from '../../../data/accounts';
+import { UserAccount, accountsStore, PERMISSION_MODULES, ModulePermission } from '../../../data/accounts';
 import { UserRole } from '../../../types/member';
 
-const emptyDraft: UserAccount = {
-  id: '',
+interface Draft {
+  name: string;
+  email: string;
+  role: UserRole;
+  status: 'active' | 'inactive';
+  permissions: UserAccount['permissions'];
+}
+
+const emptyDraft: Draft = {
   name: '',
   email: '',
   role: 'CONSULTANT',
   status: 'active',
-  createdAt: new Date().toISOString().slice(0, 10)
+  permissions: {}
 };
 
 const inputClass = 'w-full bg-slate-50 text-slate-800 text-xs rounded-xl px-3 py-2.5 border border-slate-200 focus:border-[#002366] focus:bg-white focus:outline-none';
+const disabledInputClass = 'w-full bg-slate-100 text-slate-400 text-xs rounded-xl px-3 py-2.5 border border-slate-200 cursor-not-allowed';
 const labelClass = 'block text-xs font-bold text-slate-500 uppercase mb-1.5';
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -29,37 +37,67 @@ const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
 };
 
 export const AccountsAdmin: React.FC = () => {
-  const [items, setItems] = useState<UserAccount[]>(initialAccounts);
+  const [items, setItems] = useState<UserAccount[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [draft, setDraft] = useState<UserAccount>(emptyDraft);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Draft>(emptyDraft);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [tempPassword, setTempPassword] = useState<{ email: string; password: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    accountsStore.list().then(setItems).catch((err) => console.error('Impossible de charger les comptes :', err));
+  }, []);
 
   const openCreate = () => {
-    setEditingIndex(null);
-    setDraft({ ...emptyDraft, id: `ACC-${String(items.length + 1).padStart(3, '0')}` });
+    setEditingId(null);
+    setDraft(emptyDraft);
+    setError('');
     setIsOpen(true);
   };
 
-  const openEdit = (idx: number) => {
-    setEditingIndex(idx);
-    setDraft(items[idx]);
+  const openEdit = (account: UserAccount) => {
+    setEditingId(account.id);
+    setDraft({ name: account.name, email: account.email, role: account.role, status: account.status, permissions: account.permissions ?? {} });
+    setError('');
     setIsOpen(true);
   };
 
-  const handleDelete = (idx: number) => {
-    if (window.confirm('Supprimer ce compte ?')) {
-      setItems((prev) => prev.filter((_, i) => i !== idx));
-    }
+  const handleDelete = (id: string) => {
+    if (!window.confirm('Supprimer ce compte ? La connexion associée sera aussi supprimée.')) return;
+    accountsStore
+      .remove(id)
+      .then(() => setItems((prev) => prev.filter((a) => a.id !== id)))
+      .catch((err) => alert(err instanceof Error ? err.message : 'Échec de la suppression.'));
   };
 
   const handleSave = () => {
-    if (!draft.name.trim() || !draft.email.trim()) return;
-    if (editingIndex === null) {
-      setItems((prev) => [draft, ...prev]);
+    if (!draft.name.trim() || !draft.email.trim() || saving) return;
+    setSaving(true);
+    setError('');
+
+    if (editingId === null) {
+      accountsStore
+        .create(draft)
+        .then((created) => {
+          const { tempPassword: pwd, ...account } = created;
+          setItems((prev) => [...prev, account]);
+          setTempPassword({ email: account.email, password: pwd });
+          setIsOpen(false);
+        })
+        .catch((err) => setError(err instanceof Error ? err.message : 'Échec de la création.'))
+        .finally(() => setSaving(false));
     } else {
-      setItems((prev) => prev.map((a, i) => (i === editingIndex ? draft : a)));
+      accountsStore
+        .update(editingId, { name: draft.name, role: draft.role, status: draft.status, permissions: draft.permissions })
+        .then((updated) => {
+          setItems((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+          setIsOpen(false);
+        })
+        .catch((err) => setError(err instanceof Error ? err.message : 'Échec de la mise à jour.'))
+        .finally(() => setSaving(false));
     }
-    setIsOpen(false);
   };
 
   const togglePermission = (moduleKey: string, action: keyof ModulePermission) => {
@@ -74,6 +112,14 @@ export const AccountsAdmin: React.FC = () => {
     setDraft({
       ...draft,
       permissions: { ...draft.permissions, [moduleKey]: nextPerm }
+    });
+  };
+
+  const copyPassword = () => {
+    if (!tempPassword) return;
+    navigator.clipboard.writeText(tempPassword.password).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
     });
   };
 
@@ -93,6 +139,30 @@ export const AccountsAdmin: React.FC = () => {
         </button>
       </div>
 
+      {tempPassword && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+          <KeyRound className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-amber-900">
+              Compte créé pour {tempPassword.email} — mot de passe temporaire à communiquer manuellement (affiché une seule fois) :
+            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <code className="bg-white border border-amber-200 rounded-lg px-3 py-1.5 text-xs font-mono text-amber-900">{tempPassword.password}</code>
+              <button
+                onClick={copyPassword}
+                className="px-2.5 py-1.5 rounded-lg bg-white border border-amber-200 text-amber-800 text-[11px] font-bold flex items-center gap-1 cursor-pointer hover:bg-amber-100 transition-colors"
+              >
+                {copied ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? 'Copié' : 'Copier'}
+              </button>
+              <button onClick={() => setTempPassword(null)} className="text-[11px] font-bold text-amber-700 hover:underline cursor-pointer ml-auto">
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
         <table className="w-full text-left">
           <thead>
@@ -104,7 +174,7 @@ export const AccountsAdmin: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {items.map((account, idx) => (
+            {items.map((account) => (
               <tr key={account.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors">
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
@@ -132,14 +202,14 @@ export const AccountsAdmin: React.FC = () => {
                 <td className="px-5 py-4">
                   <div className="flex items-center justify-end gap-1.5">
                     <button
-                      onClick={() => openEdit(idx)}
+                      onClick={() => openEdit(account)}
                       className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-[#002366] flex items-center justify-center hover:bg-blue-100 cursor-pointer transition-colors"
                       title="Modifier"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => handleDelete(idx)}
+                      onClick={() => handleDelete(account.id)}
                       className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
                       title="Supprimer"
                     >
@@ -163,7 +233,7 @@ export const AccountsAdmin: React.FC = () => {
       <SlideOver
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        title={editingIndex === null ? 'Nouveau compte' : 'Modifier le compte'}
+        title={editingId === null ? 'Nouveau compte' : 'Modifier le compte'}
         subtitle="Accès back-office"
         footer={
           <>
@@ -175,9 +245,10 @@ export const AccountsAdmin: React.FC = () => {
             </button>
             <button
               onClick={handleSave}
-              className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all"
+              disabled={saving}
+              className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all disabled:opacity-50"
             >
-              Enregistrer
+              {saving ? 'Enregistrement...' : 'Enregistrer'}
             </button>
           </>
         }
@@ -193,10 +264,11 @@ export const AccountsAdmin: React.FC = () => {
         </div>
 
         <div>
-          <label className={labelClass}>Email</label>
+          <label className={labelClass}>Email {editingId !== null && '(non modifiable)'}</label>
           <input
             type="email"
-            className={inputClass}
+            disabled={editingId !== null}
+            className={editingId !== null ? disabledInputClass : inputClass}
             value={draft.email}
             onChange={(e) => setDraft({ ...draft, email: e.target.value })}
             placeholder="nom@cabinet-re2m.com"
@@ -281,6 +353,8 @@ export const AccountsAdmin: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {error && <p className="text-xs text-rose-600 font-semibold">{error}</p>}
       </SlideOver>
     </div>
   );

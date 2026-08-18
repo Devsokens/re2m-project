@@ -4,6 +4,7 @@ import { articlesStore, Article } from '../../data/articles';
 import { LikeButton } from './LikeButton';
 import { PostModal, PostModalItem } from './PostModal';
 import { getComments } from '../../utils/engagementStore';
+import { newsletterStore } from '../../data/newsletters';
 
 const formatDate = (date: string) =>
   new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -20,6 +21,9 @@ const toPostModalItem = (article: Article): PostModalItem => ({
 
 export const BlogView: React.FC = () => {
   const [email, setEmail] = useState('');
+  const [subscribing, setSubscribing] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+  const [subscribeError, setSubscribeError] = useState('');
   const [articles, setArticles] = useState<Article[]>([]);
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
 
@@ -40,6 +44,21 @@ export const BlogView: React.FC = () => {
     () => [...articles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
     [articles]
   );
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || subscribing) return;
+    setSubscribing(true);
+    setSubscribeError('');
+    newsletterStore
+      .subscribe(email.trim())
+      .then(() => {
+        setSubscribed(true);
+        setEmail('');
+      })
+      .catch(() => setSubscribeError("Échec de l'inscription. Veuillez réessayer."))
+      .finally(() => setSubscribing(false));
+  };
 
   const [selected, setSelected] = useState<Article | null>(null);
   const [query, setQuery] = useState('');
@@ -155,25 +174,30 @@ export const BlogView: React.FC = () => {
             </p>
           </div>
 
-          <form
-            onSubmit={(e) => e.preventDefault()}
-            className="flex flex-col sm:flex-row items-center gap-3 max-w-md mx-auto"
-          >
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Entrez votre email"
-              className="w-full text-xs rounded-xl px-4 py-3 border border-slate-200 focus:border-[#002366] focus:outline-none bg-white"
-            />
-            <button
-              type="submit"
-              className="w-full sm:w-auto shrink-0 bg-[#002366] hover:bg-blue-900 text-white text-xs font-bold px-6 py-3 rounded-xl transition-colors cursor-pointer"
-            >
-              S'abonner
-            </button>
-          </form>
+          {subscribed ? (
+            <p className="text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 max-w-md mx-auto">
+              Merci ! Votre inscription à la newsletter est confirmée.
+            </p>
+          ) : (
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row items-center gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Entrez votre email"
+                className="w-full text-xs rounded-xl px-4 py-3 border border-slate-200 focus:border-[#002366] focus:outline-none bg-white"
+              />
+              <button
+                type="submit"
+                disabled={subscribing}
+                className="w-full sm:w-auto shrink-0 bg-[#002366] hover:bg-blue-900 text-white text-xs font-bold px-6 py-3 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {subscribing ? 'Inscription...' : "S'abonner"}
+              </button>
+            </form>
+          )}
+          {subscribeError && <p className="text-xs text-rose-600 font-semibold">{subscribeError}</p>}
         </div>
       </section>
 
