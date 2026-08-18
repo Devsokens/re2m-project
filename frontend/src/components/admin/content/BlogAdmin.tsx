@@ -14,7 +14,7 @@ const emptyDraft: ArticleInput = {
   content: '',
   author: 'Cabinet RE2M',
   date: new Date().toISOString().slice(0, 10),
-  image: '/service_01.jpg',
+  image: '',
   category: '',
   tags: []
 };

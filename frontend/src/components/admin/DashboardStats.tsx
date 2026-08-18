@@ -13,8 +13,6 @@ import {
   FileText,
   Mail,
   Heart,
-  MessageCircle,
-  Share2,
   TrendingUp
 } from 'lucide-react';
 
@@ -252,11 +250,26 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
         <KpiCard label="Abonnés Newsletter" value={newsletterSubscribers} icon={Mail} />
       </div>
 
-      {/* Reactions KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <KpiCard label="Likes (Actualités & Blog)" value={engagementStats.likes} icon={Heart} />
-        <KpiCard label="Commentaires" value={engagementStats.comments} icon={MessageCircle} />
-        <KpiCard label="Partages" value={engagementStats.shares} icon={Share2} />
+      {/* Reactions chart */}
+      <div className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div>
+            <h3 className="font-serif text-base font-bold text-[#002366]">Réactions</h3>
+            <p className="text-xs text-slate-400 font-medium">Likes, commentaires et partages — Actualités & Blog</p>
+          </div>
+          <Heart className="w-5 h-5 text-blue-800" />
+        </div>
+        {engagementStats.likes + engagementStats.comments + engagementStats.shares > 0 ? (
+          <DonutChart
+            data={[
+              { label: 'Likes', value: engagementStats.likes, color: '#002366' },
+              { label: 'Commentaires', value: engagementStats.comments, color: '#4169E1' },
+              { label: 'Partages', value: engagementStats.shares, color: '#C5A85C' }
+            ]}
+          />
+        ) : (
+          <p className="text-xs text-slate-400 text-center py-8">Aucune réaction pour le moment.</p>
+        )}
       </div>
 
       {/* Visits trend + Requests donut */}

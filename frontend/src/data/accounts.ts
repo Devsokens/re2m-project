@@ -27,11 +27,15 @@ export interface UserAccount {
   permissions?: Partial<Record<PermissionModuleKey, ModulePermission>>;
 }
 
-export type AccountInput = Pick<UserAccount, 'name' | 'email' | 'role' | 'status' | 'permissions'>;
+export type AccountInput = Pick<UserAccount, 'name' | 'email' | 'role' | 'status' | 'permissions'> & {
+  // Optional — leave unset to have the server generate a temporary password.
+  password?: string;
+};
 export type AccountUpdateInput = Pick<UserAccount, 'name' | 'role' | 'status' | 'permissions'>;
 
 export interface CreatedAccount extends UserAccount {
-  tempPassword: string;
+  // null when the admin set the password themselves (nothing to display).
+  tempPassword: string | null;
 }
 
 // Backed by the RE2M API (backend/src/routes/accounts.routes.ts), SUPER_ADMIN

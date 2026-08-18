@@ -11,6 +11,9 @@ export const permissionsSchema = z.record(z.string(), modulePermissionSchema).op
 export const createAccountSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
+  // Optional — if omitted, a random temporary password is generated and
+  // returned once in the response for the caller to communicate manually.
+  password: z.string().min(8).optional(),
   role: userRoleSchema,
   status: z.enum(['active', 'inactive']).optional().default('active'),
   permissions: permissionsSchema

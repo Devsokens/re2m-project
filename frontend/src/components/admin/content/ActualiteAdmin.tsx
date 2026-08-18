@@ -12,7 +12,7 @@ const emptyDraft: NewsInput = {
   title: '',
   excerpt: '',
   date: new Date().toISOString().slice(0, 10),
-  image: '/service_01.jpg',
+  image: '',
   tag: ''
 };
 

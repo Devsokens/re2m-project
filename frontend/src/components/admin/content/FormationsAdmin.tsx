@@ -831,6 +831,7 @@ export const FormationsAdmin: React.FC = () => {
         onClose={() => setIsFormationFormOpen(false)}
         title="Nouvelle formation"
         subtitle="Formations & certifications"
+        width="720px"
         footer={
           <>
             <button onClick={() => setIsFormationFormOpen(false)} className="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs cursor-pointer transition-all">

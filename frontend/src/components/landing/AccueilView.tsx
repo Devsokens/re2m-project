@@ -356,7 +356,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 );
               }
               case 'Testimonials': {
-                if (publishedTestimonials.length === 0 && !onUpdateBlockSetting) return null;
+                const hasTestimonials = publishedTestimonials.length > 0;
                 const repeatedTesti = [...publishedTestimonials, ...publishedTestimonials, ...publishedTestimonials];
 
                 return (
@@ -387,38 +387,52 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                         </p>
                       )}
 
-                      <div className="relative w-full overflow-x-hidden py-4">
-                        <div className="flex gap-6 animate-marquee-testimonials whitespace-nowrap">
-                          {repeatedTesti.map((testi: any, tIdx: number) => (
-                            <div
-                              key={tIdx}
-                              className="whitespace-normal shrink-0 w-80 sm:w-96 corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300 min-h-[240px]"
-                            >
-                              <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
-                                ”
-                              </span>
+                      {hasTestimonials ? (
+                        <div className="relative w-full overflow-x-hidden py-4">
+                          <div className="flex gap-6 animate-marquee-testimonials whitespace-nowrap">
+                            {repeatedTesti.map((testi: any, tIdx: number) => (
+                              <div
+                                key={tIdx}
+                                className="whitespace-normal shrink-0 w-80 sm:w-96 corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300 min-h-[240px]"
+                              >
+                                <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
+                                  ”
+                                </span>
 
-                              <div className="space-y-4 relative z-10">
-                                <p className="text-slate-600 text-sm italic leading-relaxed text-justify">{testi.text}</p>
-                              </div>
+                                <div className="space-y-4 relative z-10">
+                                  <p className="text-slate-600 text-sm italic leading-relaxed text-justify">{testi.text}</p>
+                                </div>
 
-                              <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
-                                {testi.logo && (
-                                  <img
-                                    src={testi.logo}
-                                    alt={`${testi.company} logo`}
-                                    className="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-white shrink-0"
-                                  />
-                                )}
-                                <div>
-                                  <h4 className="font-serif text-sm font-bold text-[#002366]">{testi.company}</h4>
-                                  <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{testi.service}</p>
+                                <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
+                                  {testi.logo && (
+                                    <img
+                                      src={testi.logo}
+                                      alt={`${testi.company} logo`}
+                                      className="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-white shrink-0"
+                                    />
+                                  )}
+                                  <div>
+                                    <h4 className="font-serif text-sm font-bold text-[#002366]">{testi.company}</h4>
+                                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{testi.service}</p>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        !onUpdateBlockSetting && (
+                          <div className="max-w-xl mx-auto text-center corporate-card rounded-3xl p-10 sm:p-12 bg-white border border-dashed border-slate-300">
+                            <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto mb-4">
+                              <MessageSquareQuote className="w-6 h-6 text-[#002366]" />
+                            </div>
+                            <p className="font-serif text-lg font-bold text-[#002366]">Aucun témoignage pour le moment</p>
+                            <p className="text-sm text-slate-500 mt-2">
+                              Vous avez travaillé avec le Cabinet RE2M ? Soyez le premier à partager votre expérience.
+                            </p>
+                          </div>
+                        )
+                      )}
 
                       {!onUpdateBlockSetting && (
                         <div className="relative z-10 flex justify-center mt-10">
@@ -428,7 +442,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                             className="group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-[#002366] hover:bg-blue-900 text-white text-xs font-bold cursor-pointer transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                           >
                             <MessageSquareQuote className="w-4 h-4 shrink-0" />
-                            Partagez votre expérience
+                            {hasTestimonials ? 'Partagez votre expérience' : 'Soyez le premier à témoigner'}
                             <ArrowRight className="w-3.5 h-3.5 shrink-0 group-hover:translate-x-1 transition-transform" />
                           </button>
                         </div>

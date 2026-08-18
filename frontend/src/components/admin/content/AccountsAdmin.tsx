@@ -9,6 +9,7 @@ import { ConfirmModal } from '../ConfirmModal';
 interface Draft {
   name: string;
   email: string;
+  password: string;
   role: UserRole;
   status: 'active' | 'inactive';
   permissions: UserAccount['permissions'];
@@ -17,6 +18,7 @@ interface Draft {
 const emptyDraft: Draft = {
   name: '',
   email: '',
+  password: '',
   role: 'CONSULTANT',
   status: 'active',
   permissions: {}
@@ -68,7 +70,7 @@ export const AccountsAdmin: React.FC = () => {
 
   const openEdit = (account: UserAccount) => {
     setEditingId(account.id);
-    setDraft({ name: account.name, email: account.email, role: account.role, status: account.status, permissions: account.permissions ?? {} });
+    setDraft({ name: account.name, email: account.email, password: '', role: account.role, status: account.status, permissions: account.permissions ?? {} });
     setError('');
     setIsOpen(true);
   };
@@ -88,16 +90,20 @@ export const AccountsAdmin: React.FC = () => {
 
   const handleSave = () => {
     if (!draft.name.trim() || !draft.email.trim() || saving) return;
+    if (draft.password.trim() && draft.password.trim().length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères.');
+      return;
+    }
     setSaving(true);
     setError('');
 
     if (editingId === null) {
       accountsStore
-        .create(draft)
+        .create({ ...draft, password: draft.password.trim() || undefined })
         .then((created) => {
           const { tempPassword: pwd, ...account } = created;
           setItems((prev) => [...prev, account]);
-          setTempPassword({ email: account.email, password: pwd });
+          if (pwd) setTempPassword({ email: account.email, password: pwd });
           setIsOpen(false);
         })
         .catch((err) => setError(err instanceof Error ? err.message : 'Échec de la création.'))
@@ -117,12 +123,11 @@ export const AccountsAdmin: React.FC = () => {
   const togglePermission = (moduleKey: string, action: keyof ModulePermission) => {
     const current: ModulePermission = draft.permissions?.[moduleKey as keyof typeof draft.permissions] || { read: false, edit: false };
     const nextValue = !current[action];
-    const nextPerm: ModulePermission = {
-      ...current,
-      [action]: nextValue,
-      // Editing a module implies being able to read it
-      read: action === 'edit' && nextValue ? true : current.read
-    };
+    const nextPerm: ModulePermission = { ...current, [action]: nextValue };
+    // Editing a module implies being able to read it...
+    if (action === 'edit' && nextValue) nextPerm.read = true;
+    // ...and removing read access implies removing edit access too.
+    if (action === 'read' && !nextValue) nextPerm.edit = false;
     setDraft({
       ...draft,
       permissions: { ...draft.permissions, [moduleKey]: nextPerm }
@@ -290,6 +295,23 @@ export const AccountsAdmin: React.FC = () => {
             placeholder="nom@cabinet-re2m.com"
           />
         </div>
+
+        {editingId === null && (
+          <div>
+            <label className={labelClass}>Mot de passe (optionnel)</label>
+            <input
+              type="text"
+              className={inputClass}
+              value={draft.password}
+              onChange={(e) => setDraft({ ...draft, password: e.target.value })}
+              placeholder="Laisser vide pour générer un mot de passe temporaire"
+              autoComplete="off"
+            />
+            <p className="text-[10px] text-slate-400 mt-1.5">
+              8 caractères minimum. Si laissé vide, un mot de passe temporaire sera généré et affiché une seule fois après la création.
+            </p>
+          </div>
+        )}
 
         <div>
           <label className={labelClass}>Rôle</label>

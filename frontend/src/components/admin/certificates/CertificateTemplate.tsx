@@ -146,11 +146,15 @@ export const CertificateTemplate: React.FC<CertificateData> = ({
     );
   }
 
-  // Default: 're2m-classique' — reproduces the reference template
+  // Default: 're2m-classique' — reproduces the reference template. Uses a
+  // full-height flex column (like the other two templates) so the middle
+  // content is vertically centered in whatever space remains above the
+  // seal/signature row, instead of leaving a dead gap when the content is
+  // shorter than the fixed canvas height.
   return (
     <div
       style={{ width: CERTIFICATE_WIDTH, height: CERTIFICATE_HEIGHT, fontFamily: 'Georgia, serif' }}
-      className="relative bg-white"
+      className="relative bg-white flex flex-col"
     >
       <div className="absolute inset-6 border border-slate-300" />
 
@@ -159,7 +163,7 @@ export const CertificateTemplate: React.FC<CertificateData> = ({
       <div className="absolute bottom-3 left-3" style={{ transform: 'scaleY(-1)' }}><FlourishCorner /></div>
       <div className="absolute bottom-3 right-3" style={{ transform: 'scale(-1,-1)' }}><FlourishCorner /></div>
 
-      <div className="relative z-10 flex flex-col items-center text-center pt-24 px-24">
+      <div className="flex-1 flex flex-col items-center justify-center text-center px-24 relative z-10">
         <h1 className="text-5xl font-bold text-[#3a2e22] tracking-[0.05em]" style={{ fontFamily: 'Georgia, serif' }}>
           ATTESTATION DE FORMATION
         </h1>
@@ -181,7 +185,7 @@ export const CertificateTemplate: React.FC<CertificateData> = ({
         </div>
       </div>
 
-      <div className="absolute bottom-16 left-24 right-24 flex items-end justify-between z-10">
+      <div className="flex items-end justify-between px-24 pb-16 relative z-10 shrink-0">
         <ScallopedSeal dayMonth={dayMonth} year={year} />
         <SignatureBlock signerName={signerName} signerTitle={signerTitle} stampUrl={stampUrl} />
         <div className="ml-10"><RE2MLogo /></div>
