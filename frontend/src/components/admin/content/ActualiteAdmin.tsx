@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, Newspaper, Heart, MessageCircle, Share2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Newspaper, Heart, Share2 } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
 import { RichTextEditor } from '../RichTextEditor';
 import { ImageUploadField } from '../ImageUploadField';
 import { NewsItem, NewsInput, newsStore } from '../../../data/news';
 import { EngagementSummary, getEngagementSummary } from '../../../utils/engagementStore';
 import { PageLoader } from '../../layout/PageLoader';
+import { ConfirmModal } from '../ConfirmModal';
 
 const emptyDraft: NewsInput = {
   title: '',
@@ -26,6 +27,8 @@ export const ActualiteAdmin: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [summary, setSummary] = useState<EngagementSummary>({ likes: {}, comments: {}, shares: {} });
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<NewsItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     Promise.all([newsStore.list().then(setItems), getEngagementSummary('news').then(setSummary)])
@@ -45,12 +48,17 @@ export const ActualiteAdmin: React.FC = () => {
     setIsOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm('Supprimer cette actualité ?')) return;
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     newsStore
-      .remove(id)
-      .then(() => setItems((prev) => prev.filter((n) => n.id !== id)))
-      .catch((err) => console.error('Échec de la suppression :', err));
+      .remove(deleteTarget.id)
+      .then(() => {
+        setItems((prev) => prev.filter((n) => n.id !== deleteTarget.id));
+        setDeleteTarget(null);
+      })
+      .catch((err) => console.error('Échec de la suppression :', err))
+      .finally(() => setDeleting(false));
   };
 
   const handleSave = () => {
@@ -104,7 +112,6 @@ export const ActualiteAdmin: React.FC = () => {
               />
               <div className="flex items-center gap-3 text-[11px] text-slate-500 font-semibold">
                 <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5 text-slate-400" /> {summary.likes[item.id] ?? 0}</span>
-                <span className="flex items-center gap-1"><MessageCircle className="w-3.5 h-3.5 text-slate-400" /> {summary.comments[item.id] ?? 0}</span>
                 <span className="flex items-center gap-1"><Share2 className="w-3.5 h-3.5 text-slate-400" /> {summary.shares[item.id] ?? 0}</span>
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-slate-100">
@@ -118,7 +125,7 @@ export const ActualiteAdmin: React.FC = () => {
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => setDeleteTarget(item)}
                     className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
                     title="Supprimer"
                   >
@@ -207,6 +214,15 @@ export const ActualiteAdmin: React.FC = () => {
           />
         </div>
       </SlideOver>
+
+      <ConfirmModal
+        isOpen={deleteTarget !== null}
+        title="Supprimer cette actualité ?"
+        message={deleteTarget ? `« ${deleteTarget.title} » sera définitivement supprimée.` : ''}
+        loading={deleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

@@ -28,17 +28,16 @@ const formatCertDate = (iso: string) => {
 export const CERTIFICATE_WIDTH = 1200;
 export const CERTIFICATE_HEIGHT = 848;
 
+// The real RE2M wordmark (bar-chart + arrow icon, "RE2M", "gagner grâce aux
+// achats" tagline) — reproduces the reference certificate exactly instead of
+// an approximated hand-drawn icon.
 const RE2MLogo: React.FC<{ dark?: boolean }> = ({ dark = true }) => (
-  <div className="flex flex-col items-end">
-    <div className="flex items-center gap-2">
-      <svg width="34" height="26" viewBox="0 0 34 26" fill="none">
-        <path d="M2 22 L9 14 L15 19 L24 6 L32 2" stroke={dark ? '#0f172a' : '#ffffff'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M24 2 L32 2 L32 10" stroke={dark ? '#0f172a' : '#ffffff'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <span style={{ fontFamily: 'Georgia, serif' }} className={`text-2xl font-extrabold tracking-tight ${dark ? 'text-[#0f172a]' : 'text-white'}`}>RE2M</span>
-    </div>
-    <span className="text-[9px] italic tracking-wide -mt-0.5" style={{ color: dark ? '#64748b' : '#cbd5e1' }}>gagner grâce aux achats</span>
-  </div>
+  <img
+    src="/logo2.png"
+    alt="Cabinet RE2M"
+    className="h-14 w-auto object-contain"
+    style={dark ? undefined : { filter: 'brightness(0) invert(1)' }}
+  />
 );
 
 const ScallopedSeal: React.FC<{ dayMonth: string; year: string }> = ({ dayMonth, year }) => (
@@ -105,7 +104,7 @@ export const CertificateTemplate: React.FC<CertificateData> = ({
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center text-center px-24">
-          <p className="text-xs tracking-[0.3em] text-slate-400 font-semibold">DÉCERNÉE À</p>
+          <p className="text-xs tracking-[0.3em] text-slate-400 font-semibold">DÉCERNÉ À</p>
           <h2 className="text-5xl text-[#002366] font-bold mt-4 mb-4">{participantName}</h2>
           <div className="w-24 h-1 bg-[#C9A24B] rounded-full mb-6" />
           <p className="text-xs tracking-[0.2em] text-slate-400 font-semibold">POUR SA PARTICIPATION À LA FORMATION</p>
@@ -133,7 +132,7 @@ export const CertificateTemplate: React.FC<CertificateData> = ({
         <div className="flex-1 flex flex-col items-center justify-center text-center px-20 relative z-10">
           <RE2MLogo />
           <h1 className="text-4xl font-extrabold text-[#002366] tracking-[0.15em] mt-8">ATTESTATION DE FORMATION</h1>
-          <p className="text-xs tracking-[0.3em] text-slate-400 font-semibold mt-8">DÉCERNÉE À</p>
+          <p className="text-xs tracking-[0.3em] text-slate-400 font-semibold mt-8">DÉCERNÉ À</p>
           <h2 className="text-4xl text-[#0f172a] font-bold mt-3 border-b-2 border-[#C9A24B] pb-3 px-8">{participantName}</h2>
           <p className="text-xs tracking-[0.2em] text-slate-400 font-semibold mt-8">POUR SA PRÉCIEUSE CONTRIBUTION À</p>
           <h3 className="text-lg font-bold text-[#002366] mt-3 max-w-2xl uppercase">{formationTitle}</h3>
@@ -165,7 +164,7 @@ export const CertificateTemplate: React.FC<CertificateData> = ({
           ATTESTATION DE FORMATION
         </h1>
 
-        <p className="text-[11px] tracking-[0.3em] text-slate-500 font-semibold mt-8">DÉCERNÉE À</p>
+        <p className="text-[11px] tracking-[0.3em] text-slate-500 font-semibold mt-8">DÉCERNÉ À</p>
 
         <div className="border-t border-b border-slate-400 mt-2 px-10 py-2">
           <h2 className="text-4xl text-[#3a2e22]">{participantName}</h2>
@@ -175,7 +174,9 @@ export const CertificateTemplate: React.FC<CertificateData> = ({
 
         <div className="flex items-center gap-4 mt-3">
           <span className="text-[#C9A24B] text-lg">❧</span>
-          <h3 className="text-lg font-bold text-[#0f172a] tracking-wide max-w-2xl">{formationTitle.toUpperCase()}</h3>
+          <h3 className="text-lg font-bold text-[#0f172a] tracking-wide max-w-2xl" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
+            {formationTitle.toUpperCase()}
+          </h3>
           <span className="text-[#C9A24B] text-lg scale-x-[-1]">❧</span>
         </div>
       </div>

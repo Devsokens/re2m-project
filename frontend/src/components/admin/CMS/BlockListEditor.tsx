@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CMSBlock } from '../../../types/cms';
 import { Edit, Eye, EyeOff, ArrowUp, ArrowDown, Plus, Trash2 } from 'lucide-react';
+import { ConfirmModal } from '../ConfirmModal';
 
 interface BlockListEditorProps {
   blocks: CMSBlock[];
@@ -44,13 +45,15 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
     onUpdateBlocks(reordered);
   };
 
-  const handleDeleteBlock = (blockId: string) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer définitivement cette section ? Cette action est irréversible et supprimera tout le contenu saisi.")) {
-      const updated = blocks.filter((b) => b.id !== blockId);
-      // Re-index orders
-      const reordered = updated.map((b, idx) => ({ ...b, order: idx }));
-      onUpdateBlocks(reordered);
-    }
+  const [deleteTarget, setDeleteTarget] = useState<CMSBlock | null>(null);
+
+  const handleConfirmDeleteBlock = () => {
+    if (!deleteTarget) return;
+    const updated = blocks.filter((b) => b.id !== deleteTarget.id);
+    // Re-index orders
+    const reordered = updated.map((b, idx) => ({ ...b, order: idx }));
+    onUpdateBlocks(reordered);
+    setDeleteTarget(null);
   };
 
   const handleAddBlock = (type: string) => {
@@ -280,7 +283,7 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
 
               {/* Delete Button */}
               <button
-                onClick={() => handleDeleteBlock(block.id)}
+                onClick={() => setDeleteTarget(block)}
                 className="p-2 rounded-xl border border-rose-100 bg-rose-50 text-rose-700 hover:bg-rose-100 flex items-center justify-center cursor-pointer transition-all"
                 title="Supprimer la section"
               >
@@ -297,6 +300,15 @@ export const BlockListEditor: React.FC<BlockListEditorProps> = ({
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={deleteTarget !== null}
+        title="Supprimer cette section ?"
+        message="Cette action est irréversible et supprimera tout le contenu saisi dans cette section."
+        loading={false}
+        onConfirm={handleConfirmDeleteBlock}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

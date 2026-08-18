@@ -4,6 +4,7 @@ import { SlideOver } from '../SlideOver';
 import { ImageUploadField } from '../ImageUploadField';
 import { testimonialsStore, Testimonial, TestimonialStatus } from '../../../utils/testimonialsStore';
 import { PageLoader } from '../../layout/PageLoader';
+import { ConfirmModal } from '../ConfirmModal';
 
 type FilterStatus = 'tous' | TestimonialStatus;
 
@@ -88,12 +89,35 @@ export const TestimonialsAdmin: React.FC = () => {
       .catch((err) => console.error('Échec de l\'approbation :', err));
   };
 
-  const handleReject = (row: Testimonial) => {
-    if (row.status === 'publié' && !window.confirm('Rejeter ce témoignage ? Il ne sera plus affiché sur le site mais restera consultable via le filtre "Rejeté".')) return;
+  const [rejectTarget, setRejectTarget] = useState<Testimonial | null>(null);
+  const [rejecting, setRejecting] = useState(false);
+
+  const performReject = (row: Testimonial) => {
     testimonialsStore
       .reject(row.id)
       .then((updated) => setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r))))
       .catch((err) => console.error('Échec du rejet :', err));
+  };
+
+  const handleReject = (row: Testimonial) => {
+    if (row.status === 'publié') {
+      setRejectTarget(row);
+      return;
+    }
+    performReject(row);
+  };
+
+  const handleConfirmReject = () => {
+    if (!rejectTarget) return;
+    setRejecting(true);
+    testimonialsStore
+      .reject(rejectTarget.id)
+      .then((updated) => {
+        setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+        setRejectTarget(null);
+      })
+      .catch((err) => console.error('Échec du rejet :', err))
+      .finally(() => setRejecting(false));
   };
 
   const handleRepublish = (row: Testimonial) => {
@@ -329,6 +353,20 @@ export const TestimonialsAdmin: React.FC = () => {
           />
         </div>
       </SlideOver>
+
+      <ConfirmModal
+        isOpen={rejectTarget !== null}
+        title="Rejeter ce témoignage ?"
+        message={
+          rejectTarget
+            ? `Le témoignage de ${rejectTarget.company} ne sera plus affiché sur le site, mais restera consultable via le filtre "Rejeté".`
+            : ''
+        }
+        confirmLabel="Rejeter"
+        loading={rejecting}
+        onConfirm={handleConfirmReject}
+        onCancel={() => setRejectTarget(null)}
+      />
     </div>
   );
 };

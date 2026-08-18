@@ -4,6 +4,7 @@ import { SlideOver } from '../SlideOver';
 import { UserAccount, accountsStore, PERMISSION_MODULES, ModulePermission } from '../../../data/accounts';
 import { UserRole } from '../../../types/member';
 import { PageLoader } from '../../layout/PageLoader';
+import { ConfirmModal } from '../ConfirmModal';
 
 interface Draft {
   name: string;
@@ -47,6 +48,8 @@ export const AccountsAdmin: React.FC = () => {
   const [tempPassword, setTempPassword] = useState<{ email: string; password: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<UserAccount | null>(null);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
     accountsStore
@@ -70,12 +73,17 @@ export const AccountsAdmin: React.FC = () => {
     setIsOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm('Supprimer ce compte ? La connexion associée sera aussi supprimée.')) return;
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return;
+    setDeletingAccount(true);
     accountsStore
-      .remove(id)
-      .then(() => setItems((prev) => prev.filter((a) => a.id !== id)))
-      .catch((err) => alert(err instanceof Error ? err.message : 'Échec de la suppression.'));
+      .remove(deleteTarget.id)
+      .then(() => {
+        setItems((prev) => prev.filter((a) => a.id !== deleteTarget.id));
+        setDeleteTarget(null);
+      })
+      .catch((err) => alert(err instanceof Error ? err.message : 'Échec de la suppression.'))
+      .finally(() => setDeletingAccount(false));
   };
 
   const handleSave = () => {
@@ -217,7 +225,7 @@ export const AccountsAdmin: React.FC = () => {
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => handleDelete(account.id)}
+                      onClick={() => setDeleteTarget(account)}
                       className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
                       title="Supprimer"
                     >
@@ -364,6 +372,15 @@ export const AccountsAdmin: React.FC = () => {
 
         {error && <p className="text-xs text-rose-600 font-semibold">{error}</p>}
       </SlideOver>
+
+      <ConfirmModal
+        isOpen={deleteTarget !== null}
+        title="Supprimer ce compte ?"
+        message={deleteTarget ? `${deleteTarget.name} (${deleteTarget.email}) perdra son accès au back-office ; la connexion associée sera aussi supprimée.` : ''}
+        loading={deletingAccount}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

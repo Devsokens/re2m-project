@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
 import { PageLoader } from '../../layout/PageLoader';
+import { ConfirmModal } from '../ConfirmModal';
 import { CertificatePreviewModal } from '../certificates/CertificatePreviewModal';
 import { CertificateData } from '../certificates/CertificateTemplate';
 import { CertificateTemplatePreview } from '../certificates/CertificateTemplatePreview';
@@ -100,6 +101,10 @@ export const FormationsAdmin: React.FC = () => {
   const [previewParticipant, setPreviewParticipant] = useState<Participant | null>(null);
   const [isBulkWorking, setIsBulkWorking] = useState<'pdf' | 'zip' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteFormationTarget, setDeleteFormationTarget] = useState<Formation | null>(null);
+  const [deletingFormation, setDeletingFormation] = useState(false);
+  const [deleteParticipantTarget, setDeleteParticipantTarget] = useState<Participant | null>(null);
+  const [deletingParticipant, setDeletingParticipant] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const activeFormation = formations.find((f) => f.id === activeFormationId) || null;
@@ -172,12 +177,17 @@ export const FormationsAdmin: React.FC = () => {
       })
       .catch((err) => console.error('Échec de la création de la formation :', err));
   };
-  const handleDeleteFormation = (id: string) => {
-    if (!window.confirm('Supprimer cette formation et tous ses participants ?')) return;
+  const handleConfirmDeleteFormation = () => {
+    if (!deleteFormationTarget) return;
+    setDeletingFormation(true);
     formationsStore
-      .remove(id)
-      .then(() => setFormations((prev) => prev.filter((f) => f.id !== id)))
-      .catch((err) => console.error('Échec de la suppression :', err));
+      .remove(deleteFormationTarget.id)
+      .then(() => {
+        setFormations((prev) => prev.filter((f) => f.id !== deleteFormationTarget.id));
+        setDeleteFormationTarget(null);
+      })
+      .catch((err) => console.error('Échec de la suppression :', err))
+      .finally(() => setDeletingFormation(false));
   };
 
   const openFormationDetail = (id: string) => {
@@ -203,7 +213,10 @@ export const FormationsAdmin: React.FC = () => {
       })
       .catch((err) => console.error('Échec de l\'ajout du participant :', err));
   };
-  const handleDeleteParticipant = (id: string) => {
+  const handleConfirmDeleteParticipant = () => {
+    if (!deleteParticipantTarget) return;
+    const id = deleteParticipantTarget.id;
+    setDeletingParticipant(true);
     formationsStore
       .removeParticipant(id)
       .then(() => {
@@ -215,8 +228,10 @@ export const FormationsAdmin: React.FC = () => {
           return next;
         });
         setSelectedParticipantId((prev) => (prev === id ? null : prev));
+        setDeleteParticipantTarget(null);
       })
-      .catch((err) => console.error('Échec de la suppression du participant :', err));
+      .catch((err) => console.error('Échec de la suppression du participant :', err))
+      .finally(() => setDeletingParticipant(false));
   };
 
   const openEditParticipant = (p: Participant) => {
@@ -511,7 +526,7 @@ export const FormationsAdmin: React.FC = () => {
                           <Pencil className="w-3.5 h-3.5" /> Modifier
                         </button>
                         <button
-                          onClick={() => { handleDeleteParticipant(p.id); setOpenMenuId(null); }}
+                          onClick={() => { setDeleteParticipantTarget(p); setOpenMenuId(null); }}
                           className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" /> Supprimer
@@ -575,7 +590,7 @@ export const FormationsAdmin: React.FC = () => {
                       <Pencil className="w-3.5 h-3.5" /> Modifier
                     </button>
                     <button
-                      onClick={() => handleDeleteParticipant(selectedParticipant.id)}
+                      onClick={() => setDeleteParticipantTarget(selectedParticipant)}
                       className="flex-1 px-3 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold cursor-pointer transition-colors flex items-center justify-center gap-1.5"
                     >
                       <Trash2 className="w-3.5 h-3.5" /> Supprimer
@@ -746,6 +761,15 @@ export const FormationsAdmin: React.FC = () => {
           onClose={() => setPreviewData(null)}
           onDownload={() => previewParticipant && handleDownloadOne(previewParticipant)}
         />
+
+        <ConfirmModal
+          isOpen={deleteParticipantTarget !== null}
+          title="Supprimer ce participant ?"
+          message={deleteParticipantTarget ? `${deleteParticipantTarget.fullName} sera retiré de la liste des participants.` : ''}
+          loading={deletingParticipant}
+          onConfirm={handleConfirmDeleteParticipant}
+          onCancel={() => setDeleteParticipantTarget(null)}
+        />
       </div>
     );
   }
@@ -784,7 +808,7 @@ export const FormationsAdmin: React.FC = () => {
                 Gérer les participants →
               </button>
               <button
-                onClick={() => handleDeleteFormation(f.id)}
+                onClick={() => setDeleteFormationTarget(f)}
                 className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
                 title="Supprimer"
               >
@@ -869,6 +893,15 @@ export const FormationsAdmin: React.FC = () => {
           </div>
         </div>
       </SlideOver>
+
+      <ConfirmModal
+        isOpen={deleteFormationTarget !== null}
+        title="Supprimer cette formation ?"
+        message={deleteFormationTarget ? `« ${deleteFormationTarget.title} » et tous ses participants seront définitivement supprimés.` : ''}
+        loading={deletingFormation}
+        onConfirm={handleConfirmDeleteFormation}
+        onCancel={() => setDeleteFormationTarget(null)}
+      />
     </div>
   );
 };

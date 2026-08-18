@@ -6,6 +6,7 @@ import { ImageUploadField } from '../ImageUploadField';
 import { Article, ArticleInput, articlesStore } from '../../../data/articles';
 import { EngagementComment, EngagementSummary, getComments, getEngagementSummary, replyToComment } from '../../../utils/engagementStore';
 import { PageLoader } from '../../layout/PageLoader';
+import { ConfirmModal } from '../ConfirmModal';
 
 const emptyDraft: ArticleInput = {
   title: '',
@@ -37,6 +38,8 @@ export const BlogAdmin: React.FC = () => {
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [replySaving, setReplySaving] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<Article | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     Promise.all([articlesStore.list().then(setItems), getEngagementSummary('article').then(setSummary)])
@@ -56,12 +59,17 @@ export const BlogAdmin: React.FC = () => {
     setIsOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm('Supprimer cet article ?')) return;
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     articlesStore
-      .remove(id)
-      .then(() => setItems((prev) => prev.filter((a) => a.id !== id)))
-      .catch((err) => console.error('Échec de la suppression :', err));
+      .remove(deleteTarget.id)
+      .then(() => {
+        setItems((prev) => prev.filter((a) => a.id !== deleteTarget.id));
+        setDeleteTarget(null);
+      })
+      .catch((err) => console.error('Échec de la suppression :', err))
+      .finally(() => setDeleting(false));
   };
 
   const handleSave = () => {
@@ -157,7 +165,7 @@ export const BlogAdmin: React.FC = () => {
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(article.id)}
+                    onClick={() => setDeleteTarget(article)}
                     className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
                     title="Supprimer"
                   >
@@ -317,6 +325,15 @@ export const BlogAdmin: React.FC = () => {
           </div>
         )}
       </SlideOver>
+
+      <ConfirmModal
+        isOpen={deleteTarget !== null}
+        title="Supprimer cet article ?"
+        message={deleteTarget ? `« ${deleteTarget.title} » sera définitivement supprimé.` : ''}
+        loading={deleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };
