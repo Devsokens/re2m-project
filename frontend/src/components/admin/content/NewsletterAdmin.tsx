@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Mail, Send, Users, CheckCircle2 } from 'lucide-react';
+import { Plus, Mail, Paperclip, Send, X, Users, CheckCircle2 } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
 import { RichTextEditor } from '../RichTextEditor';
 import { Newsletter, newsletterStore } from '../../../data/newsletters';
@@ -13,6 +13,7 @@ export const NewsletterAdmin: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
+  const [attachment, setAttachment] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
@@ -28,6 +29,7 @@ export const NewsletterAdmin: React.FC = () => {
   const openCompose = () => {
     setSubject('');
     setBody('');
+    setAttachment(null);
     setSent(false);
     setError('');
     setIsOpen(true);
@@ -38,7 +40,7 @@ export const NewsletterAdmin: React.FC = () => {
     setSending(true);
     setError('');
     newsletterStore
-      .send({ subject, bodyHtml: body })
+      .send({ subject, bodyHtml: body }, attachment)
       .then((created) => {
         setItems((prev) => [created, ...prev]);
         setSent(true);
@@ -162,6 +164,31 @@ export const NewsletterAdmin: React.FC = () => {
             <div>
               <label className={labelClass}>Contenu</label>
               <RichTextEditor value={body} onChange={setBody} placeholder="Rédigez votre message..." />
+            </div>
+
+            <div>
+              <label className={labelClass}>Pièce jointe</label>
+              {attachment ? (
+                <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5">
+                  <span className="text-xs text-slate-600 flex items-center gap-2 truncate">
+                    <Paperclip className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate">{attachment.name}</span>
+                  </span>
+                  <button onClick={() => setAttachment(null)} className="text-slate-400 hover:text-rose-600 cursor-pointer shrink-0">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex items-center justify-center gap-2 bg-slate-50 border border-dashed border-slate-300 rounded-xl px-3 py-3 text-xs text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors">
+                  <Paperclip className="w-3.5 h-3.5" />
+                  Joindre un fichier
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={(e) => setAttachment(e.target.files?.[0] || null)}
+                  />
+                </label>
+              )}
             </div>
 
             {error && <p className="text-xs text-rose-600 font-semibold">{error}</p>}

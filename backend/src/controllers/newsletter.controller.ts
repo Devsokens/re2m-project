@@ -49,11 +49,14 @@ export const sendCampaign = async (req: Request, res: Response) => {
   const recipients = (recipientRows ?? []).map((r) => r.email as string);
   if (recipients.length === 0) throw badRequest('Aucun abonné à la newsletter pour le moment.');
 
+  const file = req.file;
+
   await sendMail({
     to: env.GMAIL_SENDER_EMAIL ?? 'newsletter@cabinet-re2m.com',
     bcc: recipients,
     subject: input.subject,
-    html: input.bodyHtml
+    html: input.bodyHtml,
+    attachments: file ? [{ filename: file.originalname, mimeType: file.mimetype, content: file.buffer }] : undefined
   });
 
   const { data, error } = await supabaseAdmin

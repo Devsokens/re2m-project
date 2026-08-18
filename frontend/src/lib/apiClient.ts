@@ -56,5 +56,6 @@ export const apiClient = {
     const formData = new FormData();
     formData.append('file', file);
     return request<T>(path, { method: 'POST', body: formData, isFormData: true });
-  }
+  },
+  postForm: <T>(path: string, formData: FormData) => request<T>(path, { method: 'POST', body: formData, isFormData: true })
 };

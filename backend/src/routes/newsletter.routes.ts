@@ -1,7 +1,10 @@
 import { Router } from 'express';
+import multer from 'multer';
 import { asyncHandler } from '../lib/asyncHandler.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { listCampaigns, sendCampaign, subscribe, subscriberCount } from '../controllers/newsletter.controller.js';
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
 
 export const newsletterRouter = Router();
 
@@ -37,10 +40,26 @@ newsletterRouter.get('/subscribers/count', requireAuth, requireRole('SUPER_ADMIN
  *     responses:
  *       200: { description: Liste des campagnes }
  *   post:
- *     summary: Rédiger et envoyer une campagne à tous les abonnés (admin)
+ *     summary: Rédiger et envoyer une campagne à tous les abonnés, avec pièce jointe optionnelle (admin)
  *     tags: [Newsletter]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               subject: { type: string }
+ *               bodyHtml: { type: string }
+ *               attachment: { type: string, format: binary }
  *     responses:
  *       201: { description: Campagne envoyée }
  */
 newsletterRouter.get('/campaigns', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(listCampaigns));
-newsletterRouter.post('/campaigns', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(sendCampaign));
+newsletterRouter.post(
+  '/campaigns',
+  requireAuth,
+  requireRole('SUPER_ADMIN', 'ADMIN'),
+  upload.single('attachment'),
+  asyncHandler(sendCampaign)
+);
