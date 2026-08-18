@@ -13,6 +13,10 @@ import { Member } from '../../types/member';
 import { PublicTestimonialModal } from './PublicTestimonialModal';
 import { apiClient, ApiError } from '../../lib/apiClient';
 import { testimonialsStore, Testimonial } from '../../utils/testimonialsStore';
+import { LikeButton } from './LikeButton';
+import { ShareButton } from './ShareButton';
+import { AutoScrollRow } from './AutoScrollRow';
+import { getComments } from '../../utils/engagementStore';
 
 interface AccueilViewProps {
   onStartDemo: () => void;
@@ -62,43 +66,25 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
 
   const [news, setNews] = useState<NewsItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
+  const [previewCommentCounts, setPreviewCommentCounts] = useState<Record<string, number>>({});
   useEffect(() => {
     newsStore.list().then(setNews).catch((err) => console.error('Impossible de charger les actualités :', err));
     articlesStore.list().then(setArticles).catch((err) => console.error('Impossible de charger les articles :', err));
   }, []);
+
+  useEffect(() => {
+    const previewed = articles.slice(0, 3);
+    if (previewed.length === 0) return;
+    Promise.all(previewed.map((a) => getComments('article', a.id).then((comments) => [a.id, comments.length] as const)))
+      .then((entries) => setPreviewCommentCounts(Object.fromEntries(entries)))
+      .catch((err) => console.error('Impossible de charger les commentaires :', err));
+  }, [articles]);
 
   const stats = [
     { value: '25', label: "Ans d'Expérience" },
     { value: '16', label: 'Entreprises Formées' },
     { value: '42', label: 'Projets Réalisés' },
     { value: '23', label: 'Formations Certifiantes' }
-  ];
-
-  const testimonials = [
-    {
-      company: 'COLAS Gabon',
-      service: 'Formation & Accompagnement',
-      text: '“Le Cabinet RE2M nous a accompagnés dans la mise en place de notre gestion de la relation fournisseurs. Des résultats concrets et mesurables.”',
-      logo: 'https://tse4.mm.bing.net/th/id/OIP.TeuJJGq0FrNo9cbaoSOijQHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3'
-    },
-    {
-      company: 'SEEG',
-      service: 'Formation & Conseil',
-      text: '“Expertise remarquable en gestion des stocks et relation fournisseurs. Une équipe professionnelle et réactive.”',
-      logo: 'https://africannuaire.com/wp-content/uploads/2017/05/LOGO-SEEG-AA-17.jpg'
-    },
-    {
-      company: 'SGEPP',
-      service: 'Formation Achats',
-      text: '“Des formations pratiques et opérationnelles qui ont directement impacté notre performance achats.”',
-      logo: 'https://arda.africa/wp-content/uploads/2022/08/Arda_Member_Logos_SGEPP.png'
-    },
-    {
-      company: 'PERENCO',
-      service: 'Gestion des Inventaires',
-      text: '“Un accompagnement de qualité pour l\'optimisation de notre gestion des inventaires. Recommandé.”',
-      logo: 'https://th.bing.com/th/id/R.416f199d5a0200667f7e42d6df1e3241?rik=4M35Oghc52VHow&riu=http%3a%2f%2flogonoid.com%2fimages%2fperenco-logo.png&ehk=AX2r5xs6pgn5JJuZJsUs4dLRsQMfAVJthprTVaaeaE8%3d&risl=&pid=ImgRaw&r=0'
-    }
   ];
 
   if (blocks && blocks.length > 0) {
@@ -370,8 +356,8 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 );
               }
               case 'Testimonials': {
-                const testiItems = publishedTestimonials.length > 0 ? publishedTestimonials : testimonials;
-                const repeatedTesti = [...testiItems, ...testiItems, ...testiItems];
+                if (publishedTestimonials.length === 0 && !onUpdateBlockSetting) return null;
+                const repeatedTesti = [...publishedTestimonials, ...publishedTestimonials, ...publishedTestimonials];
 
                 return (
                   <section className="bg-slate-50 py-16 border-y border-slate-200 animate-fadeIn">
@@ -597,12 +583,12 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {news.slice(0, 3).map((item, idx) => (
+                      <AutoScrollRow className="sm:hidden -mx-4 px-4">
+                        {news.slice(0, 3).map((item) => (
                           <div
-                            key={idx}
+                            key={item.id}
                             onClick={() => onNavigate('actualites')}
-                            className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300"
+                            className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300 shrink-0 w-72 snap-start"
                           >
                             <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
                               <img
@@ -617,6 +603,39 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                             <div className="p-5 space-y-2 flex-1">
                               <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{item.title}</h4>
                               <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3" dangerouslySetInnerHTML={{ __html: item.excerpt }} />
+                              <div className="flex items-center gap-3 pt-2 mt-auto border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
+                                <LikeButton targetType="news" targetId={item.id} />
+                                <ShareButton targetType="news" targetId={item.id} title={item.title} />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </AutoScrollRow>
+
+                      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {news.slice(0, 3).map((item) => (
+                          <div
+                            key={item.id}
+                            onClick={() => onNavigate('actualites')}
+                            className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300"
+                          >
+                            <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                              <img
+                                src={item.image}
+                                alt={item.title}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                              <span className="absolute top-3 left-3 text-[10px] font-bold text-[#002366] bg-white/90 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                {item.tag}
+                              </span>
+                            </div>
+                            <div className="p-5 space-y-2 flex-1 flex flex-col">
+                              <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{item.title}</h4>
+                              <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3" dangerouslySetInnerHTML={{ __html: item.excerpt }} />
+                              <div className="flex items-center gap-3 pt-2 mt-auto border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
+                                <LikeButton targetType="news" targetId={item.id} />
+                                <ShareButton targetType="news" targetId={item.id} title={item.title} />
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -631,6 +650,14 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                           <span className="text-xs font-bold uppercase tracking-wider text-center px-4">Voir toutes les actualités</span>
                         </button>
                       </div>
+
+                      <button
+                        onClick={() => onNavigate('actualites')}
+                        className="sm:hidden mt-4 w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 flex items-center justify-center gap-2 text-[#002366] transition-colors cursor-pointer py-3.5"
+                      >
+                        <span className="text-xs font-bold uppercase tracking-wider">Voir toutes les actualités</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
                     </div>
                   </section>
 
@@ -645,12 +672,12 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {articles.slice(0, 3).map((article, idx) => (
+                      <AutoScrollRow className="sm:hidden -mx-4 px-4">
+                        {articles.slice(0, 3).map((article) => (
                           <div
-                            key={idx}
+                            key={article.id}
                             onClick={() => onNavigate('blog')}
-                            className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300"
+                            className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300 shrink-0 w-72 snap-start"
                           >
                             <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
                               <img
@@ -662,6 +689,42 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                             <div className="p-5 space-y-2 flex-1">
                               <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{article.title}</h4>
                               <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">{article.excerpt}</p>
+                              <div className="flex items-center gap-3 pt-2 mt-auto border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
+                                <LikeButton targetType="article" targetId={article.id} />
+                                <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
+                                  <MessageSquareQuote className="w-3.5 h-3.5 text-slate-400" /> {previewCommentCounts[article.id] ?? 0}
+                                </span>
+                                <ShareButton targetType="article" targetId={article.id} title={article.title} />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </AutoScrollRow>
+
+                      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {articles.slice(0, 3).map((article) => (
+                          <div
+                            key={article.id}
+                            onClick={() => onNavigate('blog')}
+                            className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300"
+                          >
+                            <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                              <img
+                                src={article.image}
+                                alt={article.title}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                            </div>
+                            <div className="p-5 space-y-2 flex-1 flex flex-col">
+                              <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{article.title}</h4>
+                              <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">{article.excerpt}</p>
+                              <div className="flex items-center gap-3 pt-2 mt-auto border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
+                                <LikeButton targetType="article" targetId={article.id} />
+                                <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
+                                  <MessageSquareQuote className="w-3.5 h-3.5 text-slate-400" /> {previewCommentCounts[article.id] ?? 0}
+                                </span>
+                                <ShareButton targetType="article" targetId={article.id} title={article.title} />
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -676,6 +739,14 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                           <span className="text-xs font-bold uppercase tracking-wider text-center px-4">Voir tous les articles</span>
                         </button>
                       </div>
+
+                      <button
+                        onClick={() => onNavigate('blog')}
+                        className="sm:hidden mt-4 w-full rounded-2xl border border-dashed border-white/30 bg-white/5 hover:bg-white/10 flex items-center justify-center gap-2 text-white transition-colors cursor-pointer py-3.5"
+                      >
+                        <span className="text-xs font-bold uppercase tracking-wider">Voir tous les articles</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
                     </div>
                   </section>
                 </>
@@ -733,412 +804,11 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
     );
   }
 
-  // Fallback Statique
+  // No published content yet for this page (e.g. nothing published from the
+  // visual editor) — the public site never shows stale hardcoded content.
   return (
-    <div className="space-y-16 animate-fadeIn bg-white text-[#0f172a]">
-      
-      <Hero onNavigate={onNavigate} />
-
-      {/* 1. SECTION VALEUR AJOUTÉE */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
-          <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#002366] text-xs font-semibold uppercase tracking-wider border border-blue-100">
-              <TrendingUp className="w-3.5 h-3.5" />
-              Notre valeur ajoutée
-            </div>
-            
-            <h2 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] leading-tight">
-              Faire <em>gagner votre entreprise</em>
-            </h2>
-
-            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-              Notre expertise de 25 ans nous permet d'intervenir dans tous les secteurs d'activité avec des résultats concrets. Nous transformons vos fonctions Achats et Logistique en véritables leviers de performance.
-            </p>
-
-            <div className="space-y-3 pt-2 text-slate-700 text-xs sm:text-sm">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-blue-800 shrink-0 mt-0.5" />
-                <span><strong>Diagnostic personnalisé</strong> : identification des gisements d'économies.</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-blue-800 shrink-0 mt-0.5" />
-                <span><strong>Solutions innovantes</strong> : implémentation de meilleures pratiques mondiales.</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-blue-800 shrink-0 mt-0.5" />
-                <span><strong>Transfert de compétences</strong> : formation intensive de vos équipes logistiques.</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-6 grid grid-cols-2 gap-4">
-            {stats.map((stat, idx) => (
-              <div key={idx} className="corporate-card rounded-2xl p-6 text-center space-y-2 border border-slate-100 bg-slate-50">
-                <span className="font-serif text-4xl sm:text-5xl font-extrabold text-[#002366]">{stat.value}</span>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{stat.label}</p>
-                <div className="w-8 h-1 bg-blue-800 mx-auto rounded-full mt-2" />
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </section>
-
-      {/* 1.5 SECTION QUELQUES-UNS DE NOS SERVICES */}
-      <section className="bg-[#002366] py-16 border-y border-blue-900 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
-
-            {/* Cards block - left, floats continuously */}
-            <div className="relative z-10 order-2 lg:order-1 flex items-center justify-center lg:justify-start -space-x-8 sm:-space-x-12 py-6 sm:py-10 animate-blockFloat lg:-ml-10 xl:-ml-20">
-              {[
-                {
-                  title: "Audit & Conseil",
-                  desc: "Diagnostic complet de vos fonctions Achats et Logistique. Recommandations stratégiques pour l'optimisation de vos processus et l'amélioration de votre performance.",
-                  image: "/service_01.jpg"
-                },
-                {
-                  title: "Formation Certifiante",
-                  desc: "Formations pratiques et opérationnelles en gestion des achats, contrats, stocks, inventaires, négociation et relation fournisseurs. Programme sur mesure.",
-                  image: "/service_02.jpg"
-                },
-                {
-                  title: "Accompagnement & Coaching",
-                  desc: "Coaching et accompagnement personnalisé pour la mise en œuvre de solutions innovantes. Transfert de compétences et outils d'amélioration continue.",
-                  image: "/service_03.jpg"
-                }
-              ].map((srv, idx) => {
-                const rotateClass = idx % 3 === 0 ? '-rotate-6' : idx % 3 === 2 ? 'rotate-6' : 'rotate-0';
-                const liftClass = idx % 3 === 1 ? '-translate-y-6' : 'translate-y-2';
-                const zClass = idx % 3 === 1 ? 'z-20' : 'z-10';
-                return (
-                  <div
-                    key={idx}
-                    onClick={() => onNavigate('nos-services')}
-                    style={{ animationDelay: `${idx * 0.15}s` }}
-                    className={`animate-cardFadeUp w-48 sm:w-60 shrink-0 corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 shadow-xl cursor-pointer transition-all duration-500 ease-out hover:-translate-y-8 hover:rotate-0 hover:shadow-2xl hover:z-30 ${rotateClass} ${liftClass} ${zClass}`}
-                  >
-                    <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
-                      <img
-                        src={srv.image}
-                        alt={srv.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-5 space-y-2">
-                      <h4 className="font-serif text-sm sm:text-base font-bold text-[#002366]">{srv.title}</h4>
-                      <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">
-                        {srv.desc}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Text - right */}
-            <div className="relative z-20 order-1 lg:order-2 space-y-4 text-center lg:text-left">
-              <h2 className="font-serif text-3xl font-extrabold text-white leading-tight">
-                Nos principales expertises
-              </h2>
-              <p className="text-blue-100/80 text-sm sm:text-base">
-                Découvrez un aperçu condensé des prestations offertes par le cabinet pour structurer et rentabiliser vos chaînes logistiques.
-              </p>
-              <button
-                onClick={() => onNavigate('nos-services')}
-                className="text-xs font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2.5 rounded-xl inline-flex items-center gap-1 group/btn cursor-pointer mt-2 transition-colors"
-              >
-                Découvrir tous nos services <span className="group-hover/btn:translate-x-1 transition-transform inline-block">→</span>
-              </button>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* 1.6 SECTION ACTUALITÉS (aperçu) */}
-      <section className="bg-white py-16 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-            <h2 className="font-serif text-3xl font-extrabold text-[#002366] leading-tight">
-              Actualités du Cabinet
-            </h2>
-            <p className="text-slate-500 text-sm sm:text-base">
-              Partenariats, formations, événements : les dernières sorties du Cabinet RE2M.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {news.slice(0, 3).map((item, idx) => (
-              <div
-                key={idx}
-                onClick={() => onNavigate('actualites')}
-                className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300"
-              >
-                <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <span className="absolute top-3 left-3 text-[10px] font-bold text-[#002366] bg-white/90 px-2.5 py-1 rounded-full uppercase tracking-wider">
-                    {item.tag}
-                  </span>
-                </div>
-                <div className="p-5 space-y-2 flex-1">
-                  <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{item.title}</h4>
-                  <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3" dangerouslySetInnerHTML={{ __html: item.excerpt }} />
-                </div>
-              </div>
-            ))}
-
-            <button
-              onClick={() => onNavigate('actualites')}
-              className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center gap-3 text-[#002366] transition-colors cursor-pointer min-h-[220px] group/more"
-            >
-              <div className="w-11 h-11 rounded-full bg-blue-50 flex items-center justify-center group-hover/more:bg-blue-100 transition-colors">
-                <ArrowRight className="w-5 h-5 group-hover/more:translate-x-0.5 transition-transform" />
-              </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-center px-4">Voir toutes les actualités</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 1.7 SECTION BLOG (aperçu) */}
-      <section className="bg-[#002366] py-16 border-y border-blue-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-            <h2 className="font-serif text-3xl font-extrabold text-white leading-tight">
-              Nos blogs &amp; analyses
-            </h2>
-            <p className="text-blue-100/80 text-sm sm:text-base">
-              Les réflexions et retours d'expérience de nos consultants sur les Achats et la Logistique.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {articles.slice(0, 3).map((article, idx) => (
-              <div
-                key={idx}
-                onClick={() => onNavigate('blog')}
-                className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300"
-              >
-                <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
-                  <img
-                    src={article.image}
-                    alt={article.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-5 space-y-2 flex-1">
-                  <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{article.title}</h4>
-                  <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">{article.excerpt}</p>
-                </div>
-              </div>
-            ))}
-
-            <button
-              onClick={() => onNavigate('blog')}
-              className="rounded-3xl border border-dashed border-white/30 bg-white/5 hover:bg-white/10 flex flex-col items-center justify-center gap-3 text-white transition-colors cursor-pointer min-h-[220px] group/more"
-            >
-              <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center group-hover/more:bg-white/20 group-hover/more:translate-x-1 transition-all">
-                <ArrowRight className="w-5 h-5 group-hover/more:translate-x-0.5 transition-transform" />
-              </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-center px-4">Voir tous les articles</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. SECTION TÉMOIGNAGES */}
-      <section className="bg-slate-50 py-16 border-y border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-            <h2 className="font-serif text-3xl font-extrabold text-[#002366] leading-tight">
-              Ce que disent nos clients
-            </h2>
-            <p className="text-slate-500 text-sm sm:text-base">
-              Découvrez les retours d'expérience des leaders sectoriels accompagnés par le Cabinet RE2M.
-            </p>
-          </div>
-
-          <div className="relative w-full overflow-x-hidden py-4">
-            <div className="flex gap-6 animate-marquee-testimonials whitespace-nowrap">
-              {[...testimonials, ...testimonials, ...testimonials].map((testi, idx) => (
-                <div
-                  key={idx}
-                  className="whitespace-normal shrink-0 w-80 sm:w-96 corporate-card rounded-3xl p-6 sm:p-8 bg-white border border-slate-200 flex flex-col justify-between shadow-sm relative group hover:shadow-md transition-shadow duration-300 min-h-[240px]"
-                >
-                  <span className="absolute top-4 right-6 font-serif text-6xl text-slate-100 select-none pointer-events-none group-hover:text-blue-50 transition-colors">
-                    ”
-                  </span>
-
-                  <div className="space-y-4 relative z-10">
-                    <p className="text-slate-600 text-sm italic leading-relaxed text-justify">
-                      {testi.text}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 relative z-10">
-                    <img
-                      src={testi.logo}
-                      alt={`${testi.company} logo`}
-                      className="w-12 h-12 rounded-xl object-contain border border-slate-100 p-1 bg-white shrink-0"
-                    />
-                    <div>
-                      <h4 className="font-serif text-sm font-bold text-[#002366]">{testi.company}</h4>
-                      <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{testi.service}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* 2. SECTION MOT DU FONDATEUR */}
-      <section className="bg-white py-16 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="relative max-w-sm w-full rounded-3xl overflow-hidden shadow-xl border border-slate-200/80 bg-white p-1">
-                <img
-                  src="/more-info.jpg"
-                  alt="Roch-Emmanuel MVE-MBORO - Fondateur"
-                  className="w-full h-auto rounded-2xl object-contain"
-                />
-              </div>
-            </div>
-
-            <div className="lg:col-span-7 space-y-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#002366] text-xs font-semibold uppercase tracking-wider border border-blue-100">
-                <Sparkles className="w-3.5 h-3.5" />
-                Notre Fondateur
-              </div>
-
-              <h2 className="font-serif text-3xl font-extrabold text-[#002366]">
-                Roch-Emmanuel <em>MVE-MBORO</em>
-              </h2>
-
-              <p className="text-slate-600 text-xs sm:text-sm leading-relaxed text-justify font-bold italic text-blue-900">
-                “Gagner grâce aux Achats et à la Logistique”
-              </p>
-
-              <div className="space-y-4 text-slate-600 text-xs sm:text-sm leading-relaxed text-justify">
-                <p>
-                  Dans le contexte économique actuel, la performance de la chaîne d'approvisionnement et l'optimisation des achats sont devenus des leviers stratégiques majeurs pour la compétitivité et la rentabilité des entreprises.
-                </p>
-                <p>
-                  Notre accompagnement est conçu pour structurer, professionnaliser et optimiser vos services Achats et Logistique afin de libérer de la valeur et d'avoir un impact direct et mesurable sur vos résultats financiers.
-                </p>
-                <p>
-                  Grâce à notre expertise unique, nous aidons vos collaborateurs à acquérir des compétences clés et à adopter des outils et processus d'excellence opérationnelle.
-                </p>
-              </div>
-
-              <div
-                onClick={() => setIsCertificateModalOpen(true)}
-                className="p-4 rounded-xl bg-white border border-slate-200 flex items-center gap-3 text-xs text-slate-700 cursor-pointer hover:border-blue-800 hover:bg-blue-50/40 transition-all shadow-sm group/cert"
-                title="Cliquer pour afficher la certification PNUD"
-              >
-                <Award className="w-5 h-5 text-[#002366] shrink-0 group-hover/cert:scale-110 transition-transform" />
-                <div>
-                  <span className="font-bold text-[#002366] underline group-hover/cert:text-blue-800">Certification PNUD</span> de niveau international, assurant rigueur et conformité. <span className="text-[10px] text-slate-400 font-semibold">(Cliquez pour afficher)</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      <TeamSection members={members} />
-
-      {/* 4. SECTION IL NOUS FONT CONFIANCE */}
-      <section className="py-12 bg-white overflow-hidden border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center">
-          <h3 className="font-serif text-2xl font-bold text-[#002366]">Ils nous font confiance</h3>
-          <p className="text-xs text-slate-400 mt-1">Des entreprises leaders de leur secteur partenaires du Cabinet RE2M</p>
-        </div>
-
-        <div className="relative w-full flex overflow-x-hidden py-4">
-          <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
-            {[...partners, ...partners, ...partners].map((partner, idx) => (
-              partner.logo ? (
-                <img
-                  key={idx}
-                  src={partner.logo}
-                  alt={`${partner.name} logo`}
-                  title={partner.name}
-                  className="h-14 w-auto max-w-[150px] object-contain shrink-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
-                />
-              ) : (
-                <span
-                  key={idx}
-                  title={partner.name}
-                  className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-[#002366] transition-colors"
-                >
-                  {partner.name}
-                </span>
-              )
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Certificate Modal */}
-      {isCertificateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-3xl w-full shadow-2xl relative border border-slate-200 space-y-4 animate-scaleUp">
-            
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="font-serif text-base sm:text-lg font-bold text-[#002366]">
-                Aperçu du Certificat Officiel
-              </h3>
-              <button
-                onClick={() => setIsCertificateModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 font-bold text-lg p-1 cursor-pointer"
-                aria-label="Fermer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="flex justify-center bg-slate-50 rounded-2xl p-2 border border-slate-100 overflow-hidden">
-              <img
-                src="/undp_certificate.png"
-                alt="UNDP Procurement Certificate - Roch-Emmanuel MVE-MBORO"
-                className="w-full h-auto object-contain max-h-[60vh] rounded-xl"
-              />
-            </div>
-
-            <p className="text-[11px] text-slate-500 text-center leading-relaxed">
-              Certification de Réussite délivrée à Roch-Emmanuel MVE-MBORO en Novembre 2009 à New York,<br />
-              par le Directeur du Bureau de Gestion du Programme des Nations Unies pour le Développement (PNUD).
-            </p>
-
-            <div className="text-center pt-2">
-              <button
-                onClick={() => setIsCertificateModalOpen(false)}
-                className="bg-[#002366] hover:bg-blue-900 text-white text-xs font-bold px-6 py-2.5 rounded-xl cursor-pointer"
-              >
-                Fermer l'aperçu
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
-
-      <PublicTestimonialModal isOpen={isTestimonialModalOpen} onClose={() => setIsTestimonialModalOpen(false)} />
-
+    <div className="min-h-[60vh] flex items-center justify-center bg-white text-center px-4">
+      <p className="text-sm text-slate-400">Cette page n'a pas encore de contenu publié.</p>
     </div>
   );
 };

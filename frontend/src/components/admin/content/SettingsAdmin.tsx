@@ -12,6 +12,7 @@ import { RichTextEditor } from '../RichTextEditor';
 import { ImageUploadField } from '../ImageUploadField';
 import { CERTIFICATE_TEMPLATES } from '../../../data/certificateTemplates';
 import { CertificateTemplateId } from '../../../data/formations';
+import { CertificateTemplatePreview } from '../certificates/CertificateTemplatePreview';
 
 interface SettingsSection {
   id: string;
@@ -209,18 +210,21 @@ export const SettingsAdmin: React.FC = () => {
 
             <div>
               <label className={labelClass}>Modèle par défaut</label>
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {CERTIFICATE_TEMPLATES.map((t) => (
                   <button
                     key={t.id}
                     type="button"
                     onClick={() => handleDefaultTemplateChange(t.id)}
-                    className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer ${
+                    className={`p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col items-center gap-2 ${
                       defaultTemplate === t.id ? 'border-[#002366] bg-blue-50' : 'border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    <p className="text-xs font-bold text-[#002366]">{t.name}</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5">{t.description}</p>
+                    <CertificateTemplatePreview templateId={t.id as CertificateTemplateId} width={180} />
+                    <div className="text-center">
+                      <p className="text-xs font-bold text-[#002366]">{t.name}</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5">{t.description}</p>
+                    </div>
                   </button>
                 ))}
               </div>

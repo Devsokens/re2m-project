@@ -3,6 +3,7 @@ import { Plus, Mail, Paperclip, Send, X, Users, CheckCircle2 } from 'lucide-reac
 import { SlideOver } from '../SlideOver';
 import { RichTextEditor } from '../RichTextEditor';
 import { Newsletter, newsletterStore } from '../../../data/newsletters';
+import { PageLoader } from '../../layout/PageLoader';
 
 const inputClass = 'w-full bg-slate-50 text-slate-800 text-xs rounded-xl px-3 py-2.5 border border-slate-200 focus:border-[#002366] focus:bg-white focus:outline-none';
 const labelClass = 'block text-xs font-bold text-slate-500 uppercase mb-1.5';
@@ -10,6 +11,7 @@ const labelClass = 'block text-xs font-bold text-slate-500 uppercase mb-1.5';
 export const NewsletterAdmin: React.FC = () => {
   const [items, setItems] = useState<Newsletter[]>([]);
   const [subscriberCount, setSubscriberCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
@@ -19,12 +21,12 @@ export const NewsletterAdmin: React.FC = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    newsletterStore.list().then(setItems).catch((err) => console.error('Impossible de charger les campagnes :', err));
-    newsletterStore
-      .subscriberCount()
-      .then((r) => setSubscriberCount(r.count))
-      .catch((err) => console.error('Impossible de charger le nombre d\'abonnés :', err));
+    Promise.all([newsletterStore.list().then(setItems), newsletterStore.subscriberCount().then((r) => setSubscriberCount(r.count))])
+      .catch((err) => console.error('Impossible de charger la newsletter :', err))
+      .finally(() => setIsLoading(false));
   }, []);
+
+  if (isLoading) return <PageLoader label="Chargement..." fullScreen={false} />;
 
   const openCompose = () => {
     setSubject('');

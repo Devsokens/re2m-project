@@ -5,6 +5,7 @@ import { RichTextEditor } from '../RichTextEditor';
 import { ImageUploadField } from '../ImageUploadField';
 import { Article, ArticleInput, articlesStore } from '../../../data/articles';
 import { EngagementComment, EngagementSummary, getComments, getEngagementSummary, replyToComment } from '../../../utils/engagementStore';
+import { PageLoader } from '../../layout/PageLoader';
 
 const emptyDraft: ArticleInput = {
   title: '',
@@ -35,13 +36,13 @@ export const BlogAdmin: React.FC = () => {
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [replySaving, setReplySaving] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = () => {
-    articlesStore.list().then(setItems).catch((err) => console.error('Impossible de charger les articles :', err));
-    getEngagementSummary('article').then(setSummary).catch((err) => console.error('Impossible de charger les réactions :', err));
-  };
-
-  useEffect(loadData, []);
+  useEffect(() => {
+    Promise.all([articlesStore.list().then(setItems), getEngagementSummary('article').then(setSummary)])
+      .catch((err) => console.error('Impossible de charger les articles :', err))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const openCreate = () => {
     setEditingId(null);
@@ -98,6 +99,8 @@ export const BlogAdmin: React.FC = () => {
       .catch((err) => console.error('Échec de la réponse :', err))
       .finally(() => setReplySaving(null));
   };
+
+  if (isLoading) return <PageLoader label="Chargement..." fullScreen={false} />;
 
   return (
     <div className="space-y-6 animate-fadeIn text-[#0f172a]">

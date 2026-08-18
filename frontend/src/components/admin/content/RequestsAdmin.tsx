@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Mail, Phone, Building2, CalendarClock, XCircle, MessageCircleReply, Inbox } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
 import { ServiceRequest, RequestType, RequestStatus, requestsStore } from '../../../data/requests';
+import { PageLoader } from '../../layout/PageLoader';
 
 const TYPE_OPTIONS: RequestType[] = ['Audit & Conseil', 'Formation', 'Partenariat', 'Autre'];
 
@@ -20,9 +21,14 @@ export const RequestsAdmin: React.FC = () => {
   const [action, setAction] = useState<'refuse' | 'schedule' | null>(null);
   const [meetingDate, setMeetingDate] = useState('');
   const [saving, setSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    requestsStore.list().then(setItems).catch((err) => console.error('Impossible de charger les demandes :', err));
+    requestsStore
+      .list()
+      .then(setItems)
+      .catch((err) => console.error('Impossible de charger les demandes :', err))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const filtered = useMemo(() => {
@@ -53,6 +59,8 @@ export const RequestsAdmin: React.FC = () => {
       .catch((err) => console.error('Échec de la mise à jour :', err))
       .finally(() => setSaving(false));
   };
+
+  if (isLoading) return <PageLoader label="Chargement..." fullScreen={false} />;
 
   return (
     <div className="space-y-6 animate-fadeIn text-[#0f172a]">

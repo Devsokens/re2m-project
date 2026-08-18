@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, ShieldCheck, KeyRound, Eye, PencilLine, Copy, Che
 import { SlideOver } from '../SlideOver';
 import { UserAccount, accountsStore, PERMISSION_MODULES, ModulePermission } from '../../../data/accounts';
 import { UserRole } from '../../../types/member';
+import { PageLoader } from '../../layout/PageLoader';
 
 interface Draft {
   name: string;
@@ -45,9 +46,14 @@ export const AccountsAdmin: React.FC = () => {
   const [error, setError] = useState('');
   const [tempPassword, setTempPassword] = useState<{ email: string; password: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    accountsStore.list().then(setItems).catch((err) => console.error('Impossible de charger les comptes :', err));
+    accountsStore
+      .list()
+      .then(setItems)
+      .catch((err) => console.error('Impossible de charger les comptes :', err))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const openCreate = () => {
@@ -122,6 +128,8 @@ export const AccountsAdmin: React.FC = () => {
       setTimeout(() => setCopied(false), 1500);
     });
   };
+
+  if (isLoading) return <PageLoader label="Chargement..." fullScreen={false} />;
 
   return (
     <div className="space-y-6 animate-fadeIn text-[#0f172a]">

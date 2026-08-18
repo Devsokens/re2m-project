@@ -23,8 +23,10 @@ import {
   Search
 } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
+import { PageLoader } from '../../layout/PageLoader';
 import { CertificatePreviewModal } from '../certificates/CertificatePreviewModal';
 import { CertificateData } from '../certificates/CertificateTemplate';
+import { CertificateTemplatePreview } from '../certificates/CertificateTemplatePreview';
 import { CERTIFICATE_TEMPLATES } from '../../../data/certificateTemplates';
 import {
   Formation,
@@ -97,6 +99,7 @@ export const FormationsAdmin: React.FC = () => {
   const [previewData, setPreviewData] = useState<CertificateData | null>(null);
   const [previewParticipant, setPreviewParticipant] = useState<Participant | null>(null);
   const [isBulkWorking, setIsBulkWorking] = useState<'pdf' | 'zip' | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const activeFormation = formations.find((f) => f.id === activeFormationId) || null;
@@ -111,11 +114,11 @@ export const FormationsAdmin: React.FC = () => {
   }, [participants, participantQuery]);
 
   const loadFormations = () => {
-    formationsStore.list().then(setFormations).catch((err) => console.error('Échec du chargement des formations :', err));
+    return formationsStore.list().then(setFormations).catch((err) => console.error('Échec du chargement des formations :', err));
   };
 
   useEffect(() => {
-    loadFormations();
+    loadFormations().finally(() => setIsLoading(false));
   }, []);
 
   useEffect(() => {
@@ -139,6 +142,8 @@ export const FormationsAdmin: React.FC = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [openMenuId]);
+
+  if (isLoading) return <PageLoader label="Chargement..." fullScreen={false} />;
 
   const handleOpenMenu = (id: string, e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -844,18 +849,21 @@ export const FormationsAdmin: React.FC = () => {
 
         <div>
           <label className={labelClass}>Modèle de certificat</label>
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {CERTIFICATE_TEMPLATES.map((t) => (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => setFormationDraft({ ...formationDraft, templateId: t.id as CertificateTemplateId })}
-                className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer ${
+                className={`text-left p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col items-center gap-2 ${
                   formationDraft.templateId === t.id ? 'border-[#002366] bg-blue-50' : 'border-slate-200 hover:border-slate-300'
                 }`}
               >
-                <p className="text-xs font-bold text-[#002366]">{t.name}</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">{t.description}</p>
+                <CertificateTemplatePreview templateId={t.id as CertificateTemplateId} width={180} className="w-full" />
+                <div className="text-center">
+                  <p className="text-xs font-bold text-[#002366]">{t.name}</p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">{t.description}</p>
+                </div>
               </button>
             ))}
           </div>

@@ -211,6 +211,17 @@
   border-radius: 999px;
 }
 
+/* Hides the scrollbar on auto-advancing horizontal rows (mobile news/blog
+   previews) while keeping native touch/drag scroll fully functional. */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Lightweight rich text editor (Newsletter compose) */
 .rich-text-editor:empty:before {
   content: attr(data-placeholder);

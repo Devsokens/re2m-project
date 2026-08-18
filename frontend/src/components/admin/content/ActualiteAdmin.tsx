@@ -5,6 +5,7 @@ import { RichTextEditor } from '../RichTextEditor';
 import { ImageUploadField } from '../ImageUploadField';
 import { NewsItem, NewsInput, newsStore } from '../../../data/news';
 import { EngagementSummary, getEngagementSummary } from '../../../utils/engagementStore';
+import { PageLoader } from '../../layout/PageLoader';
 
 const emptyDraft: NewsInput = {
   title: '',
@@ -24,10 +25,12 @@ export const ActualiteAdmin: React.FC = () => {
   const [draft, setDraft] = useState<NewsInput>(emptyDraft);
   const [saving, setSaving] = useState(false);
   const [summary, setSummary] = useState<EngagementSummary>({ likes: {}, comments: {}, shares: {} });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    newsStore.list().then(setItems).catch((err) => console.error('Impossible de charger les actualités :', err));
-    getEngagementSummary('news').then(setSummary).catch((err) => console.error('Impossible de charger les réactions :', err));
+    Promise.all([newsStore.list().then(setItems), getEngagementSummary('news').then(setSummary)])
+      .catch((err) => console.error('Impossible de charger les actualités :', err))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const openCreate = () => {
@@ -62,6 +65,8 @@ export const ActualiteAdmin: React.FC = () => {
       .catch((err) => console.error("Échec de l'enregistrement :", err))
       .finally(() => setSaving(false));
   };
+
+  if (isLoading) return <PageLoader label="Chargement..." fullScreen={false} />;
 
   return (
     <div className="space-y-6 animate-fadeIn text-[#0f172a]">

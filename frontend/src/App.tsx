@@ -5,6 +5,7 @@ import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { OfflineBanner } from './components/layout/OfflineBanner';
 import { BackToTop } from './components/layout/BackToTop';
+import { InstallPrompt } from './components/layout/InstallPrompt';
 import { AccueilView } from './components/landing/AccueilView';
 import { QuiNousSommesView } from './components/landing/QuiNousSommesView';
 import { NosServicesView } from './components/landing/NosServicesView';
@@ -368,6 +369,9 @@ export function App() {
 
       {/* Back to top */}
       {currentView !== 'admin' && currentView !== 'admin-login' && <BackToTop />}
+      {currentView !== 'admin' && currentView !== 'admin-login' && (
+        <InstallPrompt visible={Boolean(deferredPrompt)} onInstall={handleInstallPWA} />
+      )}
 
     </div>
   );

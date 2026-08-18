@@ -3,6 +3,7 @@ import { Plus, Pencil, Ban, RotateCcw, Link2, Copy, Check, MessageSquareQuote, S
 import { SlideOver } from '../SlideOver';
 import { ImageUploadField } from '../ImageUploadField';
 import { testimonialsStore, Testimonial, TestimonialStatus } from '../../../utils/testimonialsStore';
+import { PageLoader } from '../../layout/PageLoader';
 
 type FilterStatus = 'tous' | TestimonialStatus;
 
@@ -31,13 +32,14 @@ export const TestimonialsAdmin: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('tous');
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadRows = () => {
-    testimonialsStore.list().then(setRows).catch((err) => console.error('Échec du chargement des témoignages :', err));
+    return testimonialsStore.list().then(setRows).catch((err) => console.error('Échec du chargement des témoignages :', err));
   };
 
   useEffect(() => {
-    loadRows();
+    loadRows().finally(() => setIsLoading(false));
   }, []);
 
   const openCreate = () => {
@@ -127,6 +129,8 @@ export const TestimonialsAdmin: React.FC = () => {
     { id: 'publié', label: 'Publiés', count: counts.publié },
     { id: 'rejeté', label: 'Rejetés', count: counts.rejeté }
   ];
+
+  if (isLoading) return <PageLoader label="Chargement..." fullScreen={false} />;
 
   return (
     <div className="space-y-8 animate-fadeIn text-[#0f172a]">
