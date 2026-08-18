@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../lib/asyncHandler.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { requireAuth, requirePermission, requireRole } from '../middleware/auth.js';
 import { getDraftLayout, getPublishedLayout, publishLayout, saveDraftLayout } from '../controllers/cms.controller.js';
 
 export const cmsRouter = Router();
@@ -37,7 +37,7 @@ cmsRouter.get('/:slug/published', asyncHandler(getPublishedLayout));
  *       200: { description: Brouillon enregistré }
  */
 cmsRouter.get('/:slug/draft', requireAuth, asyncHandler(getDraftLayout));
-cmsRouter.put('/:slug/draft', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(saveDraftLayout));
+cmsRouter.put('/:slug/draft', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('content', 'edit'), asyncHandler(saveDraftLayout));
 
 /**
  * @openapi
@@ -48,4 +48,4 @@ cmsRouter.put('/:slug/draft', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), 
  *     responses:
  *       200: { description: Blocs publiés }
  */
-cmsRouter.post('/:slug/publish', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(publishLayout));
+cmsRouter.post('/:slug/publish', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('content', 'edit'), asyncHandler(publishLayout));

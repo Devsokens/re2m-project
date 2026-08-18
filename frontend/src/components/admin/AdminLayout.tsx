@@ -36,6 +36,11 @@ import { SettingsAdmin } from './content/SettingsAdmin';
 import { FormationsAdmin } from './content/FormationsAdmin';
 import { PageSlug, CMSBlock } from '../../types/cms';
 
+interface ModulePermission {
+  read: boolean;
+  edit: boolean;
+}
+
 interface AdminLayoutProps {
   members: Member[];
   logs: ActivityLog[];
@@ -46,6 +51,8 @@ interface AdminLayoutProps {
   onViewQR: (member: Member) => void;
   onPrintCard: (member: Member) => void;
   activeRole: UserRole;
+  // Only meaningful for ADMIN — SUPER_ADMIN always sees everything.
+  permissions?: Record<string, ModulePermission>;
   onTogglePreview: (slug: PageSlug, blocks: CMSBlock[] | null) => void;
   activePreviewSlug: PageSlug | null;
   onLogout: () => void;
@@ -63,6 +70,21 @@ type AdminTab =
   | 'requests'
   | 'accounts'
   | 'settings';
+
+// Maps each tab to the permission module that gates it (see Comptes admin —
+// backend/src/middleware/auth.ts requirePermission enforces the same
+// mapping server-side, this just keeps the nav from offering pages an
+// ADMIN can't actually use).
+const TAB_MODULE: Partial<Record<AdminTab, string>> = {
+  'content-editor': 'content',
+  'content-news': 'content',
+  'content-blog': 'content',
+  team: 'team',
+  testimonials: 'testimonials',
+  newsletter: 'newsletter',
+  requests: 'requests',
+  settings: 'settings'
+};
 
 interface NavLeaf {
   tab: AdminTab;
@@ -130,6 +152,18 @@ const ComingSoon: React.FC<{ label: string }> = ({ label }) => (
   </div>
 );
 
+const NoAccess: React.FC = () => (
+  <div className="flex flex-col items-center justify-center text-center gap-3 py-20 corporate-card rounded-3xl border border-slate-200 bg-white">
+    <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center">
+      <UserCog className="w-6 h-6 text-rose-600" />
+    </div>
+    <div>
+      <p className="font-serif text-base font-bold text-[#002366]">Accès non autorisé</p>
+      <p className="text-xs text-slate-500 mt-1">Votre compte n'a pas la permission de lecture sur ce module.</p>
+    </div>
+  </div>
+);
+
 export const AdminLayout: React.FC<AdminLayoutProps> = ({
   members,
   onAddMember,
@@ -139,10 +173,21 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   onViewQR,
   onPrintCard,
   activeRole,
+  permissions,
   onTogglePreview,
   activePreviewSlug,
   onLogout
 }) => {
+  const canAccessTab = (tab: AdminTab): boolean => {
+    if (activeRole === 'SUPER_ADMIN') return true;
+    if (tab === 'dashboard') return true;
+    if (tab === 'accounts') return false; // SUPER_ADMIN only, regardless of module permissions
+    if (activeRole === 'CONSULTANT') return false;
+    const moduleKey = TAB_MODULE[tab];
+    if (!moduleKey) return true; // e.g. 'formations' has no granular permission model yet
+    return Boolean(permissions?.[moduleKey]?.read);
+  };
+
   const [adminTab, setAdminTab] = useState<AdminTab>('dashboard');
   const [isContentGroupOpen, setIsContentGroupOpen] = useState(
     adminTab === 'content-editor' || adminTab === 'content-news' || adminTab === 'content-blog'
@@ -229,6 +274,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
       {NAV_STRUCTURE.map((item, idx) => {
         if (isGroup(item)) {
+          const visibleChildren = item.children.filter((child) => canAccessTab(child.tab));
+          if (visibleChildren.length === 0) return null;
           const GroupIcon = item.icon;
           return (
             <div key={idx}>
@@ -242,12 +289,13 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               </button>
               {isContentGroupOpen && (
                 <div className="mt-1 ml-4 pl-3 border-l border-blue-900 space-y-1">
-                  {item.children.map((child) => renderNavButton(child))}
+                  {visibleChildren.map((child) => renderNavButton(child))}
                 </div>
               )}
             </div>
           );
         }
+        if (!canAccessTab(item.tab)) return null;
         return renderNavButton(item);
       })}
     </nav>
@@ -317,7 +365,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         {/* Mobile top bar (sidebar collapses under lg) */}
         <div className="lg:hidden bg-[#002366] text-white px-4 py-3 flex items-center justify-between gap-2 overflow-x-auto sticky top-0 z-30">
           <div className="flex items-center gap-1.5">
-            {NAV_STRUCTURE.flatMap((item) => (isGroup(item) ? item.children : [item])).map((item) => {
+            {NAV_STRUCTURE.flatMap((item) => (isGroup(item) ? item.children : [item]))
+              .filter((item) => canAccessTab(item.tab))
+              .map((item) => {
               const Icon = item.icon;
               const isActive = adminTab === item.tab;
               return (
@@ -363,44 +413,50 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         </div>
 
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-          {adminTab === 'dashboard' && <DashboardStats members={members} />}
+          {!canAccessTab(adminTab) && <NoAccess />}
 
-          {adminTab === 'content-editor' && (
-            <GestionCMS
-              onTogglePreview={onTogglePreview}
-              activePreviewSlug={activePreviewSlug}
-              members={members}
-            />
+          {canAccessTab(adminTab) && (
+            <>
+              {adminTab === 'dashboard' && <DashboardStats members={members} />}
+
+              {adminTab === 'content-editor' && (
+                <GestionCMS
+                  onTogglePreview={onTogglePreview}
+                  activePreviewSlug={activePreviewSlug}
+                  members={members}
+                />
+              )}
+
+              {adminTab === 'content-news' && <ActualiteAdmin />}
+
+              {adminTab === 'content-blog' && <BlogAdmin />}
+
+              {adminTab === 'team' && (
+                <MemberTable
+                  members={members}
+                  onAddMember={handleOpenAddForm}
+                  onEditMember={handleOpenEditForm}
+                  onDeleteMember={onDeleteMember}
+                  onViewMember={onViewMember}
+                  onViewQR={onViewQR}
+                  onPrintCard={onPrintCard}
+                  userRole={activeRole}
+                />
+              )}
+
+              {adminTab === 'testimonials' && <TestimonialsAdmin />}
+
+              {adminTab === 'formations' && <FormationsAdmin />}
+
+              {adminTab === 'newsletter' && <NewsletterAdmin />}
+
+              {adminTab === 'requests' && <RequestsAdmin />}
+
+              {adminTab === 'accounts' && <AccountsAdmin />}
+
+              {adminTab === 'settings' && <SettingsAdmin />}
+            </>
           )}
-
-          {adminTab === 'content-news' && <ActualiteAdmin />}
-
-          {adminTab === 'content-blog' && <BlogAdmin />}
-
-          {adminTab === 'team' && (
-            <MemberTable
-              members={members}
-              onAddMember={handleOpenAddForm}
-              onEditMember={handleOpenEditForm}
-              onDeleteMember={onDeleteMember}
-              onViewMember={onViewMember}
-              onViewQR={onViewQR}
-              onPrintCard={onPrintCard}
-              userRole={activeRole}
-            />
-          )}
-
-          {adminTab === 'testimonials' && <TestimonialsAdmin />}
-
-          {adminTab === 'formations' && <FormationsAdmin />}
-
-          {adminTab === 'newsletter' && <NewsletterAdmin />}
-
-          {adminTab === 'requests' && <RequestsAdmin />}
-
-          {adminTab === 'accounts' && <AccountsAdmin />}
-
-          {adminTab === 'settings' && <SettingsAdmin />}
         </main>
       </div>
 

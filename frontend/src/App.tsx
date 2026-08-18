@@ -356,6 +356,7 @@ export function App() {
             onViewQR={(member) => setQrModalMember(member)}
             onPrintCard={(member) => setPrintModalMember(member)}
             activeRole={activeRole}
+            permissions={currentAdmin?.permissions}
             onTogglePreview={handleTogglePreview}
             activePreviewSlug={activePreviewSlug}
             onLogout={handleLogout}

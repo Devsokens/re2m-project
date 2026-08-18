@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../lib/asyncHandler.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { requireAuth, requirePermission, requireRole } from '../middleware/auth.js';
 import { createNews, deleteNews, listNews, updateNews } from '../controllers/news.controller.js';
 
 export const newsRouter = Router();
@@ -21,7 +21,7 @@ export const newsRouter = Router();
  *       201: { description: Actualité créée }
  */
 newsRouter.get('/', asyncHandler(listNews));
-newsRouter.post('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(createNews));
+newsRouter.post('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('content', 'edit'), asyncHandler(createNews));
 
 /**
  * @openapi
@@ -37,5 +37,5 @@ newsRouter.post('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHand
  *     responses:
  *       204: { description: Supprimée }
  */
-newsRouter.put('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(updateNews));
-newsRouter.delete('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(deleteNews));
+newsRouter.put('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('content', 'edit'), asyncHandler(updateNews));
+newsRouter.delete('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('content', 'edit'), asyncHandler(deleteNews));

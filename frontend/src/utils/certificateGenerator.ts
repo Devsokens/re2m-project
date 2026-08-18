@@ -4,6 +4,29 @@ import JSZip from 'jszip';
 import React from 'react';
 import { CertificateTemplate, CertificateData, CERTIFICATE_WIDTH, CERTIFICATE_HEIGHT } from '../components/admin/certificates/CertificateTemplate';
 
+// Waits for every <img> inside the container to finish loading (or fail —
+// we don't want to hang forever on a broken URL), with a hard timeout so a
+// single stuck image can never block certificate generation indefinitely.
+function waitForImages(container: HTMLElement, timeoutMs = 5000): Promise<void> {
+  const imgs = Array.from(container.querySelectorAll('img'));
+  if (imgs.length === 0) return Promise.resolve();
+
+  const perImage = imgs.map(
+    (img) =>
+      new Promise<void>((resolve) => {
+        if (img.complete && img.naturalWidth > 0) {
+          resolve();
+          return;
+        }
+        img.addEventListener('load', () => resolve(), { once: true });
+        img.addEventListener('error', () => resolve(), { once: true });
+      })
+  );
+
+  const timeout = new Promise<void>((resolve) => setTimeout(resolve, timeoutMs));
+  return Promise.race([Promise.all(perImage).then(() => undefined), timeout]);
+}
+
 // Renders a <CertificateTemplate> off-screen and rasterizes it to a PNG data URL via html2canvas.
 async function renderCertificateToDataUrl(data: CertificateData): Promise<string> {
   const html2canvas = (await import('html2canvas')).default;
@@ -17,10 +40,17 @@ async function renderCertificateToDataUrl(data: CertificateData): Promise<string
   const root = createRoot(host);
   root.render(React.createElement(CertificateTemplate, data));
 
-  // Let React commit + images load
-  await new Promise((resolve) => setTimeout(resolve, 150));
+  // Let React actually commit the DOM before we can query it — createRoot's
+  // render() schedules work rather than running synchronously.
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
   const target = host.firstElementChild as HTMLElement;
+
+  // The logo (and, if set, the signature stamp) are real <img> elements now
+  // — html2canvas rasterizes whatever is in the DOM at call time, so an
+  // image that hasn't finished loading yet renders blank or throws.
+  await waitForImages(target);
+
   const canvas = await html2canvas(target, {
     width: CERTIFICATE_WIDTH,
     height: CERTIFICATE_HEIGHT,

@@ -13,7 +13,7 @@ export const login = async (req: Request, res: Response) => {
 
   const { data: account, error: accountError } = await supabaseAdmin
     .from('user_accounts')
-    .select('id, name, email, role, status')
+    .select('id, name, email, role, status, permissions')
     .eq('id', data.user.id)
     .maybeSingle();
 
@@ -28,7 +28,8 @@ export const login = async (req: Request, res: Response) => {
       id: account.id,
       name: account.name,
       email: account.email,
-      role: userRoleSchema.parse(account.role)
+      role: userRoleSchema.parse(account.role),
+      permissions: account.permissions ?? {}
     }
   });
 };

@@ -9,6 +9,8 @@ export interface AuthenticatedAdmin {
   name: string;
   email: string;
   role: UserRole;
+  // Only meaningful for ADMIN — SUPER_ADMIN always has full access regardless.
+  permissions?: Record<string, { read: boolean; edit: boolean }>;
 }
 
 interface AdminLoginProps {

@@ -17,7 +17,7 @@ export const requireAuth = asyncHandler(async (req: Request, _res: Response, nex
 
   const { data: account, error: accountError } = await supabaseAdmin
     .from('user_accounts')
-    .select('id, name, email, role, status')
+    .select('id, name, email, role, status, permissions')
     .eq('id', authData.user.id)
     .maybeSingle();
 
@@ -27,7 +27,7 @@ export const requireAuth = asyncHandler(async (req: Request, _res: Response, nex
   }
 
   const role = userRoleSchema.parse(account.role);
-  req.user = { id: account.id, email: account.email, name: account.name, role };
+  req.user = { id: account.id, email: account.email, name: account.name, role, permissions: account.permissions ?? {} };
   next();
 });
 
@@ -59,6 +59,25 @@ export const requireRole = (...allowed: UserRole[]) => (req: Request, _res: Resp
   if (!req.user) throw unauthorized();
   if (!allowed.includes(req.user.role)) {
     throw forbidden(`Cette action nécessite un rôle parmi : ${allowed.join(', ')}.`);
+  }
+  next();
+};
+
+// Module-level permission enforcement for ADMIN accounts. SUPER_ADMIN always
+// passes; CONSULTANT never does (that role has no admin-write permissions by
+// design). For ADMIN, the actual read/edit flags set per module in the
+// Comptes screen (user_accounts.permissions) are what decides access — this
+// is what makes those toggles actually mean something server-side, instead
+// of being a decorative UI-only setting.
+export const requirePermission = (moduleKey: string, action: 'read' | 'edit') => (req: Request, _res: Response, next: NextFunction) => {
+  if (!req.user) throw unauthorized();
+  if (req.user.role === 'SUPER_ADMIN') return next();
+  if (req.user.role !== 'ADMIN') {
+    throw forbidden(`Cette action nécessite la permission "${action}" sur le module "${moduleKey}".`);
+  }
+  const perm = req.user.permissions?.[moduleKey];
+  if (!perm?.[action]) {
+    throw forbidden(`Votre compte n'a pas la permission "${action === 'edit' ? 'Éditer' : 'Lire'}" sur le module "${moduleKey}".`);
   }
   next();
 };

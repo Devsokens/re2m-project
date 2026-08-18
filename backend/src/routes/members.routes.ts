@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../lib/asyncHandler.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { requireAuth, requirePermission, requireRole } from '../middleware/auth.js';
 import {
   createMember,
   deleteMember,
@@ -29,7 +29,7 @@ export const membersRouter = Router();
  *       201: { description: Membre créé }
  */
 membersRouter.get('/', asyncHandler(listMembers));
-membersRouter.post('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(createMember));
+membersRouter.post('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('team', 'edit'), asyncHandler(createMember));
 
 /**
  * @openapi
@@ -58,7 +58,7 @@ membersRouter.post('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncH
  *       204: { description: Supprimé }
  */
 membersRouter.get('/:id', asyncHandler(getMember));
-membersRouter.put('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(updateMember));
+membersRouter.put('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('team', 'edit'), asyncHandler(updateMember));
 membersRouter.delete('/:id', requireAuth, requireRole('SUPER_ADMIN'), asyncHandler(deleteMember));
 
 /**

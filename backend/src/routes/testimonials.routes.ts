@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../lib/asyncHandler.js';
-import { optionalAuth, requireAuth, requireRole } from '../middleware/auth.js';
+import { optionalAuth, requireAuth, requirePermission, requireRole } from '../middleware/auth.js';
 import {
   approveTestimonial,
   checkToken,
@@ -32,7 +32,7 @@ export const testimonialsRouter = Router();
  *       201: { description: Témoignage créé }
  */
 testimonialsRouter.get('/', optionalAuth, asyncHandler(listTestimonials));
-testimonialsRouter.post('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(createTestimonial));
+testimonialsRouter.post('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('testimonials', 'edit'), asyncHandler(createTestimonial));
 
 /**
  * @openapi
@@ -55,7 +55,7 @@ testimonialsRouter.post('/public', asyncHandler(submitPublicTestimonial));
  *     responses:
  *       201: { description: Token généré }
  */
-testimonialsRouter.post('/tokens', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(createShareToken));
+testimonialsRouter.post('/tokens', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('testimonials', 'edit'), asyncHandler(createShareToken));
 
 /**
  * @openapi
@@ -91,7 +91,7 @@ testimonialsRouter.post('/submit/:token', asyncHandler(submitViaToken));
  *     responses:
  *       200: { description: Témoignage mis à jour }
  */
-testimonialsRouter.put('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(updateTestimonial));
+testimonialsRouter.put('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('testimonials', 'edit'), asyncHandler(updateTestimonial));
 
 /**
  * @openapi
@@ -102,7 +102,7 @@ testimonialsRouter.put('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'),
  *     responses:
  *       200: { description: Publié }
  */
-testimonialsRouter.patch('/:id/approve', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(approveTestimonial));
+testimonialsRouter.patch('/:id/approve', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('testimonials', 'edit'), asyncHandler(approveTestimonial));
 
 /**
  * @openapi
@@ -113,7 +113,7 @@ testimonialsRouter.patch('/:id/approve', requireAuth, requireRole('SUPER_ADMIN',
  *     responses:
  *       200: { description: Rejeté }
  */
-testimonialsRouter.patch('/:id/reject', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(rejectTestimonial));
+testimonialsRouter.patch('/:id/reject', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('testimonials', 'edit'), asyncHandler(rejectTestimonial));
 
 /**
  * @openapi
@@ -124,4 +124,4 @@ testimonialsRouter.patch('/:id/reject', requireAuth, requireRole('SUPER_ADMIN', 
  *     responses:
  *       200: { description: Republié }
  */
-testimonialsRouter.patch('/:id/republish', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(republishTestimonial));
+testimonialsRouter.patch('/:id/republish', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('testimonials', 'edit'), asyncHandler(republishTestimonial));

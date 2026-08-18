@@ -86,6 +86,8 @@ export const FormationsAdmin: React.FC = () => {
   const [editingFormationId, setEditingFormationId] = useState<string | null>(null);
   const [savingFormation, setSavingFormation] = useState(false);
   const [addingParticipant, setAddingParticipant] = useState(false);
+  const [isImportingExcel, setIsImportingExcel] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const [isParticipantFormOpen, setIsParticipantFormOpen] = useState(false);
   const [participantDraft, setParticipantDraft] = useState(emptyParticipantDraft);
@@ -267,39 +269,43 @@ export const FormationsAdmin: React.FC = () => {
   const handleExcelImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
-    if (!file || !activeFormationId) return;
+    if (!file || !activeFormationId || isImportingExcel) return;
 
-    const XLSX = await import('xlsx');
-    const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: 'array' });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows: any[] = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+    setIsImportingExcel(true);
+    try {
+      const XLSX = await import('xlsx');
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows: any[] = XLSX.utils.sheet_to_json(sheet, { defval: '' });
 
-    const imported = rows
-      .map((row) => {
-        const fullName = row['Nom'] || row['Nom complet'] || row['Name'] || row['nom'] || '';
-        if (!fullName) return null;
-        return {
-          fullName: String(fullName),
-          email: String(row['Email'] || row['email'] || ''),
-          organization: String(row['Organisation'] || row['Entreprise'] || row['organization'] || ''),
-          present: true
-        };
-      })
-      .filter((p): p is { fullName: string; email: string; organization: string; present: boolean } => p !== null);
+      const imported = rows
+        .map((row) => {
+          const fullName = row['Nom'] || row['Nom complet'] || row['Name'] || row['nom'] || '';
+          if (!fullName) return null;
+          return {
+            fullName: String(fullName),
+            email: String(row['Email'] || row['email'] || ''),
+            organization: String(row['Organisation'] || row['Entreprise'] || row['organization'] || ''),
+            present: true
+          };
+        })
+        .filter((p): p is { fullName: string; email: string; organization: string; present: boolean } => p !== null);
 
-    if (imported.length === 0) {
-      window.alert("Aucune ligne valide trouvée. Assurez-vous d'avoir une colonne \"Nom\".");
-      return;
+      if (imported.length === 0) {
+        window.alert("Aucune ligne valide trouvée. Assurez-vous d'avoir une colonne \"Nom\".");
+        return;
+      }
+
+      const created = await formationsStore.addParticipantsBulk(activeFormationId, imported);
+      setParticipants((prev) => [...prev, ...created]);
+      setFormations((prev) => prev.map((f) => (f.id === activeFormationId ? { ...f, participantCount: (f.participantCount ?? 0) + created.length } : f)));
+    } catch (err) {
+      console.error('Échec de l\'import Excel :', err);
+      window.alert("Échec de l'import du fichier Excel.");
+    } finally {
+      setIsImportingExcel(false);
     }
-
-    formationsStore
-      .addParticipantsBulk(activeFormationId, imported)
-      .then((created) => {
-        setParticipants((prev) => [...prev, ...created]);
-        setFormations((prev) => prev.map((f) => (f.id === activeFormationId ? { ...f, participantCount: (f.participantCount ?? 0) + created.length } : f)));
-      })
-      .catch((err) => console.error('Échec de l\'import Excel :', err));
   };
 
   const handleDownloadTemplate = async () => {
@@ -336,8 +342,16 @@ export const FormationsAdmin: React.FC = () => {
 
   const handleDownloadOne = async (p: Participant) => {
     const data = toCertData(p);
-    if (!data) return;
-    await downloadSingleCertificate(data);
+    if (!data || downloadingId) return;
+    setDownloadingId(p.id);
+    try {
+      await downloadSingleCertificate(data);
+    } catch (err) {
+      console.error('Échec du téléchargement du certificat :', err);
+      window.alert('Échec du téléchargement du certificat.');
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   const toggleSelect = (id: string) => {
@@ -365,6 +379,9 @@ export const FormationsAdmin: React.FC = () => {
       } else {
         await downloadCertificatesZip(items, `Attestations_${activeFormation.title.slice(0, 30)}.zip`);
       }
+    } catch (err) {
+      console.error('Échec du téléchargement des certificats :', err);
+      window.alert('Échec du téléchargement des certificats.');
     } finally {
       setIsBulkWorking(null);
     }
@@ -451,9 +468,11 @@ export const FormationsAdmin: React.FC = () => {
                 </button>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-[#002366] text-xs font-bold flex items-center gap-2 cursor-pointer transition-colors"
+                  disabled={isImportingExcel}
+                  className="px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-[#002366] text-xs font-bold flex items-center gap-2 cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-wait"
                 >
-                  <Upload className="w-4 h-4" /> Importer un fichier Excel
+                  {isImportingExcel ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  {isImportingExcel ? 'Import en cours...' : 'Importer un fichier Excel'}
                 </button>
                 <button
                   onClick={handleDownloadTemplate}
@@ -677,11 +696,11 @@ export const FormationsAdmin: React.FC = () => {
                         </button>
                         <button
                           onClick={() => handleDownloadOne(p)}
-                          disabled={!p.present}
-                          className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-[#002366] flex items-center justify-center hover:bg-blue-100 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          disabled={!p.present || downloadingId === p.id}
+                          className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-[#002366] flex items-center justify-center hover:bg-blue-100 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-wait"
                           title="Télécharger"
                         >
-                          <Download className="w-3.5 h-3.5" />
+                          {downloadingId === p.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                         </button>
                       </div>
                     </td>

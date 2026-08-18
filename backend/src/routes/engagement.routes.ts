@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../lib/asyncHandler.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { requireAuth, requirePermission, requireRole } from '../middleware/auth.js';
 import {
   addComment,
   getEngagementStats,
@@ -120,5 +120,6 @@ engagementRouter.patch(
   '/comments/:commentId/reply',
   requireAuth,
   requireRole('SUPER_ADMIN', 'ADMIN'),
+  requirePermission('content', 'edit'),
   asyncHandler(replyToComment)
 );

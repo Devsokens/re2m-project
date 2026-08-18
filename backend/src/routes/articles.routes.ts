@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../lib/asyncHandler.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { requireAuth, requirePermission, requireRole } from '../middleware/auth.js';
 import { createArticle, deleteArticle, listArticles, updateArticle } from '../controllers/articles.controller.js';
 
 export const articlesRouter = Router();
@@ -21,7 +21,7 @@ export const articlesRouter = Router();
  *       201: { description: Article créé }
  */
 articlesRouter.get('/', asyncHandler(listArticles));
-articlesRouter.post('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(createArticle));
+articlesRouter.post('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('content', 'edit'), asyncHandler(createArticle));
 
 /**
  * @openapi
@@ -37,5 +37,5 @@ articlesRouter.post('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), async
  *     responses:
  *       204: { description: Supprimé }
  */
-articlesRouter.put('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(updateArticle));
-articlesRouter.delete('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(deleteArticle));
+articlesRouter.put('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('content', 'edit'), asyncHandler(updateArticle));
+articlesRouter.delete('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('content', 'edit'), asyncHandler(deleteArticle));

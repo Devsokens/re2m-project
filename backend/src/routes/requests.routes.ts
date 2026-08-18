@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../lib/asyncHandler.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
+import { requireAuth, requirePermission, requireRole } from '../middleware/auth.js';
 import { createRequest, listRequests, updateRequestStatus } from '../controllers/requests.controller.js';
 
 export const requestsRouter = Router();
@@ -20,7 +20,7 @@ export const requestsRouter = Router();
  *     responses:
  *       201: { description: Demande créée }
  */
-requestsRouter.get('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(listRequests));
+requestsRouter.get('/', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('requests', 'read'), asyncHandler(listRequests));
 requestsRouter.post('/', asyncHandler(createRequest));
 
 /**
@@ -32,4 +32,4 @@ requestsRouter.post('/', asyncHandler(createRequest));
  *     responses:
  *       200: { description: Demande mise à jour }
  */
-requestsRouter.patch('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), asyncHandler(updateRequestStatus));
+requestsRouter.patch('/:id', requireAuth, requireRole('SUPER_ADMIN', 'ADMIN'), requirePermission('requests', 'edit'), asyncHandler(updateRequestStatus));
