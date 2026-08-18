@@ -1,6 +1,6 @@
 import React from 'react';
 import { CertificateTemplateId } from '../../../data/formations';
-import { FlourishCorner } from './FlourishCorner';
+import { CertificateBorderFlourish } from './CertificateBorderFlourish';
 
 export interface CertificateData {
   participantName: string;
@@ -158,10 +158,12 @@ export const CertificateTemplate: React.FC<CertificateData> = ({
     >
       <div className="absolute inset-6 border border-slate-300" />
 
-      <FlourishCorner className="absolute top-3 left-3" />
-      <div className="absolute top-3 right-3" style={{ transform: 'scaleX(-1)' }}><FlourishCorner /></div>
-      <div className="absolute bottom-3 left-3" style={{ transform: 'scaleY(-1)' }}><FlourishCorner /></div>
-      <div className="absolute bottom-3 right-3" style={{ transform: 'scale(-1,-1)' }}><FlourishCorner /></div>
+      <div className="absolute top-2 left-1/2 -translate-x-1/2" style={{ width: CERTIFICATE_WIDTH - 80 }}>
+        <CertificateBorderFlourish variant="top" />
+      </div>
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2" style={{ width: CERTIFICATE_WIDTH - 80 }}>
+        <CertificateBorderFlourish variant="bottom" />
+      </div>
 
       <div className="flex-1 flex flex-col items-center justify-center text-center px-24 relative z-10">
         <h1 className="text-6xl font-bold text-[#3a2e22] tracking-[0.05em]" style={{ fontFamily: 'Georgia, serif' }}>
