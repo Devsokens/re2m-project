@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ArrowLeft, Globe, Smile, Send, UserCircle2, MessageCircle } from 'lucide-react';
 import { LikeButton } from './LikeButton';
+import { ShareButton } from './ShareButton';
 import { CommentSection } from './CommentSection';
 import { addComment, getComments, EngagementTargetType } from '../../utils/engagementStore';
 import { stripHtml, getInitials } from '../../utils/text';
@@ -156,6 +157,7 @@ export const PostModal: React.FC<PostModalProps> = ({ item, otherItems, mode, on
           <div className="px-4 sm:px-5 py-3 flex items-center justify-between border-b border-slate-100">
             <div className="flex items-center gap-4">
               <LikeButton targetType={item.targetType} targetId={item.id} size="md" />
+              <ShareButton targetType={item.targetType} targetId={item.id} title={stripHtml(item.text).slice(0, 80)} size="md" />
               {mode === 'blog' && (
                 <span className="flex items-center gap-1.5 text-sm font-bold text-slate-500">
                   <MessageCircle className="w-4 h-4" /> {commentCount}

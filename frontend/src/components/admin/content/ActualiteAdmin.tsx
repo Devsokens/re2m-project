@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, Newspaper } from 'lucide-react';
+import { Plus, Pencil, Trash2, Newspaper, Heart, MessageCircle, Share2 } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
 import { RichTextEditor } from '../RichTextEditor';
 import { ImageUploadField } from '../ImageUploadField';
 import { NewsItem, NewsInput, newsStore } from '../../../data/news';
+import { EngagementSummary, getEngagementSummary } from '../../../utils/engagementStore';
 
 const emptyDraft: NewsInput = {
   title: '',
@@ -22,9 +23,11 @@ export const ActualiteAdmin: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<NewsInput>(emptyDraft);
   const [saving, setSaving] = useState(false);
+  const [summary, setSummary] = useState<EngagementSummary>({ likes: {}, comments: {}, shares: {} });
 
   useEffect(() => {
     newsStore.list().then(setItems).catch((err) => console.error('Impossible de charger les actualités :', err));
+    getEngagementSummary('news').then(setSummary).catch((err) => console.error('Impossible de charger les réactions :', err));
   }, []);
 
   const openCreate = () => {
@@ -94,6 +97,11 @@ export const ActualiteAdmin: React.FC = () => {
                 className="text-[11px] text-slate-500 leading-relaxed line-clamp-2 flex-1"
                 dangerouslySetInnerHTML={{ __html: item.excerpt }}
               />
+              <div className="flex items-center gap-3 text-[11px] text-slate-500 font-semibold">
+                <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5 text-slate-400" /> {summary.likes[item.id] ?? 0}</span>
+                <span className="flex items-center gap-1"><MessageCircle className="w-3.5 h-3.5 text-slate-400" /> {summary.comments[item.id] ?? 0}</span>
+                <span className="flex items-center gap-1"><Share2 className="w-3.5 h-3.5 text-slate-400" /> {summary.shares[item.id] ?? 0}</span>
+              </div>
               <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                 <span className="text-[10px] text-slate-400 font-semibold">{new Date(item.date).toLocaleDateString('fr-FR')}</span>
                 <div className="flex items-center gap-1.5">

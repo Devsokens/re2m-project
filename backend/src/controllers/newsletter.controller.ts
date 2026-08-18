@@ -51,12 +51,15 @@ export const sendCampaign = async (req: Request, res: Response) => {
 
   const file = req.file;
 
+  const senderEmail = env.GMAIL_SENDER_EMAIL ?? 'newsletter@cabinet-re2m.com';
+
   await sendMail({
-    to: env.GMAIL_SENDER_EMAIL ?? 'newsletter@cabinet-re2m.com',
+    to: senderEmail,
     bcc: recipients,
     subject: input.subject,
     html: input.bodyHtml,
-    attachments: file ? [{ filename: file.originalname, mimeType: file.mimetype, content: file.buffer }] : undefined
+    attachments: file ? [{ filename: file.originalname, mimeType: file.mimetype, content: file.buffer }] : undefined,
+    listUnsubscribe: `mailto:${senderEmail}?subject=${encodeURIComponent('Désabonnement newsletter')}`
   });
 
   const { data, error } = await supabaseAdmin

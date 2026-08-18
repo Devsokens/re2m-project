@@ -10,3 +10,7 @@ export const commentInputSchema = z.object({
 export const likeToggleSchema = z.object({
   visitorKey: z.string().min(1)
 });
+
+export const commentReplySchema = z.object({
+  reply: z.string().min(1)
+});

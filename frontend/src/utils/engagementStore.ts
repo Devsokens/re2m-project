@@ -29,11 +29,18 @@ export const getLikeState = (targetType: EngagementTargetType, targetId: string)
 export const toggleLike = (targetType: EngagementTargetType, targetId: string): Promise<LikeState> =>
   apiClient.post<LikeState>(`/api/engagement/${targetType}/${targetId}/likes`, { visitorKey: getVisitorKey() });
 
+export const recordShare = (targetType: EngagementTargetType, targetId: string): Promise<{ count: number }> =>
+  apiClient.post<{ count: number }>(`/api/engagement/${targetType}/${targetId}/shares`);
+
 export interface EngagementComment {
   id: string;
+  targetType: EngagementTargetType;
+  targetId: string;
   author: string;
   text: string;
   date: string; // ISO
+  adminReply: string | null;
+  adminReplyAt: string | null;
 }
 
 export const getComments = (targetType: EngagementTargetType, targetId: string): Promise<EngagementComment[]> =>
@@ -41,3 +48,30 @@ export const getComments = (targetType: EngagementTargetType, targetId: string):
 
 export const addComment = (targetType: EngagementTargetType, targetId: string, author: string, text: string): Promise<EngagementComment> =>
   apiClient.post<EngagementComment>(`/api/engagement/${targetType}/${targetId}/comments`, { author, text });
+
+// Admin-only: per-content like/comment/share counts for a whole content type,
+// used to show badges on the admin card lists without one request per card.
+export interface EngagementSummary {
+  likes: Record<string, number>;
+  comments: Record<string, number>;
+  shares: Record<string, number>;
+}
+
+export const getEngagementSummary = (targetType: EngagementTargetType): Promise<EngagementSummary> =>
+  apiClient.get<EngagementSummary>(`/api/engagement/summary?targetType=${targetType}`);
+
+// Admin-only: site-wide totals for the Dashboard's "Réactions" KPI cards.
+export interface EngagementStats {
+  likes: number;
+  comments: number;
+  shares: number;
+}
+
+export const getEngagementStats = (): Promise<EngagementStats> => apiClient.get<EngagementStats>('/api/engagement/stats');
+
+// Admin-only: every comment (optionally filtered), for the reply/moderation panel.
+export const listAllComments = (targetType?: EngagementTargetType): Promise<EngagementComment[]> =>
+  apiClient.get<EngagementComment[]>(`/api/engagement/comments${targetType ? `?targetType=${targetType}` : ''}`);
+
+export const replyToComment = (commentId: string, reply: string): Promise<EngagementComment> =>
+  apiClient.patch<EngagementComment>(`/api/engagement/comments/${commentId}/reply`, { reply });

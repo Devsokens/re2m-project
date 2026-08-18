@@ -21,6 +21,8 @@ import { PrintCardView } from './components/card/PrintCardView';
 import { PageSlug, CMSBlock } from './types/cms';
 import { cmsStorage } from './utils/cmsStorage';
 import { apiClient, authToken } from './lib/apiClient';
+import { getVisitorKey } from './utils/engagementStore';
+import { PageLoader } from './components/layout/PageLoader';
 
 const PAGE_SLUGS: PageSlug[] = ['accueil', 'qui-nous-sommes', 'nos-services', 'contact'];
 
@@ -54,6 +56,8 @@ export function App() {
     'contact': []
   });
 
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
   useEffect(() => {
     apiClient
       .get<Member[]>('/api/members')
@@ -66,7 +70,8 @@ export function App() {
       .then((entries) => {
         setPublishedBlocks(Object.fromEntries(entries) as Record<PageSlug, CMSBlock[]>);
       })
-      .catch((err) => console.error('Impossible de charger le contenu du site :', err));
+      .catch((err) => console.error('Impossible de charger le contenu du site :', err))
+      .finally(() => setIsInitialLoading(false));
   }, []);
 
   // View state: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'blog' | 'actualites' | 'contact' | 'profile' | 'admin' | 'admin-login'
@@ -78,6 +83,7 @@ export function App() {
       setPreviousView(currentView);
     }
     setCurrentView(view);
+    apiClient.post('/api/analytics/pageviews', { path: `/${view}`, visitorKey: getVisitorKey() }).catch(() => {});
   };
 
   // Selected member for profile view
@@ -88,6 +94,7 @@ export function App() {
   const [activeRole, setActiveRole] = useState<UserRole>('CONSULTANT');
 
   const handleLoginSuccess = (admin: AuthenticatedAdmin) => {
+    apiClient.clearCache();
     setCurrentAdmin(admin);
     setActiveRole(admin.role);
     handleNavigate('admin');
@@ -95,9 +102,14 @@ export function App() {
 
   const handleLogout = () => {
     authToken.clear();
+    apiClient.clearCache();
     setCurrentAdmin(null);
     handleNavigate('accueil');
   };
+
+  useEffect(() => {
+    apiClient.post('/api/analytics/pageviews', { path: '/accueil', visitorKey: getVisitorKey() }).catch(() => {});
+  }, []);
 
   // Modal states for global quick triggers
   const [qrModalMember, setQrModalMember] = useState<Member | null>(null);
@@ -257,6 +269,10 @@ export function App() {
 
       {/* View Switcher Router */}
       <main className="flex-1">
+        {isInitialLoading && currentView !== 'admin' && currentView !== 'admin-login' ? (
+          <PageLoader label="Chargement du site..." />
+        ) : (
+          <>
         {currentView === 'accueil' && (
           <AccueilView
             onStartDemo={() => handleOpenMemberProfile(members[0] || INITIAL_MEMBERS[0])}
@@ -321,6 +337,8 @@ export function App() {
             activePreviewSlug={activePreviewSlug}
             onLogout={handleLogout}
           />
+        )}
+          </>
         )}
       </main>
 

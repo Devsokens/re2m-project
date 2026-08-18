@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { MessageCircle, UserCircle2, Search } from 'lucide-react';
 import { articlesStore, Article } from '../../data/articles';
 import { LikeButton } from './LikeButton';
+import { ShareButton } from './ShareButton';
 import { PostModal, PostModalItem } from './PostModal';
 import { getComments } from '../../utils/engagementStore';
 import { newsletterStore } from '../../data/newsletters';
+import { PageLoader } from '../layout/PageLoader';
 
 const formatDate = (date: string) =>
   new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -26,9 +28,14 @@ export const BlogView: React.FC = () => {
   const [subscribeError, setSubscribeError] = useState('');
   const [articles, setArticles] = useState<Article[]>([]);
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    articlesStore.list().then(setArticles).catch((err) => console.error('Impossible de charger les articles :', err));
+    articlesStore
+      .list()
+      .then(setArticles)
+      .catch((err) => console.error('Impossible de charger les articles :', err))
+      .finally(() => setIsLoading(false));
   }, []);
 
   useEffect(() => {
@@ -102,12 +109,15 @@ export const BlogView: React.FC = () => {
           </div>
         </div>
 
-        {filteredArticles.length === 0 && (
+        {isLoading && <PageLoader label="Chargement des articles..." fullScreen={false} />}
+
+        {!isLoading && filteredArticles.length === 0 && (
           <p className="text-sm text-slate-400 text-center py-16">
             {articles.length === 0 ? 'Aucun article pour le moment.' : `Aucun article ne correspond à "${query}".`}
           </p>
         )}
 
+        {!isLoading && (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {filteredArticles.map((article) => {
             const commentCount = commentCounts[article.id] ?? 0;
@@ -154,6 +164,7 @@ export const BlogView: React.FC = () => {
                       >
                         <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> {commentCount}
                       </button>
+                      <ShareButton targetType="article" targetId={article.id} title={article.title} />
                     </div>
                     <span className="text-[9px] sm:text-[10px] text-slate-400">{formatDate(article.date)}</span>
                   </div>
@@ -162,6 +173,7 @@ export const BlogView: React.FC = () => {
             );
           })}
         </div>
+        )}
       </section>
 
       {/* Newsletter */}

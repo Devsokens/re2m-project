@@ -140,8 +140,12 @@ create table if not exists comments (
   target_id uuid not null,
   author text not null default 'Anonyme',
   body text not null,
+  admin_reply text,
+  admin_reply_at timestamptz,
   created_at timestamptz not null default now()
 );
+alter table comments add column if not exists admin_reply text;
+alter table comments add column if not exists admin_reply_at timestamptz;
 
 create table if not exists likes (
   id uuid primary key default gen_random_uuid(),
@@ -151,6 +155,24 @@ create table if not exists likes (
   created_at timestamptz not null default now(),
   unique (target_type, target_id, visitor_key)
 );
+
+create table if not exists shares (
+  id uuid primary key default gen_random_uuid(),
+  target_type text not null check (target_type in ('news', 'article')),
+  target_id uuid not null,
+  created_at timestamptz not null default now()
+);
+
+-- =========================================================================
+-- ANALYTICS — page views (Dashboard "Flux des visites")
+-- =========================================================================
+create table if not exists page_views (
+  id uuid primary key default gen_random_uuid(),
+  path text not null,
+  visitor_key text,
+  created_at timestamptz not null default now()
+);
+create index if not exists page_views_created_at_idx on page_views (created_at);
 
 -- =========================================================================
 -- NEWSLETTER / REQUESTS (Phase 4)
@@ -230,11 +252,20 @@ alter table newsletter_recipients enable row level security;
 alter table requests enable row level security;
 alter table settings enable row level security;
 alter table partners enable row level security;
+alter table shares enable row level security;
+alter table page_views enable row level security;
 
+drop policy if exists "public read members" on members;
 create policy "public read members" on members for select using (true);
+drop policy if exists "public read news" on news;
 create policy "public read news" on news for select using (true);
+drop policy if exists "public read articles" on articles;
 create policy "public read articles" on articles for select using (true);
+drop policy if exists "public read comments" on comments;
 create policy "public read comments" on comments for select using (true);
+drop policy if exists "public read likes" on likes;
 create policy "public read likes" on likes for select using (true);
+drop policy if exists "public read partners" on partners;
 create policy "public read partners" on partners for select using (true);
+drop policy if exists "public read published testimonials" on testimonials;
 create policy "public read published testimonials" on testimonials for select using (status = 'publié');

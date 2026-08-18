@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, FileText } from 'lucide-react';
+import { Plus, Pencil, Trash2, FileText, Heart, MessageCircle, Share2, Send } from 'lucide-react';
 import { SlideOver } from '../SlideOver';
 import { RichTextEditor } from '../RichTextEditor';
 import { ImageUploadField } from '../ImageUploadField';
 import { Article, ArticleInput, articlesStore } from '../../../data/articles';
+import { EngagementComment, EngagementSummary, getComments, getEngagementSummary, replyToComment } from '../../../utils/engagementStore';
 
 const emptyDraft: ArticleInput = {
   title: '',
@@ -19,16 +20,28 @@ const emptyDraft: ArticleInput = {
 const inputClass = 'w-full bg-slate-50 text-slate-800 text-xs rounded-xl px-3 py-2.5 border border-slate-200 focus:border-[#002366] focus:bg-white focus:outline-none';
 const labelClass = 'block text-xs font-bold text-slate-500 uppercase mb-1.5';
 
+const formatDate = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
 export const BlogAdmin: React.FC = () => {
   const [items, setItems] = useState<Article[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<ArticleInput>(emptyDraft);
   const [saving, setSaving] = useState(false);
+  const [summary, setSummary] = useState<EngagementSummary>({ likes: {}, comments: {}, shares: {} });
 
-  useEffect(() => {
+  const [commentsArticle, setCommentsArticle] = useState<Article | null>(null);
+  const [comments, setComments] = useState<EngagementComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
+  const [replySaving, setReplySaving] = useState<string | null>(null);
+
+  const loadData = () => {
     articlesStore.list().then(setItems).catch((err) => console.error('Impossible de charger les articles :', err));
-  }, []);
+    getEngagementSummary('article').then(setSummary).catch((err) => console.error('Impossible de charger les réactions :', err));
+  };
+
+  useEffect(loadData, []);
 
   const openCreate = () => {
     setEditingId(null);
@@ -63,6 +76,29 @@ export const BlogAdmin: React.FC = () => {
       .finally(() => setSaving(false));
   };
 
+  const openComments = (article: Article) => {
+    setCommentsArticle(article);
+    setCommentsLoading(true);
+    setReplyDrafts({});
+    getComments('article', article.id)
+      .then(setComments)
+      .catch((err) => console.error('Impossible de charger les commentaires :', err))
+      .finally(() => setCommentsLoading(false));
+  };
+
+  const handleReply = (commentId: string) => {
+    const reply = replyDrafts[commentId]?.trim();
+    if (!reply || replySaving) return;
+    setReplySaving(commentId);
+    replyToComment(commentId, reply)
+      .then((updated) => {
+        setComments((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+        setReplyDrafts((prev) => ({ ...prev, [commentId]: '' }));
+      })
+      .catch((err) => console.error('Échec de la réponse :', err))
+      .finally(() => setReplySaving(null));
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn text-[#0f172a]">
       <div className="flex items-center justify-between gap-4">
@@ -94,6 +130,19 @@ export const BlogAdmin: React.FC = () => {
             <div className="p-4 space-y-2 flex-1 flex flex-col">
               <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{article.title}</h4>
               <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2 flex-1">{article.excerpt}</p>
+
+              <div className="flex items-center gap-3 text-[11px] text-slate-500 font-semibold">
+                <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5 text-slate-400" /> {summary.likes[article.id] ?? 0}</span>
+                <button
+                  onClick={() => openComments(article)}
+                  className="flex items-center gap-1 hover:text-[#002366] cursor-pointer transition-colors"
+                  title="Voir et répondre aux commentaires"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-slate-400" /> {summary.comments[article.id] ?? 0}
+                </button>
+                <span className="flex items-center gap-1"><Share2 className="w-3.5 h-3.5 text-slate-400" /> {summary.shares[article.id] ?? 0}</span>
+              </div>
+
               <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                 <span className="text-[10px] text-slate-400 font-semibold">{article.author}</span>
                 <div className="flex items-center gap-1.5">
@@ -211,6 +260,59 @@ export const BlogAdmin: React.FC = () => {
             onChange={(e) => setDraft({ ...draft, tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
           />
         </div>
+      </SlideOver>
+
+      <SlideOver
+        isOpen={commentsArticle !== null}
+        onClose={() => setCommentsArticle(null)}
+        title="Commentaires"
+        subtitle={commentsArticle?.title}
+      >
+        {commentsLoading && <p className="text-xs text-slate-400 text-center py-8">Chargement...</p>}
+
+        {!commentsLoading && comments.length === 0 && (
+          <p className="text-xs text-slate-400 text-center py-8">Aucun commentaire pour cet article.</p>
+        )}
+
+        {!commentsLoading && (
+          <div className="space-y-4">
+            {comments.map((c) => (
+              <div key={c.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold text-[#0f172a]">{c.author || 'Anonyme'}</p>
+                  <p className="text-[10px] text-slate-400">{formatDate(c.date)}</p>
+                </div>
+                <p className="text-xs text-slate-700 leading-relaxed">{c.text}</p>
+
+                {c.adminReply ? (
+                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mt-2">
+                    <p className="text-[10px] font-bold text-[#002366] uppercase mb-1">Votre réponse</p>
+                    <p className="text-xs text-slate-700">{c.adminReply}</p>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 mt-2">
+                    <input
+                      value={replyDrafts[c.id] ?? ''}
+                      onChange={(e) => setReplyDrafts((prev) => ({ ...prev, [c.id]: e.target.value }))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleReply(c.id);
+                      }}
+                      placeholder="Répondre à ce commentaire..."
+                      className="flex-1 min-w-0 bg-white text-xs rounded-lg px-3 py-2 border border-slate-200 focus:border-[#002366] focus:outline-none"
+                    />
+                    <button
+                      onClick={() => handleReply(c.id)}
+                      disabled={replySaving === c.id || !replyDrafts[c.id]?.trim()}
+                      className="w-8 h-8 rounded-lg bg-[#002366] hover:bg-blue-900 text-white flex items-center justify-center shrink-0 cursor-pointer disabled:opacity-40 transition-colors"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </SlideOver>
     </div>
   );

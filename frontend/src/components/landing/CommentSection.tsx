@@ -88,6 +88,20 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ targetType, targ
                     <p className="text-xs text-slate-800 leading-relaxed mt-0.5 break-words">{c.text}</p>
                   </div>
                   <p className="text-[10px] text-slate-400 mt-1 ml-3.5">{formatRelative(c.date)}</p>
+                  {c.adminReply && (
+                    <div className="mt-2 ml-3.5 flex items-start gap-2">
+                      <div className="w-6 h-6 rounded-full bg-[#002366] flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-[9px] font-bold text-white">RE</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="bg-blue-50 border border-blue-100 rounded-2xl px-3.5 py-2.5 inline-block max-w-full">
+                          <p className="text-[11px] font-bold text-[#002366]">Cabinet RE2M</p>
+                          <p className="text-xs text-slate-800 leading-relaxed mt-0.5 break-words">{c.adminReply}</p>
+                        </div>
+                        {c.adminReplyAt && <p className="text-[10px] text-slate-400 mt-1 ml-3.5">{formatRelative(c.adminReplyAt)}</p>}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             );

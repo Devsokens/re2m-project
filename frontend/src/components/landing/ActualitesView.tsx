@@ -2,8 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Building2, Search } from 'lucide-react';
 import { newsStore, NewsItem } from '../../data/news';
 import { LikeButton } from './LikeButton';
+import { ShareButton } from './ShareButton';
 import { PostModal, PostModalItem } from './PostModal';
 import { stripHtml } from '../../utils/text';
+import { PageLoader } from '../layout/PageLoader';
 
 const formatDate = (date: string) =>
   new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -23,9 +25,14 @@ const toPostModalItem = (item: NewsItem): PostModalItem => ({
 
 export const ActualitesView: React.FC = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    newsStore.list().then(setNews).catch((err) => console.error('Impossible de charger les actualités :', err));
+    newsStore
+      .list()
+      .then(setNews)
+      .catch((err) => console.error('Impossible de charger les actualités :', err))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const sortedNews = useMemo(
@@ -72,12 +79,15 @@ export const ActualitesView: React.FC = () => {
           </div>
         </div>
 
-        {filteredNews.length === 0 && (
+        {isLoading && <PageLoader label="Chargement des actualités..." fullScreen={false} />}
+
+        {!isLoading && filteredNews.length === 0 && (
           <p className="text-sm text-slate-400 text-center py-16">
             {news.length === 0 ? 'Aucune actualité pour le moment.' : `Aucune actualité ne correspond à "${query}".`}
           </p>
         )}
 
+        {!isLoading && (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {filteredNews.map((item) => {
             const isLong = stripHtml(item.excerpt).length > VOIR_PLUS_THRESHOLD;
@@ -117,7 +127,10 @@ export const ActualitesView: React.FC = () => {
                     </button>
                   )}
                   <div className="flex items-center justify-between pt-2 sm:pt-3 mt-auto border-t border-slate-100">
-                    <LikeButton targetType="news" targetId={item.id} />
+                    <div className="flex items-center gap-3">
+                      <LikeButton targetType="news" targetId={item.id} />
+                      <ShareButton targetType="news" targetId={item.id} title={item.title} />
+                    </div>
                     <span className="text-[9px] sm:text-[10px] text-slate-400">{formatDate(item.date)}</span>
                   </div>
                 </div>
@@ -125,6 +138,7 @@ export const ActualitesView: React.FC = () => {
             );
           })}
         </div>
+        )}
 
       </section>
 

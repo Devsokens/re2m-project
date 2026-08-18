@@ -3,40 +3,24 @@ import { Member } from '../../types/member';
 import { Article, articlesStore } from '../../data/articles';
 import { NewsItem, newsStore } from '../../data/news';
 import { Newsletter, newsletterStore } from '../../data/newsletters';
+import { requestsStore, RequestType } from '../../data/requests';
+import { EngagementStats, getEngagementStats } from '../../utils/engagementStore';
+import { analyticsStore, VisitsPeriod } from '../../data/analytics';
 import {
   Eye,
   Inbox,
   Newspaper,
   FileText,
   Mail,
+  Heart,
+  MessageCircle,
+  Share2,
   TrendingUp
 } from 'lucide-react';
 
 interface DashboardStatsProps {
   members: Member[];
 }
-
-// Mock traffic trends (no backend yet) — one dataset per time granularity
-type VisitsPeriod = 'day' | 'week' | 'month' | 'year';
-
-const VISITS_DATASETS: Record<VisitsPeriod, { data: number[]; labels: string[] }> = {
-  day: {
-    data: [38, 42, 30, 55, 60, 58, 72, 65, 80, 74, 90, 85, 95, 102, 98, 110, 104, 118, 112, 126, 120, 132, 128, 140],
-    labels: ['0h', '', '2h', '', '4h', '', '6h', '', '8h', '', '10h', '', '12h', '', '14h', '', '16h', '', '18h', '', '20h', '', '22h', '']
-  },
-  week: {
-    data: [420, 460, 445, 510, 540, 500, 812],
-    labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
-  },
-  month: {
-    data: [2100, 2400, 2250, 2600, 2800, 2550, 3100, 2950, 3300, 3500, 3200, 3800, 4100, 3900, 4400, 4600, 4200, 4800, 5100, 4950, 5300, 5500, 5200, 5800, 6100, 5900, 6400, 6600, 6300, 6800],
-    labels: Array.from({ length: 30 }, (_, i) => (i % 5 === 0 ? String(i + 1) : ''))
-  },
-  year: {
-    data: [12500, 14200, 13800, 16400, 18100, 17200, 19800, 21400, 20600, 23100, 24800, 26200],
-    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
-  }
-};
 
 const PERIOD_LABELS: Record<VisitsPeriod, string> = {
   day: 'Jour',
@@ -45,15 +29,12 @@ const PERIOD_LABELS: Record<VisitsPeriod, string> = {
   year: 'Année'
 };
 
-// Mock request-type breakdown for the "Demandes" module
-const REQUEST_BREAKDOWN = [
-  { label: 'Audit & Conseil', value: 18, color: '#002366' },
-  { label: 'Formation', value: 14, color: '#4169E1' },
-  { label: 'Partenariat', value: 8, color: '#C5A85C' },
-  { label: 'Autres', value: 7, color: '#94A3B8' }
-];
-
-const TOTAL_REQUESTS = REQUEST_BREAKDOWN.reduce((sum, r) => sum + r.value, 0);
+const REQUEST_TYPE_COLORS: Record<RequestType, string> = {
+  'Audit & Conseil': '#002366',
+  Formation: '#4169E1',
+  Partenariat: '#C5A85C',
+  Autre: '#94A3B8'
+};
 
 const LineAreaChart: React.FC<{ data: number[]; labels: string[] }> = ({ data, labels }) => {
   const width = 600;
@@ -206,6 +187,12 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [newsletterSubscribers, setNewsletterSubscribers] = useState(0);
 
+  const [visitsSeries, setVisitsSeries] = useState<{ data: number[]; labels: string[] }>({ data: [], labels: [] });
+  const [visitsLoading, setVisitsLoading] = useState(true);
+  const [requestBreakdown, setRequestBreakdown] = useState<{ label: string; value: number; color: string }[]>([]);
+  const [totalRequests, setTotalRequests] = useState(0);
+  const [engagementStats, setEngagementStats] = useState<EngagementStats>({ likes: 0, comments: 0, shares: 0 });
+
   useEffect(() => {
     articlesStore.list().then(setArticles).catch((err) => console.error('Impossible de charger les articles :', err));
     newsStore.list().then(setNews).catch((err) => console.error('Impossible de charger les actualités :', err));
@@ -214,10 +201,34 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
       .subscriberCount()
       .then((r) => setNewsletterSubscribers(r.count))
       .catch((err) => console.error('Impossible de charger les abonnés :', err));
+    getEngagementStats().then(setEngagementStats).catch((err) => console.error('Impossible de charger les réactions :', err));
+    requestsStore
+      .list()
+      .then((requests) => {
+        setTotalRequests(requests.length);
+        const counts: Record<string, number> = {};
+        requests.forEach((r) => {
+          counts[r.type] = (counts[r.type] ?? 0) + 1;
+        });
+        setRequestBreakdown(
+          Object.entries(counts)
+            .map(([label, value]) => ({ label, value, color: REQUEST_TYPE_COLORS[label as RequestType] ?? '#94A3B8' }))
+            .sort((a, b) => b.value - a.value)
+        );
+      })
+      .catch((err) => console.error('Impossible de charger les demandes :', err));
   }, []);
 
-  const activeDataset = VISITS_DATASETS[visitsPeriod];
-  const periodTotal = activeDataset.data.reduce((a, b) => a + b, 0);
+  useEffect(() => {
+    setVisitsLoading(true);
+    analyticsStore
+      .getVisits(visitsPeriod)
+      .then(setVisitsSeries)
+      .catch((err) => console.error('Impossible de charger les visites :', err))
+      .finally(() => setVisitsLoading(false));
+  }, [visitsPeriod]);
+
+  const periodTotal = visitsSeries.data.reduce((a, b) => a + b, 0);
 
   const deptCounts: Record<string, number> = {};
   members.forEach((m) => {
@@ -234,11 +245,18 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-        <KpiCard label="Visites (semaine)" value={VISITS_DATASETS.week.data.reduce((a, b) => a + b, 0).toLocaleString('fr-FR')} trend="+12.4%" icon={Eye} />
-        <KpiCard label="Demandes Reçues" value={TOTAL_REQUESTS} trend="+5 cette semaine" icon={Inbox} />
+        <KpiCard label={`Visites (${PERIOD_LABELS[visitsPeriod].toLowerCase()})`} value={periodTotal.toLocaleString('fr-FR')} icon={Eye} />
+        <KpiCard label="Demandes Reçues" value={totalRequests} icon={Inbox} />
         <KpiCard label="Articles Blog" value={articles.length} icon={FileText} />
         <KpiCard label="Actualités Publiées" value={news.length} icon={Newspaper} />
         <KpiCard label="Abonnés Newsletter" value={newsletterSubscribers} icon={Mail} />
+      </div>
+
+      {/* Reactions KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <KpiCard label="Likes (Actualités & Blog)" value={engagementStats.likes} icon={Heart} />
+        <KpiCard label="Commentaires" value={engagementStats.comments} icon={MessageCircle} />
+        <KpiCard label="Partages" value={engagementStats.shares} icon={Share2} />
       </div>
 
       {/* Visits trend + Requests donut */}
@@ -263,7 +281,13 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
               ))}
             </div>
           </div>
-          <LineAreaChart data={activeDataset.data} labels={activeDataset.labels} />
+          {visitsLoading ? (
+            <p className="text-xs text-slate-400 text-center py-12">Chargement...</p>
+          ) : periodTotal === 0 ? (
+            <p className="text-xs text-slate-400 text-center py-12">Aucune visite enregistrée sur cette période.</p>
+          ) : (
+            <LineAreaChart data={visitsSeries.data} labels={visitsSeries.labels} />
+          )}
         </div>
 
         <div className="lg:col-span-5 bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
@@ -274,7 +298,11 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
             </div>
             <Inbox className="w-5 h-5 text-blue-800" />
           </div>
-          <DonutChart data={REQUEST_BREAKDOWN} />
+          {requestBreakdown.length > 0 ? (
+            <DonutChart data={requestBreakdown} />
+          ) : (
+            <p className="text-xs text-slate-400 text-center py-8">Aucune demande pour le moment.</p>
+          )}
         </div>
       </div>
 
