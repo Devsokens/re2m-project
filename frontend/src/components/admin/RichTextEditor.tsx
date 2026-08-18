@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Bold, Italic, Underline, List, Link as LinkIcon } from 'lucide-react';
 
 interface RichTextEditorProps {
@@ -16,11 +16,34 @@ const TOOLBAR_ACTIONS: { icon: React.ElementType; command: string; label: string
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeholder }) => {
   const editorRef = useRef<HTMLDivElement>(null);
+  // Tracks whether the last DOM change came from the user typing in this
+  // editor, so the sync effect below doesn't reset innerHTML (and the
+  // caret) back to the start on every keystroke — that was making text
+  // appear to type in reverse.
+  const isInternalChange = useRef(false);
+
+  useEffect(() => {
+    if (isInternalChange.current) {
+      isInternalChange.current = false;
+      return;
+    }
+    if (editorRef.current && editorRef.current.innerHTML !== value) {
+      editorRef.current.innerHTML = value;
+    }
+  }, [value]);
+
+  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    isInternalChange.current = true;
+    onChange(e.currentTarget.innerHTML);
+  };
 
   const exec = (command: string) => {
     editorRef.current?.focus();
     document.execCommand(command, false);
-    if (editorRef.current) onChange(editorRef.current.innerHTML);
+    if (editorRef.current) {
+      isInternalChange.current = true;
+      onChange(editorRef.current.innerHTML);
+    }
   };
 
   const handleLink = () => {
@@ -28,7 +51,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
     if (!url) return;
     editorRef.current?.focus();
     document.execCommand('createLink', false, url);
-    if (editorRef.current) onChange(editorRef.current.innerHTML);
+    if (editorRef.current) {
+      isInternalChange.current = true;
+      onChange(editorRef.current.innerHTML);
+    }
   };
 
   return (
@@ -58,10 +84,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
-        onInput={(e) => onChange(e.currentTarget.innerHTML)}
+        onInput={handleInput}
         data-placeholder={placeholder}
         className="min-h-[180px] max-h-[320px] overflow-y-auto px-3 py-3 text-xs text-[#0f172a] leading-relaxed focus:outline-none rich-text-editor"
-        dangerouslySetInnerHTML={{ __html: value }}
       />
     </div>
   );

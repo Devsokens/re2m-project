@@ -36,6 +36,8 @@ export const formationsStore = {
 
   create: (formation: Formation): Promise<Formation> => apiClient.post<Formation>('/api/formations', formation),
 
+  update: (id: string, formation: Formation): Promise<Formation> => apiClient.put<Formation>(`/api/formations/${id}`, formation),
+
   remove: (id: string): Promise<void> => apiClient.delete(`/api/formations/${id}`),
 
   listParticipants: (formationId: string): Promise<Participant[]> =>

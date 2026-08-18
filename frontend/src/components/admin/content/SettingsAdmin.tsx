@@ -201,16 +201,18 @@ export const SettingsAdmin: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2 border-t border-slate-100">
+          <div className="pt-2 border-t border-slate-100 space-y-6">
             <div>
               <label className={labelClass}>Cachet numérique</label>
-              <ImageUploadField value={stampUrl} onChange={handleStampChange} label="Déposer le cachet (PNG transparent recommandé)" />
+              <div className="max-w-sm">
+                <ImageUploadField value={stampUrl} onChange={handleStampChange} label="Déposer le cachet (PNG transparent recommandé)" />
+              </div>
               <p className="text-[10px] text-slate-400 mt-1.5">Ce cachet apparaît près de la signature sur chaque certificat généré.</p>
             </div>
 
             <div>
               <label className={labelClass}>Modèle par défaut</label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {CERTIFICATE_TEMPLATES.map((t) => (
                   <button
                     key={t.id}
@@ -220,7 +222,7 @@ export const SettingsAdmin: React.FC = () => {
                       defaultTemplate === t.id ? 'border-[#002366] bg-blue-50' : 'border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    <CertificateTemplatePreview templateId={t.id as CertificateTemplateId} width={180} />
+                    <CertificateTemplatePreview templateId={t.id as CertificateTemplateId} width={220} className="w-full" />
                     <div className="text-center">
                       <p className="text-xs font-bold text-[#002366]">{t.name}</p>
                       <p className="text-[10px] text-slate-500 mt-0.5">{t.description}</p>

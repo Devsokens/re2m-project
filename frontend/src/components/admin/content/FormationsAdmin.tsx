@@ -83,6 +83,9 @@ export const FormationsAdmin: React.FC = () => {
 
   const [isFormationFormOpen, setIsFormationFormOpen] = useState(false);
   const [formationDraft, setFormationDraft] = useState<Formation>(emptyFormationDraft);
+  const [editingFormationId, setEditingFormationId] = useState<string | null>(null);
+  const [savingFormation, setSavingFormation] = useState(false);
+  const [addingParticipant, setAddingParticipant] = useState(false);
 
   const [isParticipantFormOpen, setIsParticipantFormOpen] = useState(false);
   const [participantDraft, setParticipantDraft] = useState(emptyParticipantDraft);
@@ -164,18 +167,27 @@ export const FormationsAdmin: React.FC = () => {
 
   // --- Formation CRUD ---
   const openCreateFormation = () => {
+    setEditingFormationId(null);
     setFormationDraft({ ...emptyFormationDraft, id: `FRM-${Date.now()}`, templateId: getDefaultTemplateId() });
     setIsFormationFormOpen(true);
   };
+  const openEditFormation = (f: Formation) => {
+    setEditingFormationId(f.id);
+    setFormationDraft(f);
+    setIsFormationFormOpen(true);
+  };
   const handleSaveFormation = () => {
-    if (!formationDraft.title.trim()) return;
-    formationsStore
-      .create(formationDraft)
-      .then((created) => {
-        setFormations((prev) => [created, ...prev]);
+    if (!formationDraft.title.trim() || savingFormation) return;
+    setSavingFormation(true);
+    const request =
+      editingFormationId === null ? formationsStore.create(formationDraft) : formationsStore.update(editingFormationId, formationDraft);
+    request
+      .then((saved) => {
+        setFormations((prev) => (editingFormationId === null ? [saved, ...prev] : prev.map((f) => (f.id === saved.id ? saved : f))));
         setIsFormationFormOpen(false);
       })
-      .catch((err) => console.error('Échec de la création de la formation :', err));
+      .catch((err) => console.error("Échec de l'enregistrement de la formation :", err))
+      .finally(() => setSavingFormation(false));
   };
   const handleConfirmDeleteFormation = () => {
     if (!deleteFormationTarget) return;
@@ -203,7 +215,8 @@ export const FormationsAdmin: React.FC = () => {
     setIsParticipantFormOpen(true);
   };
   const handleSaveParticipant = () => {
-    if (!participantDraft.fullName.trim() || !activeFormationId) return;
+    if (!participantDraft.fullName.trim() || !activeFormationId || addingParticipant) return;
+    setAddingParticipant(true);
     formationsStore
       .addParticipant(activeFormationId, participantDraft)
       .then((created) => {
@@ -211,7 +224,8 @@ export const FormationsAdmin: React.FC = () => {
         setFormations((prev) => prev.map((f) => (f.id === activeFormationId ? { ...f, participantCount: (f.participantCount ?? 0) + 1 } : f)));
         setIsParticipantFormOpen(false);
       })
-      .catch((err) => console.error('Échec de l\'ajout du participant :', err));
+      .catch((err) => console.error('Échec de l\'ajout du participant :', err))
+      .finally(() => setAddingParticipant(false));
   };
   const handleConfirmDeleteParticipant = () => {
     if (!deleteParticipantTarget) return;
@@ -695,8 +709,12 @@ export const FormationsAdmin: React.FC = () => {
               <button onClick={() => setIsParticipantFormOpen(false)} className="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs cursor-pointer transition-all">
                 Annuler
               </button>
-              <button onClick={handleSaveParticipant} className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all">
-                Ajouter
+              <button
+                onClick={handleSaveParticipant}
+                disabled={addingParticipant}
+                className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all disabled:opacity-50"
+              >
+                {addingParticipant ? 'Ajout...' : 'Ajouter'}
               </button>
             </>
           }
@@ -807,13 +825,22 @@ export const FormationsAdmin: React.FC = () => {
               <button onClick={() => openFormationDetail(f.id)} className="text-xs font-bold text-[#002366] hover:text-blue-900 cursor-pointer">
                 Gérer les participants →
               </button>
-              <button
-                onClick={() => setDeleteFormationTarget(f)}
-                className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
-                title="Supprimer"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => openEditFormation(f)}
+                  className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 text-[#002366] flex items-center justify-center hover:bg-blue-100 cursor-pointer transition-colors"
+                  title="Modifier"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setDeleteFormationTarget(f)}
+                  className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center hover:bg-rose-100 cursor-pointer transition-colors"
+                  title="Supprimer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -829,7 +856,7 @@ export const FormationsAdmin: React.FC = () => {
       <SlideOver
         isOpen={isFormationFormOpen}
         onClose={() => setIsFormationFormOpen(false)}
-        title="Nouvelle formation"
+        title={editingFormationId === null ? 'Nouvelle formation' : 'Modifier la formation'}
         subtitle="Formations & certifications"
         width="720px"
         footer={
@@ -837,8 +864,12 @@ export const FormationsAdmin: React.FC = () => {
             <button onClick={() => setIsFormationFormOpen(false)} className="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-xs cursor-pointer transition-all">
               Annuler
             </button>
-            <button onClick={handleSaveFormation} className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all">
-              Créer
+            <button
+              onClick={handleSaveFormation}
+              disabled={savingFormation}
+              className="px-5 py-2.5 rounded-xl bg-[#002366] hover:bg-blue-900 text-white font-bold text-xs cursor-pointer shadow-sm transition-all disabled:opacity-50"
+            >
+              {savingFormation ? 'Enregistrement...' : editingFormationId === null ? 'Créer' : 'Enregistrer'}
             </button>
           </>
         }

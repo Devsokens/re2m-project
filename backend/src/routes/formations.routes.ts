@@ -9,6 +9,7 @@ import {
   deleteParticipant,
   listFormations,
   listParticipants,
+  updateFormation,
   updateParticipant
 } from '../controllers/formations.controller.js';
 
@@ -36,12 +37,18 @@ formationsRouter.post('/', asyncHandler(createFormation));
 /**
  * @openapi
  * /api/formations/{id}:
+ *   put:
+ *     summary: Modifier une formation
+ *     tags: [Formations]
+ *     responses:
+ *       200: { description: Formation mise à jour }
  *   delete:
  *     summary: Supprimer une formation (et ses participants)
  *     tags: [Formations]
  *     responses:
  *       204: { description: Supprimée }
  */
+formationsRouter.put('/:id', asyncHandler(updateFormation));
 formationsRouter.delete('/:id', asyncHandler(deleteFormation));
 
 /**

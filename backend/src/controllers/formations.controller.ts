@@ -56,6 +56,27 @@ export const createFormation = async (req: Request, res: Response) => {
   res.status(201).json(toApiFormation(data));
 };
 
+export const updateFormation = async (req: Request, res: Response) => {
+  const input = formationInputSchema.parse({ ...req.body, id: req.params.id });
+  const { data, error } = await supabaseAdmin
+    .from('formations')
+    .update({
+      title: input.title,
+      date: input.date,
+      location: input.location,
+      description: input.description,
+      template_id: input.templateId,
+      signer_name: input.signerName,
+      signer_title: input.signerTitle
+    })
+    .eq('id', req.params.id)
+    .select(`${FORMATION_COLUMNS}, participants(count)`)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw notFound('Formation');
+  res.json(toApiFormation(data));
+};
+
 export const deleteFormation = async (req: Request, res: Response) => {
   const { data, error } = await supabaseAdmin.from('formations').delete().eq('id', req.params.id).select('id').maybeSingle();
   if (error) throw error;

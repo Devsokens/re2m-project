@@ -108,6 +108,28 @@ export function App() {
     handleNavigate('accueil');
   };
 
+  // Restores the admin session on a hard refresh — without this, a valid
+  // token was still sitting in localStorage but currentAdmin/currentView
+  // always reset to signed-out/public on mount, which looked exactly like
+  // being logged out every time the admin panel was reloaded.
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+  useEffect(() => {
+    const token = authToken.get();
+    if (!token) {
+      setIsAuthChecking(false);
+      return;
+    }
+    apiClient
+      .get<{ user: AuthenticatedAdmin }>('/api/auth/me')
+      .then(({ user }) => {
+        setCurrentAdmin(user);
+        setActiveRole(user.role);
+        setCurrentView('admin');
+      })
+      .catch(() => authToken.clear())
+      .finally(() => setIsAuthChecking(false));
+  }, []);
+
   useEffect(() => {
     apiClient.post('/api/analytics/pageviews', { path: '/accueil', visitorKey: getVisitorKey() }).catch(() => {});
   }, []);
@@ -270,7 +292,7 @@ export function App() {
 
       {/* View Switcher Router */}
       <main className="flex-1">
-        {isInitialLoading && currentView !== 'admin' && currentView !== 'admin-login' ? (
+        {(isInitialLoading || isAuthChecking) && currentView !== 'admin' && currentView !== 'admin-login' ? (
           <PageLoader label="Chargement du site..." />
         ) : (
           <>

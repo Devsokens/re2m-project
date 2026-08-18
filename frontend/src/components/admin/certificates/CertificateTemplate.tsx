@@ -35,7 +35,7 @@ const RE2MLogo: React.FC<{ dark?: boolean }> = ({ dark = true }) => (
   <img
     src="/logo2.png"
     alt="Cabinet RE2M"
-    className="h-14 w-auto object-contain"
+    className="h-16 w-auto object-contain"
     style={dark ? undefined : { filter: 'brightness(0) invert(1)' }}
   />
 );
@@ -44,16 +44,16 @@ const ScallopedSeal: React.FC<{ dayMonth: string; year: string }> = ({ dayMonth,
   <div
     className="relative flex flex-col items-center justify-center shrink-0"
     style={{
-      width: 128,
-      height: 128,
+      width: 148,
+      height: 148,
       borderRadius: '50%',
       background: 'repeating-conic-gradient(#F1E1BB 0deg 15deg, #F5E9CC 15deg 30deg)'
     }}
   >
-    <div className="absolute rounded-full bg-[#FBF3E1]" style={{ inset: 10 }} />
+    <div className="absolute rounded-full bg-[#FBF3E1]" style={{ inset: 11 }} />
     <div className="relative text-center" style={{ fontFamily: 'Georgia, serif' }}>
-      <p className="text-[13px] tracking-wide text-[#3a2e22]">{dayMonth}</p>
-      <p className="text-2xl font-bold text-[#3a2e22] leading-none mt-1">{year}</p>
+      <p className="text-sm tracking-wide text-[#3a2e22]">{dayMonth}</p>
+      <p className="text-3xl font-bold text-[#3a2e22] leading-none mt-1.5">{year}</p>
     </div>
   </div>
 );
@@ -64,15 +64,15 @@ const SignatureBlock: React.FC<{ signerName: string; signerTitle: string; stampU
   stampUrl,
   light
 }) => (
-  <div className={`relative flex-1 border-t pt-2 ${light ? 'border-white/40' : 'border-slate-400'}`}>
+  <div className={`relative flex-1 border-t pt-3 ${light ? 'border-white/40' : 'border-slate-400'}`}>
     {stampUrl && (
       <img
         src={stampUrl}
         alt="Cachet"
-        className="absolute -top-16 left-6 w-20 h-20 object-contain opacity-90 pointer-events-none"
+        className="absolute -top-20 left-6 w-24 h-24 object-contain opacity-90 pointer-events-none"
       />
     )}
-    <p className={`text-[11px] leading-relaxed ${light ? 'text-white/90' : 'text-[#3a2e22]'}`} style={{ fontFamily: 'Georgia, serif' }}>
+    <p className={`text-sm leading-relaxed ${light ? 'text-white/90' : 'text-[#3a2e22]'}`} style={{ fontFamily: 'Georgia, serif' }}>
       SIGNÉ PAR <em>{signerName}</em>, {signerTitle}
     </p>
   </div>
@@ -164,24 +164,24 @@ export const CertificateTemplate: React.FC<CertificateData> = ({
       <div className="absolute bottom-3 right-3" style={{ transform: 'scale(-1,-1)' }}><FlourishCorner /></div>
 
       <div className="flex-1 flex flex-col items-center justify-center text-center px-24 relative z-10">
-        <h1 className="text-5xl font-bold text-[#3a2e22] tracking-[0.05em]" style={{ fontFamily: 'Georgia, serif' }}>
+        <h1 className="text-6xl font-bold text-[#3a2e22] tracking-[0.05em]" style={{ fontFamily: 'Georgia, serif' }}>
           ATTESTATION DE FORMATION
         </h1>
 
-        <p className="text-[11px] tracking-[0.3em] text-slate-500 font-semibold mt-8">DÉCERNÉ À</p>
+        <p className="text-sm tracking-[0.3em] text-slate-500 font-semibold mt-10">DÉCERNÉ À</p>
 
-        <div className="border-t border-b border-slate-400 mt-2 px-10 py-2">
-          <h2 className="text-4xl text-[#3a2e22]">{participantName}</h2>
+        <div className="border-t border-b border-slate-400 mt-3 px-14 py-3">
+          <h2 className="text-6xl text-[#3a2e22]">{participantName}</h2>
         </div>
 
-        <p className="text-[11px] tracking-[0.25em] text-slate-500 font-semibold mt-8">POUR SA PRÉCIEUSE CONTRIBUTION À</p>
+        <p className="text-sm tracking-[0.25em] text-slate-500 font-semibold mt-10">POUR SA PRÉCIEUSE CONTRIBUTION À</p>
 
-        <div className="flex items-center gap-4 mt-3">
-          <span className="text-[#C9A24B] text-lg">❧</span>
-          <h3 className="text-lg font-bold text-[#0f172a] tracking-wide max-w-2xl" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
+        <div className="flex items-center gap-5 mt-5">
+          <span className="text-[#C9A24B] text-2xl">❧</span>
+          <h3 className="text-2xl font-bold text-[#0f172a] tracking-wide max-w-3xl" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
             {formationTitle.toUpperCase()}
           </h3>
-          <span className="text-[#C9A24B] text-lg scale-x-[-1]">❧</span>
+          <span className="text-[#C9A24B] text-2xl scale-x-[-1]">❧</span>
         </div>
       </div>
 
