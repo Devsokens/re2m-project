@@ -1,58 +1,65 @@
-# RE2M backend
+# Backend RE2M
 
-Node.js + TypeScript + Express API for the Cabinet RE2M platform, backed by Supabase (Postgres + Auth + Storage). Lives inside the same repo as the frontend, deployed independently on Render.
+API Node.js + TypeScript + Express pour la plateforme du Cabinet RE2M, adossée à Supabase (Postgres + Auth + Storage). Vit dans le même dépôt que le frontend, déployée indépendamment sur Render.
 
-## 1. Local setup
+## 1. Installation locale
 
 ```bash
 cd backend
 npm install
-cp .env.example .env   # fill in the Supabase values below
-npm run dev             # http://localhost:4000, docs at /api-docs
+cp .env.example .env   # renseignez les valeurs Supabase ci-dessous
+npm run dev             # http://localhost:4000, docs sur /api-docs
 ```
 
-## 2. Supabase project setup (one-time)
+## 2. Configuration du projet Supabase (une seule fois)
 
-1. **Get your API keys**: Supabase dashboard → Project Settings → API. Copy `Project URL`, `anon public` key, and `service_role` key into `backend/.env`.
-2. **Run the schema**: Supabase dashboard → SQL Editor → New query → paste the full contents of `backend/sql/schema.sql` → Run.
-3. **Seed the CMS content**: same place, paste `backend/sql/seed.sql` → Run. This reproduces the current homepage/about/services/contact content exactly, so nothing visually changes when the API goes live.
-4. **Create a storage bucket**: dashboard → Storage → New bucket → name it `public-assets` (or whatever you set `SUPABASE_STORAGE_BUCKET` to) → make it **Public**.
-5. **Create your first admin login**: dashboard → Authentication → Users → Add user (set an email + password). Copy the generated user's UUID, then run in the SQL editor:
+1. **Récupérez vos clés API** : tableau de bord Supabase → Project Settings → API. Copiez `Project URL`, la clé `anon public` et la clé `service_role` dans `backend/.env`.
+2. **Exécutez le schéma** : tableau de bord Supabase → SQL Editor → New query → collez le contenu complet de `backend/sql/schema.sql` → Run.
+3. **Seedez le contenu CMS** : au même endroit, collez `backend/sql/seed.sql` → Run. Cela reproduit exactement le contenu actuel (accueil/à propos/services/contact), donc rien ne change visuellement quand l'API entre en service.
+4. **Créez un bucket de stockage** : tableau de bord → Storage → New bucket → nommez-le `public-assets` (ou la valeur que vous avez mise dans `SUPABASE_STORAGE_BUCKET`) → passez-le en **Public**.
+5. **Créez votre premier compte admin** : tableau de bord → Authentication → Users → Add user (email + mot de passe). Copiez l'UUID de l'utilisateur généré, puis exécutez dans l'éditeur SQL :
    ```sql
    insert into user_accounts (id, name, email, role, status)
-   values ('<paste-the-uuid-here>', 'Administrateur', '<same-email>', 'SUPER_ADMIN', 'active');
+   values ('<collez-l-uuid-ici>', 'Administrateur', '<même-email>', 'SUPER_ADMIN', 'active');
    ```
-   This is the account you'll log in with from the admin panel — it replaces the old hardcoded `admin@cabinet-re2m.com` / `password123`.
+   C'est le compte avec lequel vous vous connecterez depuis le panneau admin — il remplace l'ancien couple codé en dur `admin@cabinet-re2m.com` / `password123`.
 
-## 3. Gmail API setup for automated emails (optional)
+## 3. Configuration de l'API Gmail pour les emails automatiques (optionnel)
 
-The Demandes module sends automatic emails (accusé de réception, confirmation de RDV, refus) via the **Gmail API over OAuth2** rather than SMTP, because Render blocks outbound SMTP ports on its free/standard plans while HTTPS calls to the Gmail API work fine. Until the four `GMAIL_*` variables below are all set, `sendMail()` just logs a warning and skips sending — everything else in the API keeps working normally.
+Le module Demandes envoie des emails automatiques (accusé de réception, confirmation de RDV, refus) via **l'API Gmail en OAuth2** plutôt que le SMTP, car Render bloque les ports SMTP sortants sur ses offres gratuites/standards alors que les appels HTTPS vers l'API Gmail fonctionnent normalement. Tant que les quatre variables `GMAIL_*` ci-dessous ne sont pas toutes renseignées, `sendMail()` se contente d'afficher un avertissement et n'envoie rien — le reste de l'API continue de fonctionner normalement.
 
-1. **Create/select a Google Cloud project**: [console.cloud.google.com](https://console.cloud.google.com) → new project (or reuse one).
-2. **Enable the Gmail API**: in that project, "APIs & Services" → "Library" → search "Gmail API" → Enable.
-3. **Create OAuth client credentials**: "APIs & Services" → "Credentials" → "Create Credentials" → "OAuth client ID" → Application type **Desktop app**. Note the generated **Client ID** and **Client Secret**.
-4. **Configure the consent screen** (if prompted): External, fill the required fields, and add the Gmail account you'll send from as a **Test user** (unless the app is published/verified).
-5. **Generate a refresh token**: go to [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground), click the gear icon (top right) → check "Use your own OAuth credentials" → paste your Client ID/Secret. In the left panel, find and select the scope `https://www.googleapis.com/auth/gmail.send` → "Authorize APIs" → sign in with the Gmail account you want to send from → "Exchange authorization code for tokens" → copy the **Refresh token**.
-6. **Fill in `backend/.env`**:
+1. **Créez/sélectionnez un projet Google Cloud** : [console.cloud.google.com](https://console.cloud.google.com) → nouveau projet (ou réutilisez-en un).
+2. **Activez l'API Gmail** : dans ce projet, "APIs & Services" → "Library" → recherchez "Gmail API" → Enable.
+3. **Créez des identifiants OAuth** : "APIs & Services" → "Credentials" → "Create Credentials" → "OAuth client ID" → type d'application **Web application** (pas "Desktop app" — c'est ce type qui permet de déclarer une URI de redirection, nécessaire pour le Playground à l'étape 5). Dans la section **Authorized redirect URIs**, ajoutez exactement :
    ```
-   GMAIL_CLIENT_ID=<from step 3>
-   GMAIL_CLIENT_SECRET=<from step 3>
-   GMAIL_REFRESH_TOKEN=<from step 5>
-   GMAIL_SENDER_EMAIL=<the Gmail address you authorized in step 5>
+   https://developers.google.com/oauthplayground
+   ```
+   Notez le **Client ID** et le **Client Secret** générés.
+4. **Ajoutez votre compte Gmail comme testeur** (obligatoire tant que l'app n'est pas vérifiée par Google — sinon vous aurez une erreur 403 "access_denied" en essayant de vous authentifier) : dans le menu de gauche de **Google Auth Platform**, allez sur **Audience**.
+   - Si **État de la publication** affiche "En production", cliquez sur "Présentation" et repassez l'app en **Testing** (nécessaire : le mode "En production" non vérifié bloque tout le monde, y compris vous, sur ce scope sensible).
+   - Une fois en Testing, sur la page **Audience**, section **Utilisateurs test** → **+ Ajouter des utilisateurs** → ajoutez l'adresse Gmail depuis laquelle vous enverrez → Save.
+5. **Générez un refresh token** : allez sur [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground), cliquez sur l'icône d'engrenage (en haut à droite) → cochez "Use your own OAuth credentials" → collez votre Client ID/Secret (c'est ce même écran qui utilise l'URI de redirection déclarée à l'étape 3). Dans le panneau de gauche, trouvez et sélectionnez le scope `https://www.googleapis.com/auth/gmail.send` → "Authorize APIs" → connectez-vous avec le compte Gmail ajouté comme testeur à l'étape 4 → "Exchange authorization code for tokens" → copiez le **Refresh token**.
+6. **Renseignez `backend/.env`** :
+   ```
+   GMAIL_CLIENT_ID=<étape 3>
+   GMAIL_CLIENT_SECRET=<étape 3>
+   GMAIL_REFRESH_TOKEN=<étape 5>
+   GMAIL_SENDER_EMAIL=<l'adresse Gmail autorisée à l'étape 5>
    GMAIL_SENDER_NAME=Cabinet RE2M
    ```
-   Refresh tokens from the Playground don't expire unless revoked, so this is a one-time setup.
 
-## 4. Deploying on Render
+   ⚠️ **Important tant que l'app reste en mode Testing** (c'est-à-dire tant qu'elle n'est pas soumise à la vérification Google) : le refresh token expire au bout de **7 jours**. Passé ce délai, l'envoi d'email s'arrête silencieusement (avec un warning en console) jusqu'à ce qu'on refasse l'étape 5 pour en générer un nouveau. Ne repassez pas l'app en "En production" tant que la vérification n'est pas faite : le blocage 403 reviendrait immédiatement, y compris pour vous.
 
-1. Push this repo (including the `backend/` folder) to GitHub.
-2. Render dashboard → New → Web Service → connect the repo.
-3. **Root Directory**: `backend`
-4. **Build Command**: `npm install && npm run build`
-5. **Start Command**: `npm start`
-6. Add the environment variables from `.env.example` (same values as your local `.env`, plus set `CORS_ORIGINS` to your deployed frontend's URL).
-7. Once deployed, note the Render URL (e.g. `https://re2m-api.onrender.com`) — set it as `VITE_API_URL` in the frontend's environment (Vercel project settings) and redeploy the frontend.
+## 4. Déploiement sur Render
 
-## 5. API docs
+1. Poussez ce dépôt (avec le dossier `backend/`) sur GitHub.
+2. Tableau de bord Render → New → Web Service → connectez le dépôt.
+3. **Root Directory** : `backend`
+4. **Build Command** : `npm install && npm run build`
+5. **Start Command** : `npm start`
+6. Ajoutez les variables d'environnement de `.env.example` (mêmes valeurs que votre `.env` local, plus `CORS_ORIGINS` réglé sur l'URL de votre frontend déployé).
+7. Une fois déployé, notez l'URL Render (ex. `https://re2m-api.onrender.com`) — renseignez-la comme `VITE_API_URL` dans l'environnement du frontend (paramètres du projet Vercel) et redéployez le frontend.
 
-Once running, Swagger UI is available at `/api-docs` (e.g. `http://localhost:4000/api-docs` or `https://re2m-api.onrender.com/api-docs`).
+## 5. Documentation de l'API
+
+Une fois lancée, Swagger UI est disponible sur `/api-docs` (ex. `http://localhost:4000/api-docs` ou `https://re2m-api.onrender.com/api-docs`).
