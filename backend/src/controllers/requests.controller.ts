@@ -3,6 +3,7 @@ import { supabaseAdmin } from '../lib/supabase.js';
 import { requestInputSchema, requestStatusUpdateSchema } from '../schemas/request.js';
 import { notFound } from '../lib/errors.js';
 import { sendMail } from '../lib/mail.js';
+import { applyTemplateVars, getEmailTemplates } from '../lib/settings.js';
 
 const COLUMNS = 'id, name, company, email, phone, type, message, status, received_at, meeting_date';
 
@@ -41,11 +42,15 @@ export const createRequest = async (req: Request, res: Response) => {
     .single();
   if (error) throw error;
 
-  await sendMail({
-    to: input.email,
-    subject: 'Votre demande a bien été reçue — Cabinet RE2M',
-    html: `<p>Bonjour ${input.name},</p><p>Nous avons bien reçu votre demande (${input.type}) et notre équipe reviendra vers vous sous 24 à 48 heures.</p><p>Cordialement,<br/>Le Cabinet RE2M</p>`
-  });
+  const templates = await getEmailTemplates();
+  if (templates.accuse.enabled) {
+    const vars = { name: input.name, type: input.type };
+    await sendMail({
+      to: input.email,
+      subject: applyTemplateVars(templates.accuse.subject, vars),
+      html: applyTemplateVars(templates.accuse.body, vars)
+    });
+  }
 
   res.status(201).json(toApiRequest(data));
 };
@@ -65,21 +70,28 @@ export const updateRequestStatus = async (req: Request, res: Response) => {
   if (!data) throw notFound('Demande');
 
   const apiRequest = toApiRequest(data);
+  const templates = await getEmailTemplates();
 
   if (input.status === 'scheduled') {
-    await sendMail({
-      to: apiRequest.email,
-      subject: 'Rendez-vous confirmé — Cabinet RE2M',
-      html: `<p>Bonjour ${apiRequest.name},</p><p>Votre rendez-vous avec le Cabinet RE2M est confirmé pour le ${new Date(
-        input.meetingDate!
-      ).toLocaleDateString('fr-FR')}.</p><p>Cordialement,<br/>Le Cabinet RE2M</p>`
-    });
+    const template = templates.rdv;
+    if (template.enabled) {
+      const vars = { name: apiRequest.name, date: new Date(input.meetingDate!).toLocaleDateString('fr-FR') };
+      await sendMail({
+        to: apiRequest.email,
+        subject: applyTemplateVars(template.subject, vars),
+        html: applyTemplateVars(template.body, vars)
+      });
+    }
   } else {
-    await sendMail({
-      to: apiRequest.email,
-      subject: 'Votre demande — Cabinet RE2M',
-      html: `<p>Bonjour ${apiRequest.name},</p><p>Après examen, nous ne sommes malheureusement pas en mesure de donner suite à votre demande pour le moment.</p><p>Cordialement,<br/>Le Cabinet RE2M</p>`
-    });
+    const template = templates.refus;
+    if (template.enabled) {
+      const vars = { name: apiRequest.name };
+      await sendMail({
+        to: apiRequest.email,
+        subject: applyTemplateVars(template.subject, vars),
+        html: applyTemplateVars(template.body, vars)
+      });
+    }
   }
 
   res.json(apiRequest);

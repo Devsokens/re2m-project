@@ -10,9 +10,11 @@ import {
 } from 'lucide-react';
 import { RichTextEditor } from '../RichTextEditor';
 import { ImageUploadField } from '../ImageUploadField';
+import { PageLoader } from '../../layout/PageLoader';
 import { CERTIFICATE_TEMPLATES } from '../../../data/certificateTemplates';
 import { CertificateTemplateId } from '../../../data/formations';
 import { CertificateTemplatePreview } from '../certificates/CertificateTemplatePreview';
+import { AppSettings, settingsStore } from '../../../data/settings';
 
 interface SettingsSection {
   id: string;
@@ -29,8 +31,30 @@ const SECTIONS: SettingsSection[] = [
   { id: 'notifications', label: 'Notifications internes', icon: Bell }
 ];
 
-const STAMP_STORAGE_KEY = 're2m_certificate_stamp';
-const DEFAULT_TEMPLATE_STORAGE_KEY = 're2m_certificate_default_template';
+const DEFAULT_SETTINGS: AppSettings = {
+  cabinetName: 'Cabinet RE2M',
+  senderEmail: 'contact@cabinet-re2m.com',
+  emailTemplates: {
+    accuse: {
+      enabled: true,
+      subject: 'Nous avons bien reçu votre demande',
+      body: '<p>Bonjour {{name}},</p><p>Nous avons bien reçu votre demande ({{type}}) et notre équipe reviendra vers vous sous 24 à 48 heures.</p><p>Cordialement,<br/>Le Cabinet RE2M</p>'
+    },
+    refus: {
+      enabled: true,
+      subject: 'Votre demande — Cabinet RE2M',
+      body: '<p>Bonjour {{name}},</p><p>Après examen, nous ne sommes malheureusement pas en mesure de donner suite à votre demande pour le moment.</p><p>Cordialement,<br/>Le Cabinet RE2M</p>'
+    },
+    rdv: {
+      enabled: true,
+      subject: 'Rendez-vous confirmé — Cabinet RE2M',
+      body: '<p>Bonjour {{name}},</p><p>Votre rendez-vous avec le Cabinet RE2M est confirmé pour le {{date}}.</p><p>Cordialement,<br/>Le Cabinet RE2M</p>'
+    }
+  },
+  notifications: { newRequest: true, newTestimonial: true },
+  certificateStampUrl: '',
+  certificateDefaultTemplate: 're2m-classique'
+};
 
 const inputClass = 'w-full bg-slate-50 text-slate-800 text-xs rounded-xl px-3 py-2.5 border border-slate-200 focus:border-[#002366] focus:bg-white focus:outline-none';
 const labelClass = 'block text-xs font-bold text-slate-500 uppercase mb-1.5';
@@ -46,8 +70,20 @@ const EmailTemplateCard: React.FC<{
   onSubjectChange: (v: string) => void;
   body: string;
   onBodyChange: (v: string) => void;
-}> = ({ id, icon: Icon, title, description, enabled, onToggle, subject, onSubjectChange, body, onBodyChange }) => {
+  onSave: () => Promise<void>;
+}> = ({ id, icon: Icon, title, description, enabled, onToggle, subject, onSubjectChange, body, onBodyChange, onSave }) => {
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = () => {
+    setSaving(true);
+    onSave()
+      .then(() => {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 1800);
+      })
+      .finally(() => setSaving(false));
+  };
 
   return (
     <div id={id} className="bg-white border border-slate-200 rounded-3xl p-6 space-y-4 scroll-mt-24">
@@ -78,17 +114,20 @@ const EmailTemplateCard: React.FC<{
           <div>
             <label className={labelClass}>Message</label>
             <RichTextEditor value={body} onChange={onBodyChange} placeholder="Contenu de l'email..." />
+            <p className="text-[10px] text-slate-400 mt-1.5">
+              Variables disponibles : <code className="font-mono">{'{{name}}'}</code>
+              {id === 'accuse' && <> , <code className="font-mono">{'{{type}}'}</code></>}
+              {id === 'rdv' && <> , <code className="font-mono">{'{{date}}'}</code></>}
+            </p>
           </div>
           <div className="flex justify-end items-center gap-3">
             {saved && <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Enregistré</span>}
             <button
-              onClick={() => {
-                setSaved(true);
-                setTimeout(() => setSaved(false), 1800);
-              }}
-              className="px-4 py-2 rounded-xl bg-[#002366] hover:bg-blue-900 text-white text-xs font-bold cursor-pointer transition-colors"
+              onClick={handleSave}
+              disabled={saving}
+              className="px-4 py-2 rounded-xl bg-[#002366] hover:bg-blue-900 text-white text-xs font-bold cursor-pointer transition-colors disabled:opacity-50"
             >
-              Enregistrer
+              {saving ? 'Enregistrement...' : 'Enregistrer'}
             </button>
           </div>
         </div>
@@ -101,42 +140,62 @@ export const SettingsAdmin: React.FC = () => {
   const [activeSection, setActiveSection] = useState('general');
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const [cabinetName, setCabinetName] = useState('Cabinet RE2M');
-  const [senderEmail, setSenderEmail] = useState('contact@cabinet-re2m.com');
+  const [isLoading, setIsLoading] = useState(true);
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [generalSaving, setGeneralSaving] = useState(false);
+  const [generalSaved, setGeneralSaved] = useState(false);
 
-  const [accuseEnabled, setAccuseEnabled] = useState(true);
-  const [accuseSubject, setAccuseSubject] = useState('Nous avons bien reçu votre demande');
-  const [accuseBody, setAccuseBody] = useState('<p>Bonjour,</p><p>Nous avons bien reçu votre demande et reviendrons vers vous sous 48h.</p><p>Cordialement,<br/>Le Cabinet RE2M</p>');
+  useEffect(() => {
+    settingsStore
+      .get()
+      .then(setSettings)
+      .catch((err) => console.error('Impossible de charger les paramètres :', err))
+      .finally(() => setIsLoading(false));
+  }, []);
 
-  const [refusEnabled, setRefusEnabled] = useState(true);
-  const [refusSubject, setRefusSubject] = useState('Concernant votre demande');
-  const [refusBody, setRefusBody] = useState("<p>Bonjour,</p><p>Après étude, nous ne sommes malheureusement pas en mesure de donner suite à votre demande pour le moment.</p><p>Cordialement,<br/>Le Cabinet RE2M</p>");
-
-  const [rdvEnabled, setRdvEnabled] = useState(true);
-  const [rdvSubject, setRdvSubject] = useState('Confirmation de votre rendez-vous');
-  const [rdvBody, setRdvBody] = useState('<p>Bonjour,</p><p>Votre rendez-vous avec le Cabinet RE2M a été programmé. Nous vous enverrons les détails pratiques prochainement.</p><p>Cordialement,<br/>Le Cabinet RE2M</p>');
-
-  const [notifyNewRequest, setNotifyNewRequest] = useState(true);
-  const [notifyNewTestimonial, setNotifyNewTestimonial] = useState(true);
-
-  const [stampUrl, setStampUrl] = useState(() => localStorage.getItem(STAMP_STORAGE_KEY) || '');
-  const [defaultTemplate, setDefaultTemplate] = useState<CertificateTemplateId>(
-    () => (localStorage.getItem(DEFAULT_TEMPLATE_STORAGE_KEY) as CertificateTemplateId) || 're2m-classique'
-  );
+  // Persists a partial update immediately, merged onto whatever is currently
+  // in state — used for fields that used to auto-save to localStorage
+  // (stamp, default template, notification toggles) so that behaviour is
+  // preserved now that they save to the API instead.
+  const persist = (next: AppSettings) => {
+    settingsStore.update(next).then(setSettings).catch((err) => console.error("Échec de l'enregistrement :", err));
+  };
 
   const handleStampChange = (value: string) => {
-    setStampUrl(value);
-    if (value) {
-      localStorage.setItem(STAMP_STORAGE_KEY, value);
-    } else {
-      localStorage.removeItem(STAMP_STORAGE_KEY);
-    }
+    const next = { ...settings, certificateStampUrl: value };
+    setSettings(next);
+    persist(next);
   };
 
   const handleDefaultTemplateChange = (id: CertificateTemplateId) => {
-    setDefaultTemplate(id);
-    localStorage.setItem(DEFAULT_TEMPLATE_STORAGE_KEY, id);
+    const next = { ...settings, certificateDefaultTemplate: id };
+    setSettings(next);
+    persist(next);
   };
+
+  const handleNotificationToggle = (key: 'newRequest' | 'newTestimonial') => {
+    const next = { ...settings, notifications: { ...settings.notifications, [key]: !settings.notifications[key] } };
+    setSettings(next);
+    persist(next);
+  };
+
+  const handleSaveGeneral = () => {
+    setGeneralSaving(true);
+    settingsStore
+      .update(settings)
+      .then((saved) => {
+        setSettings(saved);
+        setGeneralSaved(true);
+        setTimeout(() => setGeneralSaved(false), 1800);
+      })
+      .catch((err) => console.error("Échec de l'enregistrement :", err))
+      .finally(() => setGeneralSaving(false));
+  };
+
+  const saveTemplate = (key: 'accuse' | 'refus' | 'rdv'): Promise<void> =>
+    settingsStore.update(settings).then((saved) => {
+      setSettings(saved);
+    });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -152,11 +211,13 @@ export const SettingsAdmin: React.FC = () => {
 
     Object.values(sectionRefs.current).forEach((el) => el && observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [isLoading]);
 
   const scrollToSection = (id: string) => {
     sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  if (isLoading) return <PageLoader label="Chargement..." fullScreen={false} />;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-8 animate-fadeIn text-[#0f172a] items-start">
@@ -181,12 +242,30 @@ export const SettingsAdmin: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
             <div>
               <label className={labelClass}>Nom du cabinet</label>
-              <input className={inputClass} value={cabinetName} onChange={(e) => setCabinetName(e.target.value)} />
+              <input
+                className={inputClass}
+                value={settings.cabinetName}
+                onChange={(e) => setSettings({ ...settings, cabinetName: e.target.value })}
+              />
             </div>
             <div>
               <label className={labelClass}>Email expéditeur</label>
-              <input className={inputClass} value={senderEmail} onChange={(e) => setSenderEmail(e.target.value)} />
+              <input
+                className={inputClass}
+                value={settings.senderEmail}
+                onChange={(e) => setSettings({ ...settings, senderEmail: e.target.value })}
+              />
             </div>
+          </div>
+          <div className="flex justify-end items-center gap-3">
+            {generalSaved && <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Enregistré</span>}
+            <button
+              onClick={handleSaveGeneral}
+              disabled={generalSaving}
+              className="px-4 py-2 rounded-xl bg-[#002366] hover:bg-blue-900 text-white text-xs font-bold cursor-pointer transition-colors disabled:opacity-50"
+            >
+              {generalSaving ? 'Enregistrement...' : 'Enregistrer'}
+            </button>
           </div>
         </div>
 
@@ -205,7 +284,7 @@ export const SettingsAdmin: React.FC = () => {
             <div>
               <label className={labelClass}>Cachet numérique</label>
               <div className="max-w-sm">
-                <ImageUploadField value={stampUrl} onChange={handleStampChange} label="Déposer le cachet (PNG transparent recommandé)" />
+                <ImageUploadField value={settings.certificateStampUrl} onChange={handleStampChange} label="Déposer le cachet (PNG transparent recommandé)" />
               </div>
               <p className="text-[10px] text-slate-400 mt-1.5">Ce cachet apparaît près de la signature sur chaque certificat généré.</p>
             </div>
@@ -219,7 +298,7 @@ export const SettingsAdmin: React.FC = () => {
                     type="button"
                     onClick={() => handleDefaultTemplateChange(t.id)}
                     className={`p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col items-center gap-2 ${
-                      defaultTemplate === t.id ? 'border-[#002366] bg-blue-50' : 'border-slate-200 hover:border-slate-300'
+                      settings.certificateDefaultTemplate === t.id ? 'border-[#002366] bg-blue-50' : 'border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     <CertificateTemplatePreview templateId={t.id as CertificateTemplateId} width={220} className="w-full" />
@@ -240,12 +319,13 @@ export const SettingsAdmin: React.FC = () => {
             icon={MailCheck}
             title="Accusé de réception automatique"
             description="Envoyé automatiquement dès qu'une demande est reçue"
-            enabled={accuseEnabled}
-            onToggle={() => setAccuseEnabled((v) => !v)}
-            subject={accuseSubject}
-            onSubjectChange={setAccuseSubject}
-            body={accuseBody}
-            onBodyChange={setAccuseBody}
+            enabled={settings.emailTemplates.accuse.enabled}
+            onToggle={() => setSettings({ ...settings, emailTemplates: { ...settings.emailTemplates, accuse: { ...settings.emailTemplates.accuse, enabled: !settings.emailTemplates.accuse.enabled } } })}
+            subject={settings.emailTemplates.accuse.subject}
+            onSubjectChange={(v) => setSettings({ ...settings, emailTemplates: { ...settings.emailTemplates, accuse: { ...settings.emailTemplates.accuse, subject: v } } })}
+            body={settings.emailTemplates.accuse.body}
+            onBodyChange={(v) => setSettings({ ...settings, emailTemplates: { ...settings.emailTemplates, accuse: { ...settings.emailTemplates.accuse, body: v } } })}
+            onSave={() => saveTemplate('accuse')}
           />
         </div>
 
@@ -255,12 +335,13 @@ export const SettingsAdmin: React.FC = () => {
             icon={XCircle}
             title="Email de refus"
             description="Envoyé quand une demande est marquée comme refusée"
-            enabled={refusEnabled}
-            onToggle={() => setRefusEnabled((v) => !v)}
-            subject={refusSubject}
-            onSubjectChange={setRefusSubject}
-            body={refusBody}
-            onBodyChange={setRefusBody}
+            enabled={settings.emailTemplates.refus.enabled}
+            onToggle={() => setSettings({ ...settings, emailTemplates: { ...settings.emailTemplates, refus: { ...settings.emailTemplates.refus, enabled: !settings.emailTemplates.refus.enabled } } })}
+            subject={settings.emailTemplates.refus.subject}
+            onSubjectChange={(v) => setSettings({ ...settings, emailTemplates: { ...settings.emailTemplates, refus: { ...settings.emailTemplates.refus, subject: v } } })}
+            body={settings.emailTemplates.refus.body}
+            onBodyChange={(v) => setSettings({ ...settings, emailTemplates: { ...settings.emailTemplates, refus: { ...settings.emailTemplates.refus, body: v } } })}
+            onSave={() => saveTemplate('refus')}
           />
         </div>
 
@@ -270,12 +351,13 @@ export const SettingsAdmin: React.FC = () => {
             icon={CalendarClock}
             title="Email de rendez-vous"
             description="Envoyé quand un rendez-vous est programmé"
-            enabled={rdvEnabled}
-            onToggle={() => setRdvEnabled((v) => !v)}
-            subject={rdvSubject}
-            onSubjectChange={setRdvSubject}
-            body={rdvBody}
-            onBodyChange={setRdvBody}
+            enabled={settings.emailTemplates.rdv.enabled}
+            onToggle={() => setSettings({ ...settings, emailTemplates: { ...settings.emailTemplates, rdv: { ...settings.emailTemplates.rdv, enabled: !settings.emailTemplates.rdv.enabled } } })}
+            subject={settings.emailTemplates.rdv.subject}
+            onSubjectChange={(v) => setSettings({ ...settings, emailTemplates: { ...settings.emailTemplates, rdv: { ...settings.emailTemplates.rdv, subject: v } } })}
+            body={settings.emailTemplates.rdv.body}
+            onBodyChange={(v) => setSettings({ ...settings, emailTemplates: { ...settings.emailTemplates, rdv: { ...settings.emailTemplates.rdv, body: v } } })}
+            onSave={() => saveTemplate('rdv')}
           />
         </div>
 
@@ -292,11 +374,21 @@ export const SettingsAdmin: React.FC = () => {
           <div className="space-y-2 pt-2 border-t border-slate-100">
             <label className="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer">
               <span className="text-xs font-semibold text-slate-600">Nouvelle demande reçue</span>
-              <input type="checkbox" checked={notifyNewRequest} onChange={(e) => setNotifyNewRequest(e.target.checked)} className="w-4 h-4 accent-[#002366] cursor-pointer" />
+              <input
+                type="checkbox"
+                checked={settings.notifications.newRequest}
+                onChange={() => handleNotificationToggle('newRequest')}
+                className="w-4 h-4 accent-[#002366] cursor-pointer"
+              />
             </label>
             <label className="flex items-center justify-between p-3 rounded-xl border border-slate-200 cursor-pointer">
               <span className="text-xs font-semibold text-slate-600">Nouveau témoignage soumis</span>
-              <input type="checkbox" checked={notifyNewTestimonial} onChange={(e) => setNotifyNewTestimonial(e.target.checked)} className="w-4 h-4 accent-[#002366] cursor-pointer" />
+              <input
+                type="checkbox"
+                checked={settings.notifications.newTestimonial}
+                onChange={() => handleNotificationToggle('newTestimonial')}
+                className="w-4 h-4 accent-[#002366] cursor-pointer"
+              />
             </label>
           </div>
         </div>

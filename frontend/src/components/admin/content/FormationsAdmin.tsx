@@ -41,12 +41,17 @@ import {
   downloadCertificatesZip
 } from '../../../utils/certificateGenerator';
 import { getInitials } from '../../../utils/text';
+import { settingsStore } from '../../../data/settings';
 
 const inputClass = 'w-full bg-slate-50 text-slate-800 text-xs rounded-xl px-3 py-2.5 border border-slate-200 focus:border-[#002366] focus:bg-white focus:outline-none';
 const labelClass = 'block text-xs font-bold text-slate-500 uppercase mb-1.5';
 
-const getDefaultTemplateId = (): CertificateTemplateId =>
-  (localStorage.getItem('re2m_certificate_default_template') as CertificateTemplateId) || 're2m-classique';
+// Cached from the Settings API so template pre-selection stays synchronous
+// (used when opening the create-formation form); refreshed on mount.
+let cachedDefaultTemplateId: CertificateTemplateId = 're2m-classique';
+settingsStore.get().then((s) => { cachedDefaultTemplateId = s.certificateDefaultTemplate; }).catch(() => {});
+
+const getDefaultTemplateId = (): CertificateTemplateId => cachedDefaultTemplateId;
 
 const emptyFormationDraft: Formation = {
   id: '',

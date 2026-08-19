@@ -17,6 +17,7 @@ import { requestsRouter } from './routes/requests.routes.js';
 import { newsletterRouter } from './routes/newsletter.routes.js';
 import { accountsRouter } from './routes/accounts.routes.js';
 import { analyticsRouter } from './routes/analytics.routes.js';
+import { settingsRouter } from './routes/settings.routes.js';
 
 export const app = express();
 
@@ -46,6 +47,7 @@ app.use('/api/requests', requestsRouter);
 app.use('/api/newsletter', newsletterRouter);
 app.use('/api/accounts', accountsRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/settings', settingsRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
