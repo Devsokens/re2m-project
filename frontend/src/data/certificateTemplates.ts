@@ -10,16 +10,16 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplateMeta[] = [
   {
     id: 're2m-classique',
     name: 'RE2M Classique',
-    description: "Cadre orné doré/gris, sceau circulaire — le modèle officiel du Cabinet RE2M."
+    description: "Modèle officiel historique — cadre baroque orné, arabesques fines dorées et sceau circulaire vintage."
   },
   {
     id: 'moderne',
-    name: 'Moderne',
-    description: 'Bandeau bleu marine épuré, typographie contemporaine, sans fioritures.'
+    name: 'Executive Moderne',
+    description: 'Design contemporain haut de gamme — structure architecturale bleu nuit, accents or champagne et badge géométrique.'
   },
   {
     id: 'corporate',
-    name: 'Corporate',
-    description: "Bordure fine, ruban d'accent doré, mise en page sobre et institutionnelle."
+    name: 'Prestige Institutionnel',
+    description: "Diplôme d'excellence — double cadre guilloché impérial, blason aux lauriers dorés et grand médaillon d'honneur."
   }
 ];

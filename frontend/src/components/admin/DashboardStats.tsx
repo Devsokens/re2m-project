@@ -250,60 +250,39 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
         <KpiCard label="Abonnés Newsletter" value={newsletterSubscribers} icon={Mail} />
       </div>
 
-      {/* Reactions chart */}
+      {/* Visits trend */}
       <div className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
-            <h3 className="font-serif text-base font-bold text-[#002366]">Réactions</h3>
-            <p className="text-xs text-slate-400 font-medium">Likes, commentaires et partages — Actualités & Blog</p>
+            <h3 className="font-serif text-base font-bold text-[#002366]">Flux des visites</h3>
+            <p className="text-xs text-slate-400 font-medium">{periodTotal.toLocaleString('fr-FR')} visites sur la période</p>
           </div>
-          <Heart className="w-5 h-5 text-blue-800" />
+          <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl p-1 shrink-0">
+            {(Object.keys(PERIOD_LABELS) as VisitsPeriod[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => setVisitsPeriod(p)}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer transition-all ${
+                  visitsPeriod === p ? 'bg-[#002366] text-white shadow-sm' : 'text-slate-500 hover:text-[#002366]'
+                }`}
+              >
+                {PERIOD_LABELS[p]}
+              </button>
+            ))}
+          </div>
         </div>
-        {engagementStats.likes + engagementStats.comments + engagementStats.shares > 0 ? (
-          <DonutChart
-            data={[
-              { label: 'Likes', value: engagementStats.likes, color: '#002366' },
-              { label: 'Commentaires', value: engagementStats.comments, color: '#4169E1' },
-              { label: 'Partages', value: engagementStats.shares, color: '#C5A85C' }
-            ]}
-          />
+        {visitsLoading ? (
+          <p className="text-xs text-slate-400 text-center py-12">Chargement...</p>
+        ) : periodTotal === 0 ? (
+          <p className="text-xs text-slate-400 text-center py-12">Aucune visite enregistrée sur cette période.</p>
         ) : (
-          <p className="text-xs text-slate-400 text-center py-8">Aucune réaction pour le moment.</p>
+          <LineAreaChart data={visitsSeries.data} labels={visitsSeries.labels} />
         )}
       </div>
 
-      {/* Visits trend + Requests donut */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7 bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-            <div>
-              <h3 className="font-serif text-base font-bold text-[#002366]">Flux des visites</h3>
-              <p className="text-xs text-slate-400 font-medium">{periodTotal.toLocaleString('fr-FR')} visites sur la période</p>
-            </div>
-            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl p-1 shrink-0">
-              {(Object.keys(PERIOD_LABELS) as VisitsPeriod[]).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setVisitsPeriod(p)}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold cursor-pointer transition-all ${
-                    visitsPeriod === p ? 'bg-[#002366] text-white shadow-sm' : 'text-slate-500 hover:text-[#002366]'
-                  }`}
-                >
-                  {PERIOD_LABELS[p]}
-                </button>
-              ))}
-            </div>
-          </div>
-          {visitsLoading ? (
-            <p className="text-xs text-slate-400 text-center py-12">Chargement...</p>
-          ) : periodTotal === 0 ? (
-            <p className="text-xs text-slate-400 text-center py-12">Aucune visite enregistrée sur cette période.</p>
-          ) : (
-            <LineAreaChart data={visitsSeries.data} labels={visitsSeries.labels} />
-          )}
-        </div>
-
-        <div className="lg:col-span-5 bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
+      {/* Requests donut + Reactions donut, paired so neither stretches into a mostly-empty wide card */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
               <h3 className="font-serif text-base font-bold text-[#002366]">Répartition des demandes</h3>
@@ -315,6 +294,27 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ members }) => {
             <DonutChart data={requestBreakdown} />
           ) : (
             <p className="text-xs text-slate-400 text-center py-8">Aucune demande pour le moment.</p>
+          )}
+        </div>
+
+        <div className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div>
+              <h3 className="font-serif text-base font-bold text-[#002366]">Réactions</h3>
+              <p className="text-xs text-slate-400 font-medium">Likes, commentaires et partages</p>
+            </div>
+            <Heart className="w-5 h-5 text-blue-800" />
+          </div>
+          {engagementStats.likes + engagementStats.comments + engagementStats.shares > 0 ? (
+            <DonutChart
+              data={[
+                { label: 'Likes', value: engagementStats.likes, color: '#002366' },
+                { label: 'Commentaires', value: engagementStats.comments, color: '#4169E1' },
+                { label: 'Partages', value: engagementStats.shares, color: '#C5A85C' }
+              ]}
+            />
+          ) : (
+            <p className="text-xs text-slate-400 text-center py-8">Aucune réaction pour le moment.</p>
           )}
         </div>
       </div>
