@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, ArrowRight, Users } from 'lucide-react';
 import { EditableText } from '../admin/editable/EditableText';
 import { EditableImage } from '../admin/editable/EditableImage';
 
@@ -64,7 +64,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, slides: customSlides, on
   };
 
   return (
-    <section className="relative w-full h-[580px] bg-slate-950 overflow-hidden text-white">
+    <section className="relative w-full h-[640px] sm:h-[600px] bg-slate-950 overflow-hidden text-white">
       {/* Slides wrapper */}
       <div className="absolute inset-0">
         {slides.map((slide, index) => (
@@ -89,12 +89,14 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, slides: customSlides, on
                 style={{ backgroundImage: `url(${slide.image})` }}
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#002366]/90 via-[#002366]/65 to-transparent pointer-events-none" />
+            {/* Brand-navy wash rising from the bottom-left corner, fading into the photo */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#002366]/95 via-[#002366]/55 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
-            {/* Slide Content */}
-            <div className="absolute inset-0 flex items-center">
+            {/* Slide Content — anchored bottom-left */}
+            <div className="absolute inset-0 flex items-end pb-16 sm:pb-20">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                <div className="max-w-2xl space-y-6 animate-fadeIn">
+                <div className="max-w-2xl space-y-5 animate-fadeIn">
 
                   {/* Subtitle */}
                   {onUpdateSlide ? (
@@ -119,10 +121,10 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, slides: customSlides, on
                       label="Titre"
                       value={slide.title}
                       onSave={(v) => onUpdateSlide(index, 'title', v)}
-                      className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight"
+                      className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.05]"
                     />
                   ) : (
-                    <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight">
+                    <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.05]">
                       {slide.title}
                     </h1>
                   )}
@@ -135,10 +137,10 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, slides: customSlides, on
                       multiline
                       value={slide.text}
                       onSave={(v) => onUpdateSlide(index, 'text', v)}
-                      className="text-slate-200 text-sm sm:text-base md:text-lg font-light leading-relaxed"
+                      className="text-slate-200 text-sm sm:text-base md:text-lg font-light leading-relaxed max-w-xl"
                     />
                   ) : (
-                    <p className="text-slate-200 text-sm sm:text-base md:text-lg font-light leading-relaxed">
+                    <p className="text-slate-200 text-sm sm:text-base md:text-lg font-light leading-relaxed max-w-xl">
                       {slide.text}
                     </p>
                   )}
@@ -151,19 +153,41 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, slides: customSlides, on
                         label="Texte du bouton"
                         value={slide.cta}
                         onSave={(v) => onUpdateSlide(index, 'cta', v)}
-                        className="inline-block bg-white text-[#002366] font-bold px-6 py-3.5 rounded-xl shadow-lg text-sm"
+                        className="inline-flex items-center gap-2 bg-white text-[#002366] font-bold px-6 py-3.5 rounded-full shadow-lg text-sm"
                       />
                     ) : (
                       <button
                         onClick={() => onNavigate(slide.targetView)}
-                        className="bg-white text-[#002366] font-bold px-6 py-3.5 rounded-xl shadow-lg hover:bg-slate-100 transition-colors text-sm cursor-pointer"
+                        className="group inline-flex items-center gap-2 bg-white text-[#002366] font-bold px-6 py-3.5 rounded-full shadow-lg hover:bg-slate-100 transition-colors text-sm cursor-pointer"
                       >
                         {slide.cta}
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                       </button>
                     )}
                   </div>
 
                 </div>
+              </div>
+            </div>
+
+            {/* Floating stat card — bottom-right */}
+            <div className="hidden sm:flex absolute bottom-16 sm:bottom-20 right-4 sm:right-8 lg:right-16 z-20 items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl pl-3 pr-5 py-3 shadow-xl">
+              <div className="flex -space-x-3">
+                {['RE', 'M2', 'EM'].map((initials, i) => (
+                  <div
+                    key={i}
+                    className="w-9 h-9 rounded-full bg-[#002366] border-2 border-white flex items-center justify-center text-[10px] font-bold text-white"
+                  >
+                    {initials}
+                  </div>
+                ))}
+                <div className="w-9 h-9 rounded-full bg-sky-400 border-2 border-white flex items-center justify-center">
+                  <Users className="w-4 h-4 text-[#002366]" />
+                </div>
+              </div>
+              <div>
+                <p className="font-serif text-lg font-extrabold text-white leading-none">16+</p>
+                <p className="text-[10px] text-slate-200 font-semibold whitespace-nowrap">Entreprises accompagnées</p>
               </div>
             </div>
 

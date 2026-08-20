@@ -29,12 +29,13 @@ interface PostModalProps {
   mode: 'actualite' | 'blog';
   onClose: () => void;
   onSelectItem: (item: PostModalItem) => void;
+  onCommentPosted?: () => void;
 }
 
 const formatDate = (date: string) =>
   new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
-export const PostModal: React.FC<PostModalProps> = ({ item, otherItems, mode, onClose, onSelectItem }) => {
+export const PostModal: React.FC<PostModalProps> = ({ item, otherItems, mode, onClose, onSelectItem, onCommentPosted }) => {
   const [visitorName, setVisitorName] = useState(() => localStorage.getItem(VISITOR_NAME_KEY) || '');
   const [hasChosenName, setHasChosenName] = useState(() => localStorage.getItem(VISITOR_NAME_SET_KEY) === '1');
   const [isEditingName, setIsEditingName] = useState(false);
@@ -77,6 +78,7 @@ export const PostModal: React.FC<PostModalProps> = ({ item, otherItems, mode, on
       .then(() => {
         setCommentText('');
         setRefreshKey((k) => k + 1);
+        onCommentPosted?.();
       })
       .catch((err) => console.error('Échec de l\'envoi du commentaire :', err));
   };

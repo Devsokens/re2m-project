@@ -17,6 +17,7 @@ import { LikeButton } from './LikeButton';
 import { ShareButton } from './ShareButton';
 import { AutoScrollRow } from './AutoScrollRow';
 import { getComments } from '../../utils/engagementStore';
+import { NewsletterSignup } from './NewsletterSignup';
 
 interface AccueilViewProps {
   onStartDemo: () => void;
@@ -768,6 +769,9 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
             </div>
           );
         })}
+
+        {/* Newsletter */}
+        {!onUpdateBlockSetting && <NewsletterSignup className="border-t border-slate-100 bg-slate-50" />}
 
         {/* Certificate Modal */}
         {isCertificateModalOpen && (

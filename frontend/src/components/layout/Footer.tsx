@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShieldCheck, Award, QrCode } from 'lucide-react';
+import { NewsletterSignup } from '../landing/NewsletterSignup';
 
 interface FooterProps {
   setCurrentView: (view: 'accueil' | 'qui-nous-sommes' | 'nos-services' | 'blog' | 'actualites' | 'contact' | 'profile' | 'admin' | 'admin-login') => void;
@@ -8,8 +9,8 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ setCurrentView }) => {
   return (
     <footer className="bg-slate-950 border-t border-sky-500/20 text-slate-400 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-        
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-8">
+
         {/* Brand info */}
         <div className="space-y-4 md:col-span-2">
           
@@ -38,6 +39,11 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentView }) => {
             <span className="flex items-center gap-1"><QrCode className="w-4 h-4 text-sky-300" /> QR Code vCard 4.0</span>
             <span className="flex items-center gap-1"><Award className="w-4 h-4 text-sky-300" /> Certifié PNUD</span>
           </div>
+        </div>
+
+        {/* Newsletter */}
+        <div>
+          <NewsletterSignup variant="dark" title="Newsletter" description="Nos analyses Achats & Logistique, directement dans votre boîte mail." />
         </div>
 
         {/* Quick Links */}
