@@ -18,7 +18,7 @@ import { ShareButton } from './ShareButton';
 import { AutoScrollRow } from './AutoScrollRow';
 import { getComments } from '../../utils/engagementStore';
 import { NewsletterSignup } from './NewsletterSignup';
-import { getInitials } from '../../utils/text';
+import { ServicesCarousel } from './ServicesCarousel';
 
 interface AccueilViewProps {
   onStartDemo: () => void;
@@ -209,118 +209,22 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 ];
                 const limit = block.settings.limit || 3;
                 const displayServices = allServices.slice(0, limit);
-                const [mainService, ...otherServices] = displayServices;
-                const avatarSource = members.length > 0 ? members.slice(0, 4) : [];
 
                 return (
-                  <section className="bg-white py-16 border-y border-slate-100 animate-fadeIn overflow-hidden">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                      <div className="text-center max-w-2xl mx-auto space-y-3 mb-12">
-                        <EditableText
-                          as="h2"
-                          label="Titre"
-                          value={block.settings.title || "Quelques-uns de nos services"}
-                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
-                          className="font-serif text-3xl font-extrabold text-[#002366] leading-tight"
-                        />
-                        <EditableText
-                          as="p"
-                          label="Description"
-                          multiline
-                          value={block.settings.description || "Des solutions sur mesure pour optimiser votre performance"}
-                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'description', v)}
-                          className="text-slate-500 text-sm sm:text-base"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Large featured card */}
-                        {mainService && (
-                          <div
-                            onClick={() => onNavigate('nos-services')}
-                            className="group relative rounded-3xl overflow-hidden bg-slate-50 border border-slate-200 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
-                          >
-                            <div className="w-full aspect-[16/11] overflow-hidden">
-                              <img
-                                src={mainService.image || '/service_01.jpg'}
-                                alt={mainService.title}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              />
-                            </div>
-                            <div className="p-6 space-y-2 flex-1 flex flex-col">
-                              <h4 className="font-serif text-lg sm:text-xl font-bold text-[#002366]">{mainService.title}</h4>
-                              <p className="text-sm text-slate-500 leading-relaxed line-clamp-2">{mainService.desc}</p>
-                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#002366] w-fit group-hover:gap-2.5 transition-all">
-                                En savoir plus <ArrowRight className="w-3.5 h-3.5" />
-                              </span>
-
-                              <div className="flex items-center gap-3 pt-4 mt-auto border-t border-slate-100">
-                                <div className="flex -space-x-2 shrink-0">
-                                  {(avatarSource.length > 0
-                                    ? avatarSource
-                                    : [{ id: '1', label: 'RE' }, { id: '2', label: 'M2' }, { id: '3', label: 'EM' }]
-                                  ).map((m: any, i: number) => (
-                                    m.photo ? (
-                                      <img
-                                        key={m.id ?? i}
-                                        src={m.photo}
-                                        alt={`${m.firstName ?? ''} ${m.lastName ?? ''}`}
-                                        className="w-8 h-8 rounded-full border-2 border-white object-cover shrink-0"
-                                      />
-                                    ) : (
-                                      <div
-                                        key={m.id ?? i}
-                                        className="w-8 h-8 rounded-full border-2 border-white bg-[#002366] flex items-center justify-center text-[9px] font-bold text-white shrink-0"
-                                      >
-                                        {m.label || getInitials(`${m.firstName ?? ''} ${m.lastName ?? ''}`)}
-                                      </div>
-                                    )
-                                  ))}
-                                </div>
-                                <p className="text-xs text-slate-500">
-                                  <span className="text-amber-400 tracking-tight">★★★★★</span> Une expertise reconnue depuis 25 ans
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Stacked secondary cards */}
-                        <div className="flex flex-col gap-6">
-                          {otherServices.map((srv: any, idx: number) => (
-                            <div
-                              key={idx}
-                              onClick={() => onNavigate('nos-services')}
-                              style={{ animationDelay: `${idx * 0.1}s` }}
-                              className="animate-cardFadeUp group flex-1 flex flex-col sm:flex-row items-stretch gap-4 sm:gap-0 rounded-3xl overflow-hidden bg-slate-50 border border-slate-200 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                            >
-                              <div className="w-full sm:w-2/5 aspect-[16/10] sm:aspect-auto overflow-hidden shrink-0">
-                                <img
-                                  src={srv.image || '/service_01.jpg'}
-                                  alt={srv.title}
-                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                              </div>
-                              <div className="flex-1 p-4 sm:p-5 space-y-1.5 flex flex-col justify-center">
-                                <h4 className="font-serif text-sm sm:text-base font-bold text-[#002366]">{srv.title}</h4>
-                                <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed line-clamp-2">{srv.desc}</p>
-                                <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-[#002366] w-fit group-hover:gap-2.5 transition-all">
-                                  En savoir plus <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="text-center mt-10">
-                        <button
-                          onClick={() => onNavigate('nos-services')}
-                          className="text-xs font-bold text-[#002366] bg-blue-50 hover:bg-blue-100 border border-blue-100 px-5 py-3 rounded-xl inline-flex items-center gap-1.5 group/btn cursor-pointer transition-colors"
-                        >
-                          Découvrir tous nos services <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
-                        </button>
-                      </div>
+                  <section className="bg-white py-16 animate-fadeIn overflow-hidden">
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                      <ServicesCarousel
+                        title={
+                          <EditableText
+                            as="span"
+                            label="Titre"
+                            value={block.settings.title || "Quelques-uns de nos services"}
+                            onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
+                          />
+                        }
+                        items={displayServices}
+                        onExplore={() => onNavigate('nos-services')}
+                      />
                     </div>
                   </section>
                 );

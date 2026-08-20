@@ -37,13 +37,13 @@ const ServiceAccordionRow: React.FC<{
   return (
     <div
       className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center py-14 animate-fadeIn ${
-        index !== 0 ? 'border-t border-white/10' : ''
+        index !== 0 ? 'border-t border-slate-200' : ''
       }`}
     >
       <div className={`space-y-5 ${reversed ? 'lg:order-2' : ''}`}>
         {icon}
-        <div className="font-serif text-2xl sm:text-3xl font-bold text-white">{title}</div>
-        <div className="text-sm text-slate-300 leading-relaxed max-w-lg">{desc}</div>
+        <div className="font-serif text-2xl sm:text-3xl font-bold text-[#002366]">{title}</div>
+        <div className="text-sm text-slate-500 leading-relaxed max-w-lg">{desc}</div>
 
         <div className="space-y-2 pt-2">
           {details.map((label, i) => {
@@ -51,24 +51,24 @@ const ServiceAccordionRow: React.FC<{
             return (
               <div
                 key={i}
-                className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden transition-colors hover:border-white/20"
+                className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden transition-colors hover:border-slate-300"
               >
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? -1 : i)}
                   className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left cursor-pointer"
                 >
-                  <span className="flex items-center gap-2.5 text-sm font-semibold text-slate-100">
-                    <CheckCircle className={`w-4 h-4 shrink-0 transition-colors duration-300 ${isOpen ? 'text-sky-400' : 'text-slate-500'}`} />
+                  <span className="flex items-center gap-2.5 text-sm font-semibold text-slate-700">
+                    <CheckCircle className={`w-4 h-4 shrink-0 transition-colors duration-300 ${isOpen ? 'text-blue-800' : 'text-slate-400'}`} />
                     {label}
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 shrink-0 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-sky-400' : ''}`}
+                    className={`w-4 h-4 shrink-0 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-blue-800' : ''}`}
                   />
                 </button>
                 <div className={`grid transition-all duration-300 ease-out ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
                   <div className="overflow-hidden">
-                    <p className="px-4 pb-4 pl-11 text-xs text-slate-400 leading-relaxed">{revealText}</p>
+                    <p className="px-4 pb-4 pl-11 text-xs text-slate-500 leading-relaxed">{revealText}</p>
                   </div>
                 </div>
               </div>
@@ -79,10 +79,10 @@ const ServiceAccordionRow: React.FC<{
 
       <div className={reversed ? 'lg:order-1' : ''}>
         <div className="relative group max-w-md mx-auto lg:max-w-none">
-          <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl aspect-[4/3]">
+          <div className="rounded-3xl overflow-hidden border border-slate-200 shadow-xl aspect-[4/3]">
             {imageMain}
           </div>
-          <div className="hidden sm:block absolute -bottom-6 -right-6 w-28 h-28 lg:w-36 lg:h-36 rounded-2xl overflow-hidden border-4 border-[#020c24] shadow-2xl">
+          <div className="hidden sm:block absolute -bottom-6 -right-6 w-28 h-28 lg:w-36 lg:h-36 rounded-2xl overflow-hidden border-4 border-white shadow-xl">
             <img src={imageSrc} alt={imageAlt} className="w-full h-full object-cover" />
           </div>
         </div>
@@ -145,7 +145,7 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
 
   if (blocks && blocks.length > 0) {
     return (
-      <div className="animate-fadeIn bg-gradient-to-b from-[#020c24] via-[#00102e] to-[#020c24] text-white">
+      <div className="animate-fadeIn bg-white text-[#0f172a]">
         {blocks.map((block) => {
           if (!onSelectBlock && !block.enabled) return null;
 
@@ -155,7 +155,7 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                 return (
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
                     <div className="text-center max-w-3xl mx-auto space-y-4">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-sky-200 text-xs font-bold uppercase tracking-wider">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[#002366] text-xs font-bold uppercase tracking-wider">
                         <Sparkles className="w-3.5 h-3.5" /> Nos expertises
                       </div>
                       <EditableText
@@ -163,7 +163,7 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                         label="Titre"
                         value={block.settings.title}
                         onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
-                        className="font-serif text-3xl sm:text-4xl font-extrabold text-white"
+                        className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366]"
                       />
                       <EditableText
                         as="p"
@@ -171,7 +171,7 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                         multiline
                         value={block.settings.description}
                         onSave={(v) => onUpdateBlockSetting?.(block.id, 'description', v)}
-                        className="text-slate-300 text-sm sm:text-base"
+                        className="text-slate-500 text-sm sm:text-base"
                       />
                     </div>
                   </div>
@@ -195,7 +195,7 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                             <EditableIcon
                               value={srv.iconName}
                               onSave={(iconName) => saveField('iconName', iconName)}
-                              className="w-11 h-11 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-sky-300"
+                              className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366]"
                               iconClassName="w-5 h-5"
                             />
                           }
@@ -248,14 +248,14 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
               }
               case 'Collaborations':
                 return (
-                  <section className="py-12 border-t border-white/10 overflow-hidden">
+                  <section className="py-12 border-t border-slate-100 overflow-hidden">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center">
                       <EditableText
                         as="h3"
                         label="Titre"
                         value={block.settings.title || "Ils nous font confiance"}
                         onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
-                        className="font-serif text-2xl font-bold text-white"
+                        className="font-serif text-2xl font-bold text-[#002366]"
                       />
                       <EditableText
                         as="p"
@@ -267,7 +267,7 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
 
                       {onUpdateBlockSetting && (
                         <div className="flex justify-center mt-4">
-                          <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-xs font-bold cursor-pointer hover:bg-white/20 transition-colors">
+                          <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 border border-blue-100 text-[#002366] text-xs font-bold cursor-pointer hover:bg-blue-100 transition-colors">
                             <Plus className="w-4 h-4" />
                             Ajouter un partenaire
                             <input
@@ -299,19 +299,17 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                             const collabs = block.settings.items || partners;
                             return (
                               <div key={idx} className="relative shrink-0 group/partner">
-                                <div className="w-[150px] h-16 flex items-center justify-center rounded-xl bg-white/95 px-2">
-                                  <EditableImage
-                                    src={partner.logo || ''}
-                                    alt={`${partner.name} logo`}
-                                    onSave={(v) => {
-                                      const updated = [...collabs];
-                                      updated[idx] = { ...updated[idx], logo: v };
-                                      onUpdateBlockSetting(block.id, 'items', updated);
-                                    }}
-                                    containerClassName="w-full h-full flex items-center justify-center"
-                                    className="h-12 w-auto max-w-[130px] object-contain"
-                                  />
-                                </div>
+                                <EditableImage
+                                  src={partner.logo || ''}
+                                  alt={`${partner.name} logo`}
+                                  onSave={(v) => {
+                                    const updated = [...collabs];
+                                    updated[idx] = { ...updated[idx], logo: v };
+                                    onUpdateBlockSetting(block.id, 'items', updated);
+                                  }}
+                                  containerClassName="w-[150px] h-16 flex items-center justify-center"
+                                  className="h-12 w-auto max-w-[130px] object-contain opacity-80 hover:opacity-100 transition-opacity"
+                                />
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -330,24 +328,24 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                       </div>
                     ) : (
                       <div className="relative w-full flex overflow-x-hidden py-4">
-                        <div className="flex items-center gap-8 animate-marquee-slow whitespace-nowrap">
+                        <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
                           {(() => {
                             const collabs = block.settings.items || partners;
                             const repeated = [...collabs, ...collabs, ...collabs];
                             return repeated.map((partner, pIdx) => (
                               partner.logo ? (
-                                <div key={pIdx} title={partner.name} className="w-[150px] h-16 shrink-0 flex items-center justify-center rounded-xl bg-white/95 px-2 opacity-90 hover:opacity-100 transition-opacity">
-                                  <img
-                                    src={partner.logo}
-                                    alt={`${partner.name} logo`}
-                                    className="h-12 w-auto max-w-[130px] object-contain"
-                                  />
-                                </div>
+                                <img
+                                  key={pIdx}
+                                  src={partner.logo}
+                                  alt={`${partner.name} logo`}
+                                  title={partner.name}
+                                  className="h-14 w-auto max-w-[150px] object-contain shrink-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
+                                />
                               ) : (
                                 <span
                                   key={pIdx}
                                   title={partner.name}
-                                  className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-white transition-colors"
+                                  className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-[#002366] transition-colors"
                                 >
                                   {partner.name}
                                 </span>
@@ -368,7 +366,7 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
             <div
               key={block.id}
               className={`relative transition-all ${
-                onSelectBlock && !block.enabled ? 'rounded-3xl my-2 opacity-40 bg-white/5' : ''
+                onSelectBlock && !block.enabled ? 'rounded-3xl my-2 opacity-40 bg-slate-50/50' : ''
               }`}
             >
               {onSelectBlock && !block.enabled && (
@@ -386,18 +384,18 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
 
   // Fallback Statique
   return (
-    <div className="animate-fadeIn bg-gradient-to-b from-[#020c24] via-[#00102e] to-[#020c24] text-white">
+    <div className="animate-fadeIn bg-white text-[#0f172a]">
 
       {/* Header Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-sky-200 text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[#002366] text-xs font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" /> Nos expertises
           </div>
-          <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-white">
+          <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366]">
             Nos Domaines d'Expertise Stratégiques
           </h1>
-          <p className="text-slate-300 text-sm sm:text-base">
+          <p className="text-slate-500 text-sm sm:text-base">
             Des services structurés pour vous faire réaliser des économies substantielles et optimiser vos flux de stockage.
           </p>
         </div>
@@ -412,7 +410,7 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
               key={idx}
               index={idx}
               icon={
-                <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-sky-300">
+                <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366]">
                   <Icon className="w-5 h-5" />
                 </div>
               }
@@ -429,28 +427,28 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
       </div>
 
       {/* SECTION COLLABORATIONS */}
-      <section className="py-12 border-t border-white/10 overflow-hidden">
+      <section className="py-12 bg-white overflow-hidden border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center">
-          <h3 className="font-serif text-2xl font-bold text-white">Ils nous font confiance</h3>
+          <h3 className="font-serif text-2xl font-bold text-[#002366]">Ils nous font confiance</h3>
           <p className="text-xs text-slate-400 mt-1">Des entreprises leaders de leur secteur partenaires du Cabinet RE2M</p>
         </div>
 
         <div className="relative w-full flex overflow-x-hidden py-4">
-          <div className="flex items-center gap-8 animate-marquee-slow whitespace-nowrap">
+          <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
             {[...partners, ...partners, ...partners].map((partner, idx) => (
               partner.logo ? (
-                <div key={idx} title={partner.name} className="w-[150px] h-16 shrink-0 flex items-center justify-center rounded-xl bg-white/95 px-2 opacity-90 hover:opacity-100 transition-opacity">
-                  <img
-                    src={partner.logo}
-                    alt={`${partner.name} logo`}
-                    className="h-12 w-auto max-w-[130px] object-contain"
-                  />
-                </div>
+                <img
+                  key={idx}
+                  src={partner.logo}
+                  alt={`${partner.name} logo`}
+                  title={partner.name}
+                  className="h-14 w-auto max-w-[150px] object-contain shrink-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
+                />
               ) : (
                 <span
                   key={idx}
                   title={partner.name}
-                  className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-white transition-colors"
+                  className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-[#002366] transition-colors"
                 >
                   {partner.name}
                 </span>
