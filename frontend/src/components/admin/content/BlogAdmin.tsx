@@ -309,7 +309,7 @@ export const BlogAdmin: React.FC = () => {
                         if (e.key === 'Enter') handleReply(c.id);
                       }}
                       placeholder="Répondre à ce commentaire..."
-                      className="flex-1 min-w-0 bg-white text-xs rounded-lg px-3 py-2 border border-slate-200 focus:border-[#002366] focus:outline-none"
+                      className="flex-1 min-w-0 bg-white text-slate-800 text-xs rounded-lg px-3 py-2 border border-slate-200 focus:border-[#002366] focus:outline-none placeholder:text-slate-400"
                     />
                     <button
                       onClick={() => handleReply(c.id)}
