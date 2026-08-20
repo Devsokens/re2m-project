@@ -18,7 +18,7 @@ import { ShareButton } from './ShareButton';
 import { AutoScrollRow } from './AutoScrollRow';
 import { getComments } from '../../utils/engagementStore';
 import { NewsletterSignup } from './NewsletterSignup';
-import { ServicesCarousel } from './ServicesCarousel';
+import { ServicesShowcase } from './ServicesShowcase';
 
 interface AccueilViewProps {
   onStartDemo: () => void;
@@ -211,20 +211,41 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 const displayServices = allServices.slice(0, limit);
 
                 return (
-                  <section className="bg-white py-16 animate-fadeIn overflow-hidden">
-                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                      <ServicesCarousel
-                        title={
+                  <section className="bg-slate-50 py-16 border-y border-slate-100 animate-fadeIn overflow-hidden">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+                      <div className="flex flex-wrap items-end justify-between gap-6">
+                        <div className="max-w-xl space-y-2">
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#002366] text-xs font-bold uppercase tracking-wider border border-blue-100">
+                            Nos services
+                          </div>
                           <EditableText
-                            as="span"
+                            as="h2"
                             label="Titre"
                             value={block.settings.title || "Quelques-uns de nos services"}
                             onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
+                            className="font-serif text-3xl font-extrabold text-[#002366] leading-tight block"
                           />
-                        }
-                        items={displayServices}
-                        onExplore={() => onNavigate('nos-services')}
-                      />
+                        </div>
+                        <EditableText
+                          as="p"
+                          label="Description"
+                          multiline
+                          value={block.settings.description || "Des solutions sur mesure pour optimiser votre performance"}
+                          onSave={(v) => onUpdateBlockSetting?.(block.id, 'description', v)}
+                          className="text-slate-500 text-sm sm:text-base max-w-sm"
+                        />
+                      </div>
+
+                      <ServicesShowcase items={displayServices} onExplore={() => onNavigate('nos-services')} />
+
+                      <div className="text-center">
+                        <button
+                          onClick={() => onNavigate('nos-services')}
+                          className="text-xs font-bold text-[#002366] bg-white hover:bg-blue-50 border border-slate-200 px-5 py-3 rounded-xl inline-flex items-center gap-1.5 group/btn cursor-pointer transition-colors shadow-sm"
+                        >
+                          Découvrir tous nos services <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                        </button>
+                      </div>
                     </div>
                   </section>
                 );
