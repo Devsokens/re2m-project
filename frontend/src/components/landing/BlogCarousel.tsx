@@ -141,7 +141,11 @@ export const BlogCarousel: React.FC<BlogCarouselProps> = ({ items, onSelect, onV
                 Voir plus
               </button>
               <div className="flex items-center gap-3 pt-1 border-t border-white/10 mt-1" onClick={(e) => e.stopPropagation()}>
-                <LikeButton targetType="article" targetId={item.id} className="[&_span]:text-blue-100" />
+                <LikeButton
+                  targetType="article"
+                  targetId={item.id}
+                  className="[&_svg]:!text-white [&_span]:!text-white [&_.fill-blue-600]:!fill-white [&_.text-blue-600]:!text-white"
+                />
                 <button
                   onClick={() => onSelect(item)}
                   className="flex items-center gap-1 text-[11px] font-bold text-blue-100/70 hover:text-white cursor-pointer transition-colors"
