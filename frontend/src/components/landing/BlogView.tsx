@@ -173,6 +173,15 @@ export const BlogView: React.FC = () => {
                       <p className="text-[10px] sm:text-[11px] text-slate-500 leading-relaxed line-clamp-2 mt-1">
                         {article.excerpt}
                       </p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelected(article);
+                        }}
+                        className="text-[10px] sm:text-[11px] font-bold text-[#002366] hover:underline cursor-pointer mt-1"
+                      >
+                        Voir plus
+                      </button>
                       <div className="flex items-center justify-between gap-2 mt-2">
                         <div className="flex items-center gap-2.5" onClick={(e) => e.stopPropagation()}>
                           <LikeButton targetType="article" targetId={article.id} />
