@@ -640,6 +640,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                   <BlogCarousel
                     items={articles.slice(0, 3)}
                     onSelect={() => onNavigate('blog')}
+                    onViewAll={() => onNavigate('blog')}
                   />
                 </>
               )}

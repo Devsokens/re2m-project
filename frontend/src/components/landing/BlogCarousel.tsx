@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { stripHtml } from '../../utils/text';
 import { LikeButton } from './LikeButton';
 import { ShareButton } from './ShareButton';
@@ -18,6 +18,7 @@ export interface BlogCarouselItem {
 interface BlogCarouselProps {
   items: BlogCarouselItem[];
   onSelect: (item: BlogCarouselItem) => void;
+  onViewAll: () => void;
 }
 
 const formatDate = (date: string) =>
@@ -28,7 +29,7 @@ const readTime = (content: string) => Math.max(1, Math.round(stripHtml(content).
 // Auto-advancing horizontal reel (native scroll, pauses on user interaction)
 // with synced pagination dots and manual arrows, in the spirit of the
 // reference "Blog Section" Dribbble shot.
-export const BlogCarousel: React.FC<BlogCarouselProps> = ({ items, onSelect }) => {
+export const BlogCarousel: React.FC<BlogCarouselProps> = ({ items, onSelect, onViewAll }) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const pausedUntilRef = useRef(0);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -152,6 +153,16 @@ export const BlogCarousel: React.FC<BlogCarouselProps> = ({ items, onSelect }) =
             </div>
           </div>
         ))}
+
+        <button
+          onClick={onViewAll}
+          className="snap-start shrink-0 w-[260px] sm:w-[320px] rounded-3xl border border-dashed border-white/30 bg-white/5 hover:bg-white/10 flex flex-col items-center justify-center gap-3 text-white transition-colors cursor-pointer"
+        >
+          <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center group-hover/more:bg-white/20 transition-all">
+            <ArrowRight className="w-5 h-5" />
+          </div>
+          <span className="text-xs font-bold uppercase tracking-wider text-center px-4">Voir tous les articles</span>
+        </button>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between mt-8">
