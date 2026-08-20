@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Sparkles, ArrowRight, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
 import { EditableText } from '../admin/editable/EditableText';
 import { EditableImage } from '../admin/editable/EditableImage';
 
@@ -167,27 +167,6 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, slides: customSlides, on
                   </div>
 
                 </div>
-              </div>
-            </div>
-
-            {/* Floating stat card — bottom-right */}
-            <div className="hidden sm:flex absolute bottom-16 sm:bottom-20 right-4 sm:right-8 lg:right-16 z-20 items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl pl-3 pr-5 py-3 shadow-xl">
-              <div className="flex -space-x-3">
-                {['RE', 'M2', 'EM'].map((initials, i) => (
-                  <div
-                    key={i}
-                    className="w-9 h-9 rounded-full bg-[#002366] border-2 border-white flex items-center justify-center text-[10px] font-bold text-white"
-                  >
-                    {initials}
-                  </div>
-                ))}
-                <div className="w-9 h-9 rounded-full bg-sky-400 border-2 border-white flex items-center justify-center">
-                  <Users className="w-4 h-4 text-[#002366]" />
-                </div>
-              </div>
-              <div>
-                <p className="font-serif text-lg font-extrabold text-white leading-none">16+</p>
-                <p className="text-[10px] text-slate-200 font-semibold whitespace-nowrap">Entreprises accompagnées</p>
               </div>
             </div>
 
