@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Clock, MessageCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { stripHtml } from '../../utils/text';
 import { LikeButton } from './LikeButton';
 import { ShareButton } from './ShareButton';
@@ -18,7 +18,6 @@ export interface BlogCarouselItem {
 interface BlogCarouselProps {
   items: BlogCarouselItem[];
   onSelect: (item: BlogCarouselItem) => void;
-  onViewAll: () => void;
 }
 
 const formatDate = (date: string) =>
@@ -29,7 +28,7 @@ const readTime = (content: string) => Math.max(1, Math.round(stripHtml(content).
 // Auto-advancing horizontal reel (native scroll, pauses on user interaction)
 // with synced pagination dots and manual arrows, in the spirit of the
 // reference "Blog Section" Dribbble shot.
-export const BlogCarousel: React.FC<BlogCarouselProps> = ({ items, onSelect, onViewAll }) => {
+export const BlogCarousel: React.FC<BlogCarouselProps> = ({ items, onSelect }) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const pausedUntilRef = useRef(0);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -93,25 +92,11 @@ export const BlogCarousel: React.FC<BlogCarouselProps> = ({ items, onSelect, onV
   return (
     <section className="bg-[#002366] py-16 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-start justify-between gap-6 mb-10">
-          <div className="space-y-3 max-w-xl">
-            <button
-              onClick={onViewAll}
-              className="text-[11px] font-bold text-white bg-white/10 border border-white/20 px-3 py-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
-            >
-              Voir tous les articles
-            </button>
-            <h2 className="font-serif text-3xl sm:text-4xl font-extrabold text-white leading-tight">Blog &amp; Articles</h2>
-            <p className="text-slate-400 text-sm sm:text-base">
-              Les réflexions et retours d'expérience de nos consultants sur les Achats et la Logistique.
-            </p>
-          </div>
-          <button
-            onClick={onViewAll}
-            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer shrink-0 mt-2"
-          >
-            En savoir plus <ArrowUpRight className="w-4 h-4" />
-          </button>
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-10">
+          <h2 className="font-serif text-3xl sm:text-4xl font-extrabold text-white leading-tight">Blog &amp; Articles</h2>
+          <p className="text-blue-100/80 text-sm sm:text-base">
+            Les réflexions et retours d'expérience de nos consultants sur les Achats et la Logistique.
+          </p>
         </div>
       </div>
 
@@ -144,6 +129,15 @@ export const BlogCarousel: React.FC<BlogCarouselProps> = ({ items, onSelect, onV
                 {formatDate(item.date)} — {readTime(item.content)} min de lecture
               </div>
               <h3 className="font-serif text-base font-bold text-white leading-snug line-clamp-2">{item.title}</h3>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelect(item);
+                }}
+                className="text-[11px] font-bold text-sky-300 hover:text-white cursor-pointer transition-colors"
+              >
+                Voir plus
+              </button>
               <div className="flex items-center gap-3 pt-1 border-t border-white/10 mt-1" onClick={(e) => e.stopPropagation()}>
                 <LikeButton targetType="article" targetId={item.id} className="[&_span]:text-blue-100" />
                 <button

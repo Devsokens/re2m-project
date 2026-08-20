@@ -47,6 +47,7 @@ export const ServicesShowcase: React.FC<ServicesShowcaseProps> = ({ items, onExp
         return (
           <div
             key={index}
+            onMouseEnter={() => setActiveIndex(index)}
             onClick={() => setActiveIndex(index)}
             style={{ flexGrow: isActive ? 3 : 1, flexBasis: 0 }}
             className={`group relative rounded-3xl overflow-hidden text-left cursor-pointer flex flex-col border transition-[flex-grow,background-color,box-shadow] duration-[900ms] ease-in-out lg:min-h-[380px] ${

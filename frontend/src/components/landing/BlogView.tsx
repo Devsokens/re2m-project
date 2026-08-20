@@ -98,7 +98,6 @@ export const BlogView: React.FC = () => {
                   <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#002366] leading-tight">
                     {featured.title}
                   </h1>
-                  <p className="text-sm text-slate-500 leading-relaxed line-clamp-4">{featured.excerpt}</p>
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => setSelected(featured)}
