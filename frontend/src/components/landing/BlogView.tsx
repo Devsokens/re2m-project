@@ -170,6 +170,9 @@ export const BlogView: React.FC = () => {
                       <h4 className="font-serif text-xs sm:text-sm font-bold text-[#002366] leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">
                         {article.title}
                       </h4>
+                      <p className="text-[10px] sm:text-[11px] text-slate-500 leading-relaxed line-clamp-2 mt-1">
+                        {article.excerpt}
+                      </p>
                       <div className="flex items-center justify-between gap-2 mt-2">
                         <div className="flex items-center gap-2.5" onClick={(e) => e.stopPropagation()}>
                           <LikeButton targetType="article" targetId={article.id} />

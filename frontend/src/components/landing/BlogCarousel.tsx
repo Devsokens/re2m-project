@@ -129,6 +129,7 @@ export const BlogCarousel: React.FC<BlogCarouselProps> = ({ items, onSelect }) =
                 {formatDate(item.date)} — {readTime(item.content)} min de lecture
               </div>
               <h3 className="font-serif text-base font-bold text-white leading-snug line-clamp-2">{item.title}</h3>
+              <p className="text-xs text-blue-100/70 leading-relaxed line-clamp-2">{item.excerpt}</p>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
