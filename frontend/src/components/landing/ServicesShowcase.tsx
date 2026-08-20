@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 export interface ServicesShowcaseItem {
@@ -12,88 +12,107 @@ interface ServicesShowcaseProps {
   onExplore: () => void;
 }
 
-// Scattered decorative squares used on the muted "selector" cards — purely
-// visual, echoes the reference design's confetti-like accent dots.
-const DOT_LAYOUTS: Array<{ top: string; left: string; size: string }> = [
-  { top: '18%', left: '20%', size: 'w-2.5 h-2.5' },
-  { top: '30%', left: '55%', size: 'w-2 h-2' },
-  { top: '46%', left: '32%', size: 'w-3 h-3' },
-  { top: '58%', left: '68%', size: 'w-2 h-2' },
-  { top: '68%', left: '42%', size: 'w-2.5 h-2.5' },
-  { top: '40%', left: '78%', size: 'w-1.5 h-1.5' }
-];
+const AUTOPLAY_DELAY = 6500;
 
-const ACCENTS = [
-  ['bg-amber-400', 'bg-amber-300/70', 'bg-amber-200/60'],
-  ['bg-fuchsia-500', 'bg-fuchsia-400/70', 'bg-violet-400/60'],
-  ['bg-emerald-500', 'bg-emerald-400/70', 'bg-emerald-300/60'],
-  ['bg-sky-500', 'bg-sky-400/70', 'bg-sky-300/60']
-];
-
+// Cards keep a fixed position — only their flex-grow ratio and inner content
+// visibility transition, so switching the active card morphs smoothly in
+// place (crossfade + width grow) instead of swapping via remount. Every
+// card always shows its photo (muted/grayscale + navy wash by default,
+// full colour once active) rather than hiding it until selected.
+// Auto-advances on its own; a click jumps straight to that card and
+// resets the autoplay clock.
 export const ServicesShowcase: React.FC<ServicesShowcaseProps> = ({ items, onExplore }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+
+  useEffect(() => {
+    if (items.length <= 1 || isHovering) return;
+    const timer = setInterval(() => {
+      setActiveIndex((i) => (i + 1) % items.length);
+    }, AUTOPLAY_DELAY);
+    return () => clearInterval(timer);
+  }, [items.length, isHovering, activeIndex]);
 
   if (items.length === 0) return null;
 
-  const ordered = [activeIndex, ...items.map((_, i) => i).filter((i) => i !== activeIndex)];
-
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
-      {ordered.map((itemIndex, position) => {
-        const item = items[itemIndex];
-        const isFeatured = position === 0;
-        const accent = ACCENTS[itemIndex % ACCENTS.length];
+    <div
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      className="flex flex-col lg:flex-row gap-4 items-stretch"
+    >
+      {items.map((item, index) => {
+        const isActive = index === activeIndex;
 
-        if (isFeatured) {
-          return (
+        return (
+          <div
+            key={index}
+            onClick={() => setActiveIndex(index)}
+            style={{ flexGrow: isActive ? 3 : 1, flexBasis: 0 }}
+            className={`group relative rounded-3xl overflow-hidden text-left cursor-pointer flex flex-col border transition-[flex-grow,background-color,box-shadow] duration-[900ms] ease-in-out lg:min-h-[380px] ${
+              isActive ? 'bg-white border-slate-200 shadow-xl' : 'bg-white/5 hover:bg-white/10 border-white/10'
+            }`}
+          >
+            {/* Photo — always present; muted by default, revealed on activation */}
             <div
-              key={itemIndex}
-              className="animate-fadeIn sm:col-span-2 lg:col-span-2 rounded-3xl bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col sm:flex-row lg:flex-col"
+              className={`relative overflow-hidden shrink-0 transition-all duration-[900ms] ease-in-out ${
+                isActive ? 'h-48 sm:h-56' : 'h-24 sm:h-28'
+              }`}
             >
-              <div className="relative w-full sm:w-1/2 lg:w-full aspect-[4/3] sm:aspect-auto lg:aspect-[16/10] overflow-hidden shrink-0">
-                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                <span className="absolute top-4 left-4 text-white text-xs font-bold bg-black/30 backdrop-blur-sm px-2.5 py-1 rounded-full">
-                  {String(position + 1).padStart(2, '0')}
-                </span>
-              </div>
-              <div className="p-6 space-y-3 flex-1 flex flex-col justify-center">
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#002366] leading-tight">{item.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed line-clamp-3">{item.desc}</p>
+              <img
+                src={item.image}
+                alt={item.title}
+                className={`w-full h-full object-cover transition-all duration-[900ms] ease-in-out ${
+                  isActive ? 'scale-100 grayscale-0' : 'scale-110 grayscale'
+                }`}
+              />
+              <div
+                className={`absolute inset-0 bg-[#001845] transition-opacity duration-700 ease-in-out ${
+                  isActive ? 'opacity-0' : 'opacity-55 group-hover:opacity-40'
+                }`}
+              />
+              <span
+                className={`absolute top-3 left-3 sm:top-4 sm:left-4 text-2xl sm:text-3xl font-serif font-extrabold transition-colors duration-500 ${
+                  isActive ? 'text-white/90' : 'text-white/70'
+                }`}
+              >
+                {String(index + 1).padStart(2, '0')}
+              </span>
+            </div>
+
+            <div className="p-5 sm:p-6 flex flex-col flex-1">
+              <h3
+                className={`font-serif text-base sm:text-lg font-bold leading-snug transition-colors duration-500 ${
+                  isActive ? 'text-[#002366]' : 'text-white'
+                }`}
+              >
+                {item.title}
+              </h3>
+              <p
+                className={`text-sm leading-relaxed overflow-hidden transition-all duration-700 ease-in-out ${
+                  isActive ? 'max-h-24 opacity-100 mt-2 text-slate-500' : 'max-h-0 opacity-0 mt-0 text-blue-100/80'
+                }`}
+              >
+                {item.desc}
+              </p>
+              <div
+                className={`overflow-hidden transition-all duration-700 ease-in-out ${
+                  isActive ? 'max-h-10 opacity-100 pt-2' : 'max-h-0 opacity-0'
+                }`}
+              >
                 <button
-                  onClick={onExplore}
-                  className="group/btn inline-flex items-center gap-2 text-xs font-bold text-[#002366] w-fit cursor-pointer mt-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onExplore();
+                  }}
+                  className="group/btn inline-flex items-center gap-2 text-xs font-bold text-[#002366] w-fit cursor-pointer"
                 >
                   En savoir plus
                   <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
-          );
-        }
-
-        return (
-          <button
-            key={itemIndex}
-            type="button"
-            onClick={() => setActiveIndex(itemIndex)}
-            className="group relative rounded-3xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 overflow-hidden text-left cursor-pointer transition-colors duration-300 min-h-[220px] flex flex-col justify-between p-5"
-          >
-            {/* Decorative scattered dots */}
-            <div className="absolute inset-0 pointer-events-none">
-              {DOT_LAYOUTS.map((dot, i) => (
-                <span
-                  key={i}
-                  style={{ top: dot.top, left: dot.left }}
-                  className={`absolute ${dot.size} rounded-[3px] rotate-12 transition-transform duration-500 group-hover:scale-125 ${accent[i % accent.length]}`}
-                />
-              ))}
-            </div>
-
-            <span className="relative text-3xl font-serif font-extrabold text-slate-300 group-hover:text-slate-400 transition-colors">
-              {String(position + 1).padStart(2, '0')}
-            </span>
-            <span className="relative text-sm font-bold text-[#002366] leading-snug">{item.title}</span>
-          </button>
+          </div>
         );
       })}
     </div>
