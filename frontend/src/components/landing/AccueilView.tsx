@@ -16,9 +16,9 @@ import { testimonialsStore, Testimonial } from '../../utils/testimonialsStore';
 import { LikeButton } from './LikeButton';
 import { ShareButton } from './ShareButton';
 import { AutoScrollRow } from './AutoScrollRow';
-import { getComments } from '../../utils/engagementStore';
 import { NewsletterSignup } from './NewsletterSignup';
 import { ServicesShowcase } from './ServicesShowcase';
+import { BlogCarousel } from './BlogCarousel';
 
 interface AccueilViewProps {
   onStartDemo: () => void;
@@ -68,19 +68,10 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
 
   const [news, setNews] = useState<NewsItem[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [previewCommentCounts, setPreviewCommentCounts] = useState<Record<string, number>>({});
   useEffect(() => {
     newsStore.list().then(setNews).catch((err) => console.error('Impossible de charger les actualités :', err));
     articlesStore.list().then(setArticles).catch((err) => console.error('Impossible de charger les articles :', err));
   }, []);
-
-  useEffect(() => {
-    const previewed = articles.slice(0, 3);
-    if (previewed.length === 0) return;
-    Promise.all(previewed.map((a) => getComments('article', a.id).then((comments) => [a.id, comments.length] as const)))
-      .then((entries) => setPreviewCommentCounts(Object.fromEntries(entries)))
-      .catch((err) => console.error('Impossible de charger les commentaires :', err));
-  }, [articles]);
 
   const stats = [
     { value: '25', label: "Ans d'Expérience" },
@@ -650,94 +641,11 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                     </div>
                   </section>
 
-                  <section className="bg-[#002366] py-16 border-y border-blue-900">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                      <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-                        <h2 className="font-serif text-3xl font-extrabold text-white leading-tight">
-                          Nos blogs &amp; analyses
-                        </h2>
-                        <p className="text-blue-100/80 text-sm sm:text-base">
-                          Les réflexions et retours d'expérience de nos consultants sur les Achats et la Logistique.
-                        </p>
-                      </div>
-
-                      <AutoScrollRow className="sm:hidden -mx-4 px-4">
-                        {articles.slice(0, 3).map((article) => (
-                          <div
-                            key={article.id}
-                            onClick={() => onNavigate('blog')}
-                            className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300 shrink-0 w-72 snap-start"
-                          >
-                            <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
-                              <img
-                                src={article.image}
-                                alt={article.title}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              />
-                            </div>
-                            <div className="p-5 space-y-2 flex-1">
-                              <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{article.title}</h4>
-                              <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">{article.excerpt}</p>
-                              <div className="flex items-center gap-3 pt-2 mt-auto border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
-                                <LikeButton targetType="article" targetId={article.id} />
-                                <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
-                                  <MessageSquareQuote className="w-3.5 h-3.5 text-slate-400" /> {previewCommentCounts[article.id] ?? 0}
-                                </span>
-                                <ShareButton targetType="article" targetId={article.id} title={article.title} />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </AutoScrollRow>
-
-                      <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {articles.slice(0, 3).map((article) => (
-                          <div
-                            key={article.id}
-                            onClick={() => onNavigate('blog')}
-                            className="corporate-card rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col cursor-pointer group hover:shadow-lg transition-all duration-300"
-                          >
-                            <div className="w-full aspect-[37/25] overflow-hidden bg-slate-100 relative border-b border-slate-100">
-                              <img
-                                src={article.image}
-                                alt={article.title}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              />
-                            </div>
-                            <div className="p-5 space-y-2 flex-1 flex flex-col">
-                              <h4 className="font-serif text-sm font-bold text-[#002366] leading-snug line-clamp-2">{article.title}</h4>
-                              <p className="text-[11px] text-slate-500 leading-relaxed text-justify line-clamp-3">{article.excerpt}</p>
-                              <div className="flex items-center gap-3 pt-2 mt-auto border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
-                                <LikeButton targetType="article" targetId={article.id} />
-                                <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
-                                  <MessageSquareQuote className="w-3.5 h-3.5 text-slate-400" /> {previewCommentCounts[article.id] ?? 0}
-                                </span>
-                                <ShareButton targetType="article" targetId={article.id} title={article.title} />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-
-                        <button
-                          onClick={() => onNavigate('blog')}
-                          className="rounded-3xl border border-dashed border-white/30 bg-white/5 hover:bg-white/10 flex flex-col items-center justify-center gap-3 text-white transition-colors cursor-pointer min-h-[220px] group/more"
-                        >
-                          <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center group-hover/more:bg-white/20 group-hover/more:translate-x-1 transition-all">
-                            <ArrowRight className="w-5 h-5 group-hover/more:translate-x-0.5 transition-transform" />
-                          </div>
-                          <span className="text-xs font-bold uppercase tracking-wider text-center px-4">Voir tous les articles</span>
-                        </button>
-                      </div>
-
-                      <button
-                        onClick={() => onNavigate('blog')}
-                        className="sm:hidden mt-4 w-full rounded-2xl border border-dashed border-white/30 bg-white/5 hover:bg-white/10 flex items-center justify-center gap-2 text-white transition-colors cursor-pointer py-3.5"
-                      >
-                        <span className="text-xs font-bold uppercase tracking-wider">Voir tous les articles</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </section>
+                  <BlogCarousel
+                    items={articles.slice(0, 3)}
+                    onSelect={() => onNavigate('blog')}
+                    onViewAll={() => onNavigate('blog')}
+                  />
                 </>
               )}
             </div>
