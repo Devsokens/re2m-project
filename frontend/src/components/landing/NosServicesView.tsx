@@ -1,5 +1,5 @@
-import React from 'react';
-import { ClipboardList, GraduationCap, UsersRound, CheckCircle, Workflow, Plus, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { ClipboardList, GraduationCap, UsersRound, CheckCircle, Workflow, Plus, X, ChevronDown, Sparkles } from 'lucide-react';
 import { partners } from '../../data/partners';
 import { CMSBlock } from '../../types/cms';
 import { EditableIcon } from '../admin/editable/EditableIcon';
@@ -14,6 +14,82 @@ interface NosServicesViewProps {
   renderBlockEditor?: (block: CMSBlock) => React.ReactNode;
   onUpdateBlockSetting?: (blockId: string, key: string, value: any) => void;
 }
+
+// One alternating (image left/right) accordion row for a service. Only one
+// detail can be expanded at a time; since the data model has a single `desc`
+// per service (not one per detail), the expanded panel reveals that shared
+// description — still gives real, animated interactivity without requiring
+// a CMS schema change for per-detail long-form text.
+const ServiceAccordionRow: React.FC<{
+  index: number;
+  icon?: React.ReactNode;
+  title: React.ReactNode;
+  desc: React.ReactNode;
+  revealText: string;
+  details: React.ReactNode[];
+  imageMain: React.ReactNode;
+  imageSrc: string;
+  imageAlt: string;
+}> = ({ index, icon, title, desc, revealText, details, imageMain, imageSrc, imageAlt }) => {
+  const [openIndex, setOpenIndex] = useState(0);
+  const reversed = index % 2 === 1;
+
+  return (
+    <div
+      className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center py-14 animate-fadeIn ${
+        index !== 0 ? 'border-t border-white/10' : ''
+      }`}
+    >
+      <div className={`space-y-5 ${reversed ? 'lg:order-2' : ''}`}>
+        {icon}
+        <div className="font-serif text-2xl sm:text-3xl font-bold text-white">{title}</div>
+        <div className="text-sm text-slate-300 leading-relaxed max-w-lg">{desc}</div>
+
+        <div className="space-y-2 pt-2">
+          {details.map((label, i) => {
+            const isOpen = openIndex === i;
+            return (
+              <div
+                key={i}
+                className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden transition-colors hover:border-white/20"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenIndex(isOpen ? -1 : i)}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left cursor-pointer"
+                >
+                  <span className="flex items-center gap-2.5 text-sm font-semibold text-slate-100">
+                    <CheckCircle className={`w-4 h-4 shrink-0 transition-colors duration-300 ${isOpen ? 'text-sky-400' : 'text-slate-500'}`} />
+                    {label}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 shrink-0 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-sky-400' : ''}`}
+                  />
+                </button>
+                <div className={`grid transition-all duration-300 ease-out ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+                  <div className="overflow-hidden">
+                    <p className="px-4 pb-4 pl-11 text-xs text-slate-400 leading-relaxed">{revealText}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className={reversed ? 'lg:order-1' : ''}>
+        <div className="relative group max-w-md mx-auto lg:max-w-none">
+          <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl aspect-[4/3]">
+            {imageMain}
+          </div>
+          <div className="hidden sm:block absolute -bottom-6 -right-6 w-28 h-28 lg:w-36 lg:h-36 rounded-2xl overflow-hidden border-4 border-[#020c24] shadow-2xl">
+            <img src={imageSrc} alt={imageAlt} className="w-full h-full object-cover" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSelectBlock, selectedBlockId, renderBlockEditor, onUpdateBlockSetting }) => {
   const list = [
@@ -69,7 +145,7 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
 
   if (blocks && blocks.length > 0) {
     return (
-      <div className="animate-fadeIn space-y-8 bg-white text-[#0f172a] py-10">
+      <div className="animate-fadeIn bg-gradient-to-b from-[#020c24] via-[#00102e] to-[#020c24] text-white">
         {blocks.map((block) => {
           if (!onSelectBlock && !block.enabled) return null;
 
@@ -77,14 +153,17 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
             switch (block.type) {
               case 'HeaderBanner':
                 return (
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center max-w-3xl mx-auto">
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+                    <div className="text-center max-w-3xl mx-auto space-y-4">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-sky-200 text-xs font-bold uppercase tracking-wider">
+                        <Sparkles className="w-3.5 h-3.5" /> Nos expertises
+                      </div>
                       <EditableText
                         as="h1"
                         label="Titre"
                         value={block.settings.title}
                         onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
-                        className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-5"
+                        className="font-serif text-3xl sm:text-4xl font-extrabold text-white"
                       />
                       <EditableText
                         as="p"
@@ -92,7 +171,7 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                         multiline
                         value={block.settings.description}
                         onSave={(v) => onUpdateBlockSetting?.(block.id, 'description', v)}
-                        className="text-slate-500 text-sm sm:text-base"
+                        className="text-slate-300 text-sm sm:text-base"
                       />
                     </div>
                   </div>
@@ -100,94 +179,83 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
               case 'ServicesList': {
                 const serviceItems = block.settings.items || [];
                 return (
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                      {serviceItems.map((srv: any, idx: number) => {
-                        const saveField = (key: string, v: any) => {
-                          const items = [...serviceItems];
-                          items[idx] = { ...items[idx], [key]: v };
-                          onUpdateBlockSetting?.(block.id, 'items', items);
-                        };
-                        const details: string[] = srv.details || [];
-                        return (
-                          <div key={idx} className="corporate-card rounded-3xl border border-slate-200/80 flex flex-col justify-between overflow-hidden bg-white h-full">
-                            <div className="flex flex-col h-full justify-between">
-                              <div>
-                                <div className="w-full aspect-[37/20] overflow-hidden bg-slate-100 border-b border-slate-100 relative group">
-                                  <EditableImage
-                                    src={srv.image}
-                                    alt={srv.title}
-                                    onSave={(v) => saveField('image', v)}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                  />
-                                </div>
-                                <div className="p-5 space-y-4">
-                                  <div className="space-y-3">
-                                    <EditableIcon
-                                      value={srv.iconName}
-                                      onSave={(iconName) => saveField('iconName', iconName)}
-                                      className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366]"
-                                      iconClassName="w-5 h-5"
-                                    />
-                                    <div>
-                                      <EditableText
-                                        as="h3"
-                                        label="Titre"
-                                        value={srv.title}
-                                        onSave={(v) => saveField('title', v)}
-                                        className="font-serif text-base font-bold text-[#002366] leading-snug min-h-[40px] flex items-center"
-                                      />
-                                      <EditableText
-                                        as="p"
-                                        label="Description"
-                                        multiline
-                                        value={srv.desc}
-                                        onSave={(v) => saveField('desc', v)}
-                                        className="text-xs text-slate-500 mt-1 leading-relaxed min-h-[72px]"
-                                      />
-                                    </div>
-                                  </div>
-                                  <ul className="space-y-1.5 border-t border-slate-100 pt-3">
-                                    {details.map((det: string, detIdx: number) => (
-                                      <li key={detIdx} className="flex items-start gap-2 text-xs text-slate-600">
-                                        <CheckCircle className="w-4 h-4 text-blue-800 shrink-0 mt-0.5" />
-                                        <EditableText
-                                          as="span"
-                                          label={`Détail ${detIdx + 1}`}
-                                          value={det}
-                                          onSave={(v) => {
-                                            const updated = [...details];
-                                            updated[detIdx] = v;
-                                            saveField('details', updated);
-                                          }}
-                                          className="leading-tight"
-                                        />
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              </div>
-                              <div className="px-5 pb-5 pt-3 mt-auto border-t border-slate-100">
-                                <span className="text-[11px] font-bold text-[#002366]">Expertise Cabinet RE2M</span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+                    {serviceItems.map((srv: any, idx: number) => {
+                      const saveField = (key: string, v: any) => {
+                        const items = [...serviceItems];
+                        items[idx] = { ...items[idx], [key]: v };
+                        onUpdateBlockSetting?.(block.id, 'items', items);
+                      };
+                      const details: string[] = srv.details || [];
+                      return (
+                        <ServiceAccordionRow
+                          key={idx}
+                          index={idx}
+                          icon={
+                            <EditableIcon
+                              value={srv.iconName}
+                              onSave={(iconName) => saveField('iconName', iconName)}
+                              className="w-11 h-11 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-sky-300"
+                              iconClassName="w-5 h-5"
+                            />
+                          }
+                          title={
+                            <EditableText
+                              as="span"
+                              label="Titre"
+                              value={srv.title}
+                              onSave={(v) => saveField('title', v)}
+                            />
+                          }
+                          desc={
+                            <EditableText
+                              as="span"
+                              label="Description"
+                              multiline
+                              value={srv.desc}
+                              onSave={(v) => saveField('desc', v)}
+                            />
+                          }
+                          revealText={srv.desc}
+                          details={details.map((det: string, detIdx: number) => (
+                            <EditableText
+                              key={detIdx}
+                              as="span"
+                              label={`Détail ${detIdx + 1}`}
+                              value={det}
+                              onSave={(v) => {
+                                const updated = [...details];
+                                updated[detIdx] = v;
+                                saveField('details', updated);
+                              }}
+                            />
+                          ))}
+                          imageMain={
+                            <EditableImage
+                              src={srv.image}
+                              alt={srv.title}
+                              onSave={(v) => saveField('image', v)}
+                              className="w-full h-full object-cover"
+                            />
+                          }
+                          imageSrc={srv.image}
+                          imageAlt={srv.title}
+                        />
+                      );
+                    })}
                   </div>
                 );
               }
               case 'Collaborations':
                 return (
-                  <section className="py-12 bg-white overflow-hidden border-t border-slate-100">
+                  <section className="py-12 border-t border-white/10 overflow-hidden">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center">
                       <EditableText
                         as="h3"
                         label="Titre"
                         value={block.settings.title || "Ils nous font confiance"}
                         onSave={(v) => onUpdateBlockSetting?.(block.id, 'title', v)}
-                        className="font-serif text-2xl font-bold text-[#002366]"
+                        className="font-serif text-2xl font-bold text-white"
                       />
                       <EditableText
                         as="p"
@@ -199,7 +267,7 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
 
                       {onUpdateBlockSetting && (
                         <div className="flex justify-center mt-4">
-                          <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 border border-blue-100 text-[#002366] text-xs font-bold cursor-pointer hover:bg-blue-100 transition-colors">
+                          <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-xs font-bold cursor-pointer hover:bg-white/20 transition-colors">
                             <Plus className="w-4 h-4" />
                             Ajouter un partenaire
                             <input
@@ -231,17 +299,19 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                             const collabs = block.settings.items || partners;
                             return (
                               <div key={idx} className="relative shrink-0 group/partner">
-                                <EditableImage
-                                  src={partner.logo || ''}
-                                  alt={`${partner.name} logo`}
-                                  onSave={(v) => {
-                                    const updated = [...collabs];
-                                    updated[idx] = { ...updated[idx], logo: v };
-                                    onUpdateBlockSetting(block.id, 'items', updated);
-                                  }}
-                                  containerClassName="w-[150px] h-16 flex items-center justify-center"
-                                  className="h-12 w-auto max-w-[130px] object-contain opacity-80 hover:opacity-100 transition-opacity"
-                                />
+                                <div className="w-[150px] h-16 flex items-center justify-center rounded-xl bg-white/95 px-2">
+                                  <EditableImage
+                                    src={partner.logo || ''}
+                                    alt={`${partner.name} logo`}
+                                    onSave={(v) => {
+                                      const updated = [...collabs];
+                                      updated[idx] = { ...updated[idx], logo: v };
+                                      onUpdateBlockSetting(block.id, 'items', updated);
+                                    }}
+                                    containerClassName="w-full h-full flex items-center justify-center"
+                                    className="h-12 w-auto max-w-[130px] object-contain"
+                                  />
+                                </div>
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -260,24 +330,24 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
                       </div>
                     ) : (
                       <div className="relative w-full flex overflow-x-hidden py-4">
-                        <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
+                        <div className="flex items-center gap-8 animate-marquee-slow whitespace-nowrap">
                           {(() => {
                             const collabs = block.settings.items || partners;
                             const repeated = [...collabs, ...collabs, ...collabs];
                             return repeated.map((partner, pIdx) => (
                               partner.logo ? (
-                                <img
-                                  key={pIdx}
-                                  src={partner.logo}
-                                  alt={`${partner.name} logo`}
-                                  title={partner.name}
-                                  className="h-14 w-auto max-w-[150px] object-contain shrink-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
-                                />
+                                <div key={pIdx} title={partner.name} className="w-[150px] h-16 shrink-0 flex items-center justify-center rounded-xl bg-white/95 px-2 opacity-90 hover:opacity-100 transition-opacity">
+                                  <img
+                                    src={partner.logo}
+                                    alt={`${partner.name} logo`}
+                                    className="h-12 w-auto max-w-[130px] object-contain"
+                                  />
+                                </div>
                               ) : (
                                 <span
                                   key={pIdx}
                                   title={partner.name}
-                                  className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-[#002366] transition-colors"
+                                  className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-white transition-colors"
                                 >
                                   {partner.name}
                                 </span>
@@ -298,11 +368,11 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
             <div
               key={block.id}
               className={`relative transition-all ${
-                onSelectBlock && !block.enabled ? 'rounded-3xl my-2 opacity-40 bg-slate-50/50' : ''
+                onSelectBlock && !block.enabled ? 'rounded-3xl my-2 opacity-40 bg-white/5' : ''
               }`}
             >
               {onSelectBlock && !block.enabled && (
-                <div className="absolute top-3 right-3 bg-[#002366] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none">
+                <div className="absolute top-3 right-3 bg-white text-[#002366] text-[9px] font-extrabold px-2.5 py-1 rounded-lg shadow-md z-30 uppercase pointer-events-none">
                   Masqué: {block.type}
                 </div>
               )}
@@ -316,98 +386,71 @@ export const NosServicesView: React.FC<NosServicesViewProps> = ({ blocks, onSele
 
   // Fallback Statique
   return (
-    <div className="animate-fadeIn space-y-8 bg-white text-[#0f172a] py-10">
+    <div className="animate-fadeIn bg-gradient-to-b from-[#020c24] via-[#00102e] to-[#020c24] text-white">
 
       {/* Header Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto">
-          <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-[#002366] mb-5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="text-center max-w-3xl mx-auto space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-sky-200 text-xs font-bold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5" /> Nos expertises
+          </div>
+          <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-white">
             Nos Domaines d'Expertise Stratégiques
           </h1>
-
-          <p className="text-slate-500 text-sm sm:text-base">
+          <p className="text-slate-300 text-sm sm:text-base">
             Des services structurés pour vous faire réaliser des économies substantielles et optimiser vos flux de stockage.
           </p>
         </div>
       </div>
 
-      {/* Services List Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {list.map((srv, idx) => {
-            const Icon = srv.icon;
-            return (
-              <div key={idx} className="corporate-card rounded-3xl border border-slate-200/80 flex flex-col justify-between overflow-hidden bg-white h-full">
-                <div className="flex flex-col h-full justify-between">
-                  <div>
-                    <div className="w-full aspect-[37/20] overflow-hidden bg-slate-100 border-b border-slate-100 relative group">
-                      <img 
-                        src={srv.image} 
-                        alt={srv.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
-
-                    <div className="p-5 space-y-4">
-                      <div className="space-y-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#002366]">
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        
-                        <div>
-                          <h3 className="font-serif text-base font-bold text-[#002366] leading-snug min-h-[40px] flex items-center">
-                            {srv.title}
-                          </h3>
-                          <p className="text-xs text-slate-500 mt-1 leading-relaxed min-h-[72px]">
-                            {srv.desc}
-                          </p>
-                        </div>
-                      </div>
-
-                      <ul className="space-y-1.5 border-t border-slate-100 pt-3">
-                        {srv.details.map((det, index) => (
-                          <li key={index} className="flex items-start gap-2 text-xs text-slate-600">
-                            <CheckCircle className="w-4 h-4 text-blue-800 shrink-0 mt-0.5" />
-                            <span className="leading-tight">{det}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="px-5 pb-5 pt-3 mt-auto border-t border-slate-100">
-                    <span className="text-[11px] font-bold text-[#002366]">Expertise Cabinet RE2M</span>
-                  </div>
+      {/* Services accordion list */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+        {list.map((srv, idx) => {
+          const Icon = srv.icon;
+          return (
+            <ServiceAccordionRow
+              key={idx}
+              index={idx}
+              icon={
+                <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-sky-300">
+                  <Icon className="w-5 h-5" />
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              }
+              title={srv.title}
+              desc={srv.desc}
+              revealText={srv.desc}
+              details={srv.details}
+              imageMain={<img src={srv.image} alt={srv.title} className="w-full h-full object-cover" />}
+              imageSrc={srv.image}
+              imageAlt={srv.title}
+            />
+          );
+        })}
       </div>
 
       {/* SECTION COLLABORATIONS */}
-      <section className="py-12 bg-white overflow-hidden border-t border-slate-100">
+      <section className="py-12 border-t border-white/10 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center">
-          <h3 className="font-serif text-2xl font-bold text-[#002366]">Ils nous font confiance</h3>
+          <h3 className="font-serif text-2xl font-bold text-white">Ils nous font confiance</h3>
           <p className="text-xs text-slate-400 mt-1">Des entreprises leaders de leur secteur partenaires du Cabinet RE2M</p>
         </div>
 
         <div className="relative w-full flex overflow-x-hidden py-4">
-          <div className="flex items-center gap-20 animate-marquee-slow whitespace-nowrap">
+          <div className="flex items-center gap-8 animate-marquee-slow whitespace-nowrap">
             {[...partners, ...partners, ...partners].map((partner, idx) => (
               partner.logo ? (
-                <img
-                  key={idx}
-                  src={partner.logo}
-                  alt={`${partner.name} logo`}
-                  title={partner.name}
-                  className="h-14 w-auto max-w-[150px] object-contain shrink-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
-                />
+                <div key={idx} title={partner.name} className="w-[150px] h-16 shrink-0 flex items-center justify-center rounded-xl bg-white/95 px-2 opacity-90 hover:opacity-100 transition-opacity">
+                  <img
+                    src={partner.logo}
+                    alt={`${partner.name} logo`}
+                    className="h-12 w-auto max-w-[130px] object-contain"
+                  />
+                </div>
               ) : (
                 <span
                   key={idx}
                   title={partner.name}
-                  className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-[#002366] transition-colors"
+                  className="font-serif text-lg font-bold text-slate-400 shrink-0 hover:text-white transition-colors"
                 >
                   {partner.name}
                 </span>
